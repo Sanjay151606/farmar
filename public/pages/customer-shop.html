@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FARMORA - Direct Farm Marketplace</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+    <header class="header animate-entrance-header">
+        <nav class="nav">
+            <a href="/" class="logo">
+                <i class="fas fa-seedling"></i>
+                <span>FARMORA</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="/customer-shop.html" class="active"><i class="fas fa-store"></i> Shop</a></li>
+                <li><a href="/booking.html"><i class="fas fa-shopping-bag"></i> Cart & Orders</a></li>
+                <li><a href="/tracker.html"><i class="fas fa-map-marker-alt"></i> Live Track</a></li>
+                <li><a href="/transaction-dashboard.html"><i class="fas fa-receipt"></i> Analytics</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="page-container">
+        
+        <!-- Page Header -->
+        <div class="page-header animate-entrance-hero">
+            <div class="page-header-info">
+                <h1>Direct Farm Marketplace</h1>
+                <p>Buy fresh produce directly from verified farmers with transparent pricing.</p>
+            </div>
+            <div class="page-header-action">
+                <div style="background: var(--primary-bg); border: 1px solid var(--primary-light); padding: 8px 18px; border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 600; color: var(--primary); box-shadow: var(--shadow-sm);">
+                    <i class="fas fa-map-marker-alt" style="margin-right: 6px;"></i> Delivery Location: <span id="deliveryLocText">Chennai</span>
+                    <button onclick="changeDeliveryLocation()" style="background: var(--primary); color: white; border: none; padding: 4px 12px; border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 700; margin-left: 10px; cursor: pointer; transition: var(--transition);">Change</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Glassmorphic Category Filter Chips Bar -->
+        <div class="filter-chips-wrapper animate-entrance-cards">
+            <button class="filter-pill active" onclick="setCategoryFilter('all', this)"><i class="fas fa-border-all"></i> All Produce</button>
+            <button class="filter-pill" onclick="setCategoryFilter('grains', this)"><i class="fas fa-wheat-awn"></i> Rice & Grains</button>
+            <button class="filter-pill" onclick="setCategoryFilter('vegetables', this)"><i class="fas fa-carrot"></i> Fresh Vegetables</button>
+            <button class="filter-pill" onclick="setCategoryFilter('fruits', this)"><i class="fas fa-apple-whole"></i> Organic Fruits</button>
+            <button class="filter-pill" onclick="setCategoryFilter('dairy', this)"><i class="fas fa-cow"></i> Dairy & Oils</button>
+        </div>
+
+        <!-- Search & District Filter Controls -->
+        <div class="glass-card" style="padding: var(--space-5); margin-bottom: var(--space-6); display: flex; gap: var(--space-4); flex-wrap: wrap; align-items: center; justify-content: space-between;">
+            <div style="flex: 1; min-width: 260px; position: relative;">
+                <i class="fas fa-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--primary); font-size: 1rem;"></i>
+                <input type="text" id="searchInput" class="form-input" placeholder="Search produce, farmer name, or district..." style="padding-left: 42px; border-radius: var(--radius-full);" />
+            </div>
+            <div style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+                <select id="districtFilter" class="form-select" style="min-width: 160px; border-radius: var(--radius-md);">
+                    <option value="">All 38 Districts</option>
+                </select>
+                <select id="sortFilter" class="form-select" style="min-width: 180px; border-radius: var(--radius-md);">
+                    <option value="default">Sort by: Featured</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="name">Product Name</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Dynamic Product Cards Grid -->
+        <div class="product-grid" id="shopGrid">
+            <div style="grid-column: 1 / -1; text-align: center; padding: 4rem; color: var(--primary);">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2.5rem; margin-bottom: 1rem; display: block;"></i>
+                <h3>Loading direct farm catalog...</h3>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Floating Cart Badge Button -->
+    <div style="position: fixed; bottom: 25px; right: 25px; z-index: 1050;">
+        <button onclick="window.location.href='/booking.html'" style="width: 62px; height: 62px; border-radius: 50%; background: var(--accent); color: white; border: none; box-shadow: 0 8px 24px rgba(230, 81, 0, 0.35); font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; transition: transform 0.2s ease;">
+            <i class="fas fa-shopping-cart"></i>
+            <span id="cartCountBadge" style="position: absolute; top: -4px; right: -4px; background: var(--primary); color: white; font-size: 0.78rem; font-weight: 800; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white;">0</span>
+        </button>
+    </div>
+
+    <script src="assets/product.js"></script>
+    <script src="assets/translations.js"></script>
+    <script src="assets/script.js"></script>
+    <script>
+        let selectedCategory = 'all';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const savedLoc = localStorage.getItem('userLocation') || 'Chennai';
+            document.getElementById('deliveryLocText').textContent = savedLoc;
+
+            // Load products directly from backend API
+            const products = await fetchProductsFromAPI();
+            populateDistrictDropdown(products);
+            renderShopGrid();
+            updateShopCartBadge();
+
+            window.setCategoryFilter = (cat, btnEl) => {
+                selectedCategory = cat;
+                document.querySelectorAll('.filter-pill').forEach(el => el.classList.remove('active'));
+                if (btnEl) btnEl.classList.add('active');
+                renderShopGrid();
+            };
+
+            function populateDistrictDropdown(items) {
+                const distSel = document.getElementById('districtFilter');
+                if (!distSel) return;
+                distSel.innerHTML = '<option value="">All 38 Districts</option>';
+                const uniqueDistricts = [...new Set(items.map(p => p.farmerLocation).filter(loc => loc && loc !== 'Location not available'))];
+                uniqueDistricts.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d;
+                    opt.textContent = d;
+                    distSel.appendChild(opt);
+                });
+            }
+
+            function renderShopGrid() {
+                const grid = document.getElementById('shopGrid');
+                const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+                const distVal = document.getElementById('districtFilter').value;
+                const sortVal = document.getElementById('sortFilter').value;
+
+                let list = [...allProducts];
+
+                // Category filter
+                if (selectedCategory === 'grains') list = list.filter(p => p.category === 'rice' || p.name.toLowerCase().includes('rice') || p.name.toLowerCase().includes('wheat'));
+                if (selectedCategory === 'vegetables') list = list.filter(p => p.category === 'vegetable' || p.name.toLowerCase().includes('tomato') || p.name.toLowerCase().includes('onion') || p.name.toLowerCase().includes('carrot'));
+                if (selectedCategory === 'fruits') list = list.filter(p => p.category === 'fruits' || p.name.toLowerCase().includes('mango') || p.name.toLowerCase().includes('guava'));
+                if (selectedCategory === 'dairy') list = list.filter(p => p.category === 'dairy' || p.name.toLowerCase().includes('milk') || p.name.toLowerCase().includes('jaggery'));
+
+                if (distVal) list = list.filter(p => p.farmerLocation === distVal);
+                if (searchVal) {
+                    list = list.filter(p => 
+                        p.name.toLowerCase().includes(searchVal) ||
+                        p.farmer.toLowerCase().includes(searchVal) ||
+                        p.farmerLocation.toLowerCase().includes(searchVal)
+                    );
+                }
+
+                if (sortVal === 'price-low') list.sort((a, b) => a.price - b.price);
+                else if (sortVal === 'price-high') list.sort((a, b) => b.price - a.price);
+                else if (sortVal === 'name') list.sort((a, b) => a.name.localeCompare(b.name));
+
+                if (list.length === 0) {
+                    grid.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem; color: var(--slate-400);">
+                            <i class="fas fa-box-open" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem; display: block;"></i>
+                            <h3>No produce items match your search</h3>
+                            <p style="margin-top:4px;">Try selecting another category or district filter.</p>
+                        </div>`;
+                    return;
+                }
+
+                grid.innerHTML = list.map(p => {
+                    const imageHtml = p.image 
+                        ? `<img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.parentNode.innerHTML='<i class=\\'${p.icon || 'fas fa-seedling'}\\'></i>';" />`
+                        : `<i class="${p.icon || 'fas fa-seedling'}"></i>`;
+
+                    const farmerPhotoHtml = p.farmerPhoto
+                        ? `<img src="${p.farmerPhoto}" style="width:18px;height:18px;border-radius:50%;object-fit:cover;margin-right:6px;" />`
+                        : `<i class="fas fa-user" style="margin-right:6px;"></i>`;
+
+                    return `
+                        <div class="product-card reveal-on-scroll">
+                            <div class="product-card-img">
+                                <span class="product-card-badge"><i class="fas fa-map-marker-alt"></i> ${p.farmerLocation}</span>
+                                ${imageHtml}
+                            </div>
+                            <div class="product-card-body">
+                                <div class="product-card-title">${p.name}</div>
+                                <div class="product-card-farmer">${farmerPhotoHtml} ${p.farmer}</div>
+                                <div style="font-size: 0.82rem; color: var(--slate-500); margin-bottom: 12px; display: flex; justify-content: space-between;">
+                                    <span><i class="fas fa-calendar-alt"></i> ${p.season || 'Fresh'}</span>
+                                    <span><i class="fas fa-check-circle" style="color:var(--success)"></i> In Stock (${p.quantity || 50} ${p.unit || 'kg'})</span>
+                                </div>
+                                <div class="product-card-footer">
+                                    <div class="product-card-price">₹${p.price} <span style="font-size:0.8rem;color:var(--slate-500)">/ ${p.unit || 'kg'}</span></div>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <div class="qty-stepper">
+                                            <button class="qty-stepper-btn" onclick="changeCardQty('${p.id}', -1)">-</button>
+                                            <input type="text" id="qty_${p.id}" class="qty-stepper-val" value="1" readonly />
+                                            <button class="qty-stepper-btn" onclick="changeCardQty('${p.id}', 1)">+</button>
+                                        </div>
+                                        <button class="btn btn-sm btn-primary" onclick="addShopToCart('${p.id}')">
+                                            <i class="fas fa-cart-plus"></i> Add
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Re-initialize scroll reveal observer for newly rendered cards
+                if (window.initScrollRevealObserver) window.initScrollRevealObserver();
+            }
+
+            window.changeCardQty = (id, delta) => {
+                const el = document.getElementById('qty_' + id);
+                if (el) {
+                    let val = parseInt(el.value) + delta;
+                    if (val < 1) val = 1;
+                    el.value = val;
+                }
+            };
+
+            window.addShopToCart = (id) => {
+                const p = allProducts.find(item => item.id === id);
+                if (!p) return;
+                const qtyEl = document.getElementById('qty_' + id);
+                const quantity = qtyEl ? parseInt(qtyEl.value) : 1;
+                addToCart({ ...p, quantity });
+                updateShopCartBadge();
+                if (window.showToast) window.showToast(`Added ${quantity} ${p.unit || 'kg'} of ${p.name} to cart!`, 'success');
+            };
+
+            window.changeDeliveryLocation = () => {
+                const newLoc = prompt('Enter your delivery city/district:', savedLoc);
+                if (newLoc && newLoc.trim()) {
+                    localStorage.setItem('userLocation', newLoc.trim());
+                    document.getElementById('deliveryLocText').textContent = newLoc.trim();
+                    if (window.showToast) window.showToast(`Delivery location set to ${newLoc.trim()}`, 'info');
+                }
+            };
+
+            function updateShopCartBadge() {
+                const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                const total = cart.reduce((acc, item) => acc + item.quantity, 0);
+                const badge = document.getElementById('cartCountBadge');
+                if (badge) {
+                    badge.textContent = total;
+                    badge.style.animation = 'popBadge 0.3s ease';
+                    setTimeout(() => badge.style.animation = '', 300);
+                }
+            }
+
+            document.getElementById('searchInput').addEventListener('input', renderShopGrid);
+            document.getElementById('districtFilter').addEventListener('change', renderShopGrid);
+            document.getElementById('sortFilter').addEventListener('change', renderShopGrid);
+        });
+    </script>
+</body>
+</html>

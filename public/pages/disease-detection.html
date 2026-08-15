@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FARMORA - Crop Disease Detection</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+    <div class="page-container">
+        
+        <!-- Standardized Page Header -->
+        <div class="page-header animate-entrance-hero">
+            <div class="page-header-info">
+                <div style="display: inline-flex; align-items: center; gap: 6px; background: #dcfce7; color: #15803d; padding: 4px 14px; border-radius: 20px; font-weight: 700; font-size: 0.82rem; margin-bottom: 8px;">
+                    <i class="fas fa-microscope"></i> AI-POWERED CROP HEALTH
+                </div>
+                <h1>Crop Disease Detection</h1>
+                <p>Upload a clear photo of your crop or affected leaf to identify possible diseases and get recommended next steps.</p>
+            </div>
+            <div class="page-header-action">
+                <a href="/farmer-dashboard.html" class="btn btn-outline" style="border-radius: var(--radius-full);">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Role Guard Banner if not logged in as Farmer -->
+        <div id="roleNoticeBanner" style="display: none; background: #fffbebfb; border: 1px solid #fef08a; padding: 14px 20px; border-radius: var(--radius-md); margin-bottom: 1.5rem; color: #854d0e; font-size: 0.92rem; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <i class="fas fa-info-circle"></i> <strong>Farmer Authorization Active:</strong> You are currently viewing as <span id="currentRoleDisplay">Customer</span>. Switch to Farmer role to save diagnoses to your profile.
+            </div>
+            <button onclick="switchRole('farmer')" class="btn btn-sm btn-primary" style="padding: 6px 14px;">
+                <i class="fas fa-tractor"></i> Switch to Farmer
+            </button>
+        </div>
+
+        <!-- Main 2-Column Detection Grid with Equal Height Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; align-items: stretch;">
+            
+            <!-- LEFT COLUMN: Image Upload & Preview -->
+            <div class="glass-card" style="padding: 1.8rem; background: white; border-radius: var(--radius-xl); box-shadow: var(--shadow-md); display: flex; flex-direction: column;">
+                <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--slate-900); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-camera" style="color: var(--primary);"></i> 1. Upload Crop Image
+                </h3>
+
+                <!-- Upload Drag & Drop Area -->
+                <div id="dropZone" style="border: 2px dashed #a7f3d0; background: #f0fdf4; border-radius: var(--radius-lg); padding: 2.5rem 1.5rem; text-align: center; cursor: pointer; transition: all 0.25s ease; position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;"
+                     onclick="document.getElementById('cropFileInput').click()"
+                     ondragover="event.preventDefault(); this.style.borderColor='#16a34a'; this.style.background='#dcfce7';"
+                     ondragleave="this.style.borderColor='#a7f3d0'; this.style.background='#f0fdf4';"
+                     ondrop="handleFileDrop(event)">
+                    
+                    <input type="file" id="cropFileInput" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="handleFileSelect(event)">
+                    <input type="file" id="cameraFileInput" accept="image/*" capture="environment" style="display: none;" onchange="handleFileSelect(event)">
+                    
+                    <div style="width: 60px; height: 60px; border-radius: 50%; background: #dcfce7; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 1rem;">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--slate-800); margin-bottom: 4px;">Upload Crop Image</h4>
+                    <p style="font-size: 0.88rem; color: var(--slate-500); margin-bottom: 1rem;">Drag and drop an image here or browse from your device</p>
+                    <div style="font-size: 0.78rem; color: var(--slate-400); font-weight: 600;">Supported formats: JPG, JPEG, PNG, WEBP (Max 10MB)</div>
+                </div>
+
+                <!-- Action Buttons: File Picker + Camera Capture -->
+                <div style="display: flex; gap: 10px; margin-top: 1.2rem; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="document.getElementById('cropFileInput').click()" style="flex: 1; min-width: 140px; justify-content: center;">
+                        <i class="fas fa-folder-open"></i> Upload Image
+                    </button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('cameraFileInput').click()" style="flex: 1; min-width: 140px; justify-content: center; background: var(--slate-800); color: white; border-color: var(--slate-800);">
+                        <i class="fas fa-camera"></i> Take Photo
+                    </button>
+                </div>
+
+                <!-- Image Preview Area -->
+                <div id="imagePreviewContainer" style="display: none; margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1.2rem;">
+                    <div style="font-size: 0.88rem; font-weight: 700; color: var(--slate-700); margin-bottom: 8px;">Selected Crop Photo:</div>
+                    <div style="position: relative; width: 100%; height: 220px; border-radius: var(--radius-md); overflow: hidden; background: #000; margin-bottom: 1rem; border: 1px solid var(--border);">
+                        <img id="previewImageElement" src="" alt="Crop Preview" style="width: 100%; height: 100%; object-fit: contain;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-accent" id="btnAnalyzeCrop" onclick="runCropAnalysis()" style="flex: 2; justify-content: center; font-weight: 700;">
+                            <i class="fas fa-bolt"></i> Analyze Crop
+                        </button>
+                        <button class="btn btn-outline" onclick="resetImageSelection()" style="flex: 1; justify-content: center;">
+                            <i class="fas fa-redo"></i> Change
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Analysis Loading State -->
+                <div id="analysisLoadingState" style="display: none; margin-top: 1.5rem; padding: 1.5rem; background: #f8fafc; border-radius: var(--radius-md); border: 1px solid var(--border); text-align: center;">
+                    <div style="font-size: 2rem; color: var(--primary); margin-bottom: 10px;">
+                        <i class="fas fa-seedling fa-spin"></i>
+                    </div>
+                    <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--slate-900);">🌿 Analyzing Crop Symptoms...</h4>
+                    <p style="font-size: 0.85rem; color: var(--slate-600); margin-top: 4px; margin-bottom: 12px;">AI is examining leaf patterns, lesion geometry, and color pigmentation...</p>
+                    <div style="width: 100%; background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div id="analysisProgressBar" style="width: 10%; height: 100%; background: var(--primary); transition: width 0.4s ease;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Analysis Result UI -->
+            <div class="glass-card" style="padding: 1.8rem; background: white; border-radius: var(--radius-xl); box-shadow: var(--shadow-md); display: flex; flex-direction: column;">
+                <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--slate-900); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-clipboard-check" style="color: var(--primary);"></i> 2. AI Analysis & Recommendations
+                </h3>
+
+                <!-- Placeholder Empty State -->
+                <div id="resultEmptyState" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 1.5rem; text-align: center; color: var(--slate-400); background: var(--slate-50); border-radius: var(--radius-lg); border: 1px dashed var(--border);">
+                    <i class="fas fa-leaf" style="font-size: 3rem; margin-bottom: 1rem; color: #cbd5e1;"></i>
+                    <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--slate-700);">No Analysis Conducted Yet</h4>
+                    <p style="font-size: 0.88rem; color: var(--slate-500); margin-top: 4px; max-width: 320px;">Upload a crop photo on the left and click "Analyze Crop" to display AI disease assessment.</p>
+                </div>
+
+                <!-- Result Content Box -->
+                <div id="resultCardContainer" style="display: none; flex: 1;">
+                    <!-- Disease / Healthy Card Header -->
+                    <div id="resultCardHeader" style="padding: 1.2rem; border-radius: var(--radius-lg); margin-bottom: 1.2rem; background: #fef2f2; border: 1px solid #fca5a5;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                            <div>
+                                <span id="resultCropNamePill" style="background: rgba(0,0,0,0.06); font-size: 0.78rem; font-weight: 700; padding: 2px 10px; border-radius: 12px; color: var(--slate-800);">Tomato</span>
+                                <h2 id="resultDiseaseName" style="font-size: 1.35rem; font-weight: 800; color: #991b1b; margin-top: 6px; margin-bottom: 2px;">Early Blight (Alternaria solani)</h2>
+                            </div>
+                            <div style="text-align: right; flex-shrink: 0;">
+                                <div style="font-size: 0.72rem; color: var(--slate-500); font-weight: 700;">CONFIDENCE</div>
+                                <div id="resultConfidenceVal" style="font-size: 1.25rem; font-weight: 800; color: #16a34a;">92%</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; margin-top: 10px; align-items: center; flex-wrap: wrap;">
+                            <span id="resultSeverityBadge" style="background: #ef4444; color: white; font-size: 0.75rem; font-weight: 800; padding: 3px 10px; border-radius: 12px;">SEVERITY: MODERATE</span>
+                            <span id="resultDateBadge" style="font-size: 0.8rem; color: var(--slate-600);"><i class="fas fa-calendar-alt"></i> Just now</span>
+                        </div>
+                    </div>
+
+                    <!-- Symptoms Section -->
+                    <div style="margin-bottom: 1.2rem;">
+                        <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--slate-900); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-exclamation-triangle" style="color: #d97706;"></i> Identified Symptoms
+                        </h4>
+                        <ul id="resultSymptomsList" style="padding-left: 1.2rem; color: var(--slate-700); font-size: 0.9rem; line-height: 1.6;">
+                            <li>Dark brown concentric spots on leaves</li>
+                            <li>Yellowing of leaf tissue surrounding spots</li>
+                        </ul>
+                    </div>
+
+                    <!-- Recommended Actions Section -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--slate-900); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-check-circle" style="color: var(--primary);"></i> Recommended Actions
+                        </h4>
+                        <ol id="resultRecommendationsList" style="padding-left: 1.2rem; color: var(--slate-700); font-size: 0.9rem; line-height: 1.6;">
+                            <li>Remove and destroy heavily affected lower leaves immediately.</li>
+                            <li>Improve air circulation between plants.</li>
+                        </ol>
+                    </div>
+
+                    <!-- AI Responsible UX Disclaimer -->
+                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px 14px; border-radius: var(--radius-md); font-size: 0.82rem; color: #166534; display: flex; align-items: flex-start; gap: 8px; margin-top: auto;">
+                        <i class="fas fa-shield-alt" style="font-size: 1rem; color: #15803d; margin-top: 2px; flex-shrink: 0;"></i>
+                        <div>
+                            <strong>AI-generated preliminary assessment.</strong> For critical crop-health decisions, verify the result with a qualified agricultural extension officer.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- DIAGNOSIS HISTORY SECTION -->
+        <div class="glass-card" style="padding: 2rem; background: white; border-radius: var(--radius-xl); box-shadow: var(--shadow-md);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);">
+                <div>
+                    <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--slate-900); display: flex; align-items: center; gap: 8px; margin: 0;">
+                        <i class="fas fa-history" style="color: var(--primary);"></i> Diagnosis History
+                    </h3>
+                    <p style="color: var(--slate-500); font-size: 0.9rem; margin-top: 2px;">Previous AI assessments logged for your farm holdings.</p>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <div style="background: var(--slate-100); padding: 6px 16px; border-radius: var(--radius-md); font-size: 0.85rem; font-weight: 700; color: var(--slate-700);">
+                        Total Analyses: <span id="statTotalAnalyses" style="color: var(--primary);">1</span>
+                    </div>
+                    <div style="background: #dcfce7; padding: 6px 16px; border-radius: var(--radius-md); font-size: 0.85rem; font-weight: 700; color: #15803d;">
+                        Healthy: <span id="statHealthyCount">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Table -->
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="background: var(--slate-50); border-bottom: 2px solid var(--border); color: var(--slate-600); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            <th style="padding: 14px 16px; vertical-align: middle;">Diagnosis ID</th>
+                            <th style="padding: 14px 16px; vertical-align: middle;">Crop</th>
+                            <th style="padding: 14px 16px; vertical-align: middle;">Disease Assessment</th>
+                            <th style="padding: 14px 16px; vertical-align: middle;">Confidence</th>
+                            <th style="padding: 14px 16px; vertical-align: middle;">Severity</th>
+                            <th style="padding: 14px 16px; vertical-align: middle;">Date</th>
+                            <th style="padding: 14px 16px; vertical-align: middle; text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 2rem; color: var(--slate-400);">Loading diagnosis history...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="assets/translations.js"></script>
+    <script src="assets/script.js"></script>
+    <script>
+        let currentBase64Image = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const session = window.getUserSession();
+            if (session.role !== 'farmer') {
+                const banner = document.getElementById('roleNoticeBanner');
+                if (banner) banner.style.display = 'flex';
+            }
+            loadDiagnosisHistory();
+        });
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) processImageFile(file);
+        }
+
+        function handleFileDrop(e) {
+            e.preventDefault();
+            const zone = document.getElementById('dropZone');
+            if (zone) {
+                zone.style.borderColor = '#a7f3d0';
+                zone.style.background = '#f0fdf4';
+            }
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                processImageFile(e.dataTransfer.files[0]);
+            }
+        }
+
+        function processImageFile(file) {
+            if (!file.type.match('image.*')) {
+                if (window.showToast) window.showToast('Please select a valid image file (JPG, PNG, WEBP)', 'error');
+                return;
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                if (window.showToast) window.showToast('File size exceeds 10MB limit', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentBase64Image = e.target.result;
+                const previewImg = document.getElementById('previewImageElement');
+                const previewContainer = document.getElementById('imagePreviewContainer');
+                if (previewImg) previewImg.src = currentBase64Image;
+                if (previewContainer) previewContainer.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function resetImageSelection() {
+            currentBase64Image = null;
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            if (previewContainer) previewContainer.style.display = 'none';
+            document.getElementById('cropFileInput').value = '';
+            document.getElementById('cameraFileInput').value = '';
+        }
+
+        async function runCropAnalysis() {
+            if (!currentBase64Image) {
+                if (window.showToast) window.showToast('Please select or upload a crop photo first', 'error');
+                return;
+            }
+
+            const loadingState = document.getElementById('analysisLoadingState');
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const progressBar = document.getElementById('analysisProgressBar');
+
+            if (loadingState) loadingState.style.display = 'block';
+            if (previewContainer) previewContainer.style.display = 'none';
+
+            let width = 10;
+            const progressInterval = setInterval(() => {
+                width += 15;
+                if (progressBar) progressBar.style.width = Math.min(width, 90) + '%';
+            }, 250);
+
+            const session = window.getUserSession();
+
+            try {
+                const res = await fetch('/api/farmer/disease-detection', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-user-role': 'farmer',
+                        'Authorization': `Bearer ${session.token}`
+                    },
+                    body: JSON.stringify({
+                        image: currentBase64Image,
+                        farmerName: session.name
+                    })
+                });
+
+                clearInterval(progressInterval);
+                if (progressBar) progressBar.style.width = '100%';
+
+                const data = await res.json();
+                setTimeout(() => {
+                    if (loadingState) loadingState.style.display = 'none';
+                    if (data.diagnosis) {
+                        displayAnalysisResult(data.diagnosis);
+                        loadDiagnosisHistory();
+                        if (window.showToast) window.showToast('Crop disease analysis complete!', 'success');
+                    } else {
+                        if (previewContainer) previewContainer.style.display = 'block';
+                        if (window.showToast) window.showToast(data.error || 'Failed to analyze crop image', 'error');
+                    }
+                }, 400);
+
+            } catch (err) {
+                clearInterval(progressInterval);
+                if (loadingState) loadingState.style.display = 'none';
+                if (previewContainer) previewContainer.style.display = 'block';
+                if (window.showToast) window.showToast('Network error analyzing crop. Please try again.', 'error');
+            }
+        }
+
+        function displayAnalysisResult(diag) {
+            const emptyState = document.getElementById('resultEmptyState');
+            const container = document.getElementById('resultCardContainer');
+            if (emptyState) emptyState.style.display = 'none';
+            if (container) container.style.display = 'block';
+
+            document.getElementById('resultCropNamePill').textContent = diag.cropName;
+            document.getElementById('resultDiseaseName').textContent = diag.diseaseName;
+            document.getElementById('resultConfidenceVal').textContent = diag.confidence + '%';
+
+            const header = document.getElementById('resultCardHeader');
+            const badge = document.getElementById('resultSeverityBadge');
+
+            if (diag.isHealthy) {
+                header.style.background = '#f0fdf4';
+                header.style.borderColor = '#bbf7d0';
+                document.getElementById('resultDiseaseName').style.color = '#15803d';
+                badge.style.background = '#16a34a';
+                badge.textContent = 'STATUS: HEALTHY CROP';
+            } else {
+                header.style.background = '#fef2f2';
+                header.style.borderColor = '#fca5a5';
+                document.getElementById('resultDiseaseName').style.color = '#991b1b';
+                badge.style.background = diag.severity === 'High' ? '#dc2626' : '#ea580c';
+                badge.textContent = `SEVERITY: ${diag.severity.toUpperCase()}`;
+            }
+
+            const symptomsList = document.getElementById('resultSymptomsList');
+            symptomsList.innerHTML = diag.symptoms.map(s => `<li>${s}</li>`).join('');
+
+            const recsList = document.getElementById('resultRecommendationsList');
+            recsList.innerHTML = diag.recommendations.map(r => `<li>${r}</li>`).join('');
+        }
+
+        async function loadDiagnosisHistory() {
+            const session = window.getUserSession();
+            try {
+                const res = await fetch(`/api/farmer/disease-detection/history?farmerId=${encodeURIComponent(session.name)}`, {
+                    headers: {
+                        'x-user-role': 'farmer',
+                        'Authorization': `Bearer ${session.token}`
+                    }
+                });
+                const data = await res.json();
+                if (data.diagnoses) {
+                    renderHistoryTable(data.diagnoses);
+                    if (data.stats) {
+                        document.getElementById('statTotalAnalyses').textContent = data.stats.totalAnalyses;
+                        document.getElementById('statHealthyCount').textContent = data.stats.healthyCount;
+                    }
+                }
+            } catch (err) {}
+        }
+
+        function renderHistoryTable(diagnoses) {
+            const tbody = document.getElementById('historyTableBody');
+            if (!tbody) return;
+
+            if (!diagnoses.length) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--slate-400);">No previous crop diagnoses found for your profile.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = diagnoses.map(d => {
+                const dateStr = new Date(d.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+                const statusPill = d.isHealthy 
+                    ? `<span style="background:#dcfce7;color:#15803d;padding:3px 10px;border-radius:12px;font-weight:700;font-size:0.78rem;">Healthy</span>`
+                    : `<span style="background:#fef2f2;color:#dc2626;padding:3px 10px;border-radius:12px;font-weight:700;font-size:0.78rem;">${d.severity}</span>`;
+
+                return `
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 14px 16px; font-weight: 700; color: var(--slate-900); vertical-align: middle;">${d.id}</td>
+                        <td style="padding: 14px 16px; font-weight: 600; vertical-align: middle;">${d.cropName}</td>
+                        <td style="padding: 14px 16px; color: var(--slate-700); font-weight: 500; vertical-align: middle;">${d.diseaseName}</td>
+                        <td style="padding: 14px 16px; font-weight: 800; color: var(--primary); vertical-align: middle;">${d.confidence}%</td>
+                        <td style="padding: 14px 16px; vertical-align: middle;">${statusPill}</td>
+                        <td style="padding: 14px 16px; color: var(--slate-500); vertical-align: middle;">${dateStr}</td>
+                        <td style="padding: 14px 16px; text-align: right; vertical-align: middle;">
+                            <button onclick='displayAnalysisResult(${JSON.stringify(d).replace(/'/g, "&apos;")})' class="btn btn-sm btn-outline" style="padding: 5px 12px; font-size: 0.8rem; border-radius: var(--radius-full);">
+                                View Report
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

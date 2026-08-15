@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FARMORA - Product Details & Catalog</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <header class="header">
+    <nav class="nav">
+      <a href="/" class="logo">
+        <i class="fas fa-seedling"></i>
+        <span>FARMORA</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+        <li><a href="/customer-shop.html" class="active"><i class="fas fa-store"></i> Shop</a></li>
+        <li><a href="/booking.html"><i class="fas fa-shopping-bag"></i> Cart & Orders</a></li>
+        <li><a href="/tracker.html"><i class="fas fa-map-marker-alt"></i> Live Track</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="page-container">
+    
+    <!-- Breadcrumb Navigation -->
+    <div style="font-size: 0.88rem; color: var(--slate-500); margin-bottom: var(--space-4); display: flex; align-items: center; gap: 8px;">
+      <a href="/" style="color: var(--primary); text-decoration: none;"><i class="fas fa-home"></i> Home</a>
+      <span>&rsaquo;</span>
+      <a href="/customer-shop.html" style="color: var(--primary); text-decoration: none;">Marketplace</a>
+      <span>&rsaquo;</span>
+      <span id="breadcrumbCurrent" style="color: var(--slate-900); font-weight: 600;">Product Showcase</span>
+    </div>
+
+    <!-- Single Product Detail Section (Dynamic) -->
+    <div id="productDetailSection" style="display: none; background: white; border-radius: var(--radius-lg); padding: var(--space-8); border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: var(--space-8);">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-8); align-items: center;">
+        <div style="height: 320px; border-radius: var(--radius-md); background: var(--primary-bg); display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--border);" id="detailImgBox">
+          <!-- Image or Icon -->
+        </div>
+        <div>
+          <div id="detailBadge" style="display: inline-block; background: var(--primary-bg); color: var(--primary); font-weight: 700; font-size: 0.8rem; padding: 4px 12px; border-radius: var(--radius-full); margin-bottom: 8px;">In Stock</div>
+          <h1 id="detailTitle" style="font-size: 2rem; color: var(--slate-900); font-weight: 800; margin-bottom: 8px;">Product Name</h1>
+          
+          <div style="font-size: 1.6rem; font-weight: 800; color: var(--accent); margin-bottom: var(--space-4);" id="detailPrice">₹0 / kg</div>
+          
+          <div style="background: var(--slate-50); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-4); margin-bottom: var(--space-5); display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9rem;">
+            <div><i class="fas fa-user" style="color: var(--primary); margin-right: 6px;"></i><strong>Farmer:</strong> <span id="detailFarmer">—</span></div>
+            <div><i class="fas fa-warehouse" style="color: var(--primary); margin-right: 6px;"></i><strong>Farm:</strong> <span id="detailFarm">—</span></div>
+            <div><i class="fas fa-map-marker-alt" style="color: var(--accent); margin-right: 6px;"></i><strong>Location:</strong> <span id="detailLocation">—</span></div>
+            <div><i class="fas fa-boxes" style="color: var(--primary); margin-right: 6px;"></i><strong>Stock:</strong> <span id="detailStock">—</span></div>
+          </div>
+
+          <p id="detailDesc" style="color: var(--slate-600); font-size: 0.95rem; line-height: 1.6; margin-bottom: var(--space-6);">Fresh farm produce harvested directly from Tamil Nadu fields.</p>
+
+          <div style="display: flex; gap: var(--space-4); align-items: center; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;">
+              <button onclick="changeDetailQty(-1)" style="width:36px;height:42px;border:none;background:var(--slate-100);font-weight:bold;cursor:pointer;font-size:1.1rem;">-</button>
+              <input type="text" id="detailQty" value="1" readonly style="width:44px;height:42px;border:none;text-align:center;font-weight:700;font-size:1rem;" />
+              <button onclick="changeDetailQty(1)" style="width:36px;height:42px;border:none;background:var(--slate-100);font-weight:bold;cursor:pointer;font-size:1.1rem;">+</button>
+            </div>
+            <button class="btn btn-primary" id="detailAddCartBtn" style="height: 42px; padding: 0 24px;"><i class="fas fa-cart-plus"></i> Add to Cart</button>
+            <button class="btn btn-accent" id="detailBuyNowBtn" style="height: 42px; padding: 0 24px;"><i class="fas fa-bolt"></i> Buy Now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page Header for Catalog Mode -->
+    <div class="page-header" id="catalogHeader">
+      <div class="page-header-info">
+        <h1>Fresh Harvest Catalog</h1>
+        <p>Direct produce listings from verified Tamil Nadu farms with price transparency.</p>
+      </div>
+      <div class="page-header-action">
+        <a href="/customer-shop.html" class="btn btn-accent"><i class="fas fa-store"></i> Open Customer Shop</a>
+      </div>
+    </div>
+
+    <!-- Search & Controls -->
+    <div id="catalogControls" style="background: white; border-radius: var(--radius-lg); padding: var(--space-5); border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: var(--space-6); display: flex; gap: var(--space-4); flex-wrap: wrap; align-items: center; justify-content: space-between;">
+      <div style="flex: 1; min-width: 260px; position: relative;">
+        <i class="fas fa-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--primary);"></i>
+        <input type="text" id="searchInput" class="form-input" placeholder="Search product name, farmer, or location..." style="padding-left: 42px; border-radius: var(--radius-full);" />
+      </div>
+      <select id="districtSelect" class="form-select" style="min-width: 180px; border-radius: var(--radius-md);">
+        <option value="">All Districts</option>
+      </select>
+    </div>
+
+    <!-- Product Cards Grid -->
+    <div id="products" class="product-grid">
+      <div style="grid-column: 1 / -1; text-align: center; color: var(--slate-400); padding: 3rem;">
+        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 8px;"></i>
+        <p>Loading fresh catalog...</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="assets/product.js"></script>
+  <script src="assets/script.js"></script>
+  <script>
+    let currentDetailProduct = null;
+
+    window.changeDetailQty = (delta) => {
+      const el = document.getElementById('detailQty');
+      if (el) {
+        let val = parseInt(el.value) + delta;
+        if (val < 1) val = 1;
+        el.value = val;
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const prodId = urlParams.get('id');
+
+      if (prodId) {
+        try {
+          const res = await fetch(`/api/products/${prodId}`);
+          if (res.ok) {
+            currentDetailProduct = await res.json();
+            renderSingleProductDetail(currentDetailProduct);
+          }
+        } catch (e) {}
+      }
+    });
+
+    function renderSingleProductDetail(p) {
+      document.getElementById('breadcrumbCurrent').textContent = p.name;
+      document.getElementById('catalogHeader').style.display = 'none';
+      document.getElementById('catalogControls').style.display = 'none';
+      document.getElementById('productDetailSection').style.display = 'block';
+
+      document.getElementById('detailTitle').textContent = p.name;
+      document.getElementById('detailPrice').textContent = `₹${p.price} / ${p.unit || 'kg'}`;
+      document.getElementById('detailFarmer').textContent = p.farmer || 'Verified Farmer';
+      document.getElementById('detailFarm').textContent = p.farmName || (p.farmer + ' Farms');
+      document.getElementById('detailLocation').textContent = p.farmerLocation || 'Location not available';
+      document.getElementById('detailStock').textContent = `${p.quantity} ${p.unit || 'kg'} available`;
+      document.getElementById('detailDesc').textContent = p.description || 'Fresh farm produce harvested directly from Tamil Nadu fields.';
+
+      const imgBox = document.getElementById('detailImgBox');
+      if (p.image) {
+        imgBox.innerHTML = `<img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.parentNode.innerHTML='<i class=\\'${p.icon || 'fas fa-seedling'}\\' style=\\'font-size:5rem;color:var(--primary);\\'></i>';" />`;
+      } else {
+        imgBox.innerHTML = `<i class="${p.icon || 'fas fa-seedling'}" style="font-size: 5rem; color: var(--primary);"></i>`;
+      }
+
+      document.getElementById('detailAddCartBtn').onclick = () => {
+        const qty = parseInt(document.getElementById('detailQty').value) || 1;
+        addToCart({ ...p, quantity: qty });
+      };
+
+      document.getElementById('detailBuyNowBtn').onclick = () => {
+        const qty = parseInt(document.getElementById('detailQty').value) || 1;
+        addToCart({ ...p, quantity: qty });
+        window.location.href = '/booking.html';
+      };
+    }
+  </script>
+</body>
+</html>

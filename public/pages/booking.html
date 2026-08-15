@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FARMORA - Confirm Booking & Cart</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <a href="/" class="logo">
+                <i class="fas fa-seedling"></i>
+                <span>FARMORA</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="/customer-shop.html"><i class="fas fa-store"></i> Shop</a></li>
+                <li><a href="/booking.html" class="active"><i class="fas fa-shopping-bag"></i> Cart</a></li>
+                <li><a href="/tracker.html"><i class="fas fa-map-marker-alt"></i> Live Track</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="page-container">
+        
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-header-info">
+                <h1 id="pageTitle">Confirm Your Order</h1>
+                <p id="pageSubtitle">Review your items and proceed to secure checkout.</p>
+            </div>
+            <div class="page-header-action" id="headerActions">
+                <button class="btn btn-secondary" id="showOrdersBtn"><i class="fas fa-history"></i> My Past Orders</button>
+            </div>
+        </div>
+
+        <div id="bookingDetails" style="margin-bottom: var(--space-8);">
+            <!-- Cart or Orders list populated by JS -->
+        </div>
+
+        <div style="display: flex; gap: var(--space-4); justify-content: flex-end;" id="bookingButtons">
+            <a href="/customer-shop.html" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Continue Shopping</a>
+            <button class="btn btn-accent" id="confirmOrderBtn"><i class="fas fa-check-circle"></i> Proceed to Payment</button>
+        </div>
+
+    </div>
+
+    <script src="assets/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const bookingDetailsEl = document.getElementById('bookingDetails');
+            const pageTitleEl = document.getElementById('pageTitle');
+            const pageSubtitleEl = document.getElementById('pageSubtitle');
+            const confirmOrderBtn = document.getElementById('confirmOrderBtn');
+            const showOrdersBtn = document.getElementById('showOrdersBtn');
+
+            const userLocation = localStorage.getItem('userLocation') || 'Chennai';
+            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+            function calculateTotal() {
+                return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+            }
+
+            function generateOrderId() {
+                return 'ORD-' + Math.floor(100000 + Math.random() * 900000);
+            }
+
+            function renderCartDetails() {
+                pageTitleEl.textContent = "Confirm Your Order";
+                pageSubtitleEl.textContent = "Review your items and proceed to secure checkout.";
+                confirmOrderBtn.style.display = cart.length > 0 ? 'inline-flex' : 'none';
+
+                if (cart.length === 0) {
+                    bookingDetailsEl.innerHTML = `
+                        <div style="background: white; border-radius: var(--radius-lg); padding: 4rem 2rem; text-align: center; border: 1px solid var(--border);">
+                            <i class="fas fa-shopping-basket" style="font-size: 3rem; color: var(--slate-400); margin-bottom: 1rem;"></i>
+                            <h3 style="font-size: 1.3rem; color: var(--slate-800);">Your Cart is Currently Empty</h3>
+                            <p style="color: var(--slate-500); margin-top: 4px; margin-bottom: 1.5rem;">Explore our direct farm marketplace to add fresh produce!</p>
+                            <a href="/customer-shop.html" class="btn btn-primary"><i class="fas fa-store"></i> Browse Customer Shop</a>
+                        </div>
+                    `;
+                } else {
+                    let htmlContent = '<div style="display: flex; flex-direction: column; gap: var(--space-4);">';
+                    cart.forEach(item => {
+                        const fromLocation = item.farmerLocation || 'Madurai';
+                        const itemTotal = item.price * item.quantity;
+                        htmlContent += `
+                            <div style="background: white; border-radius: var(--radius-lg); padding: var(--space-5); border: 1px solid var(--border); box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-4);">
+                                <div style="display: flex; align-items: center; gap: var(--space-4);">
+                                    <div style="width: 54px; height: 54px; border-radius: var(--radius-md); background: var(--primary-bg); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.6rem;">
+                                        <i class="${item.icon || 'fas fa-seedling'}"></i>
+                                    </div>
+                                    <div>
+                                        <h3 style="font-size: 1.15rem; color: var(--slate-900); font-weight: 700;">${item.name}</h3>
+                                        <div style="font-size: 0.85rem; color: var(--slate-500);">Farmer: ${item.farmer} (${fromLocation}) &rarr; Deliver to: ${userLocation}</div>
+                                        <div style="font-size: 0.9rem; font-weight: 600; color: var(--slate-700); margin-top: 4px;">₹${item.price} / ${item.unit || 'kg'} &bull; Item Total: <strong>₹${itemTotal}</strong></div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="display: flex; align-items: center; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;">
+                                        <button onclick="updateCartQty('${item.id}', -1)" style="width:30px;height:34px;border:none;background:var(--slate-100);font-weight:bold;cursor:pointer;">-</button>
+                                        <span style="width:36px;text-align:center;font-weight:700;font-size:0.9rem;">${item.quantity}</span>
+                                        <button onclick="updateCartQty('${item.id}', 1)" style="width:30px;height:34px;border:none;background:var(--slate-100);font-weight:bold;cursor:pointer;">+</button>
+                                    </div>
+                                    <button class="btn btn-sm btn-danger remove-item-btn" data-product-id="${item.id}">
+                                        <i class="fas fa-trash-alt"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    const total = calculateTotal();
+                    htmlContent += `
+                        <div style="background: var(--slate-900); color: white; border-radius: var(--radius-lg); padding: var(--space-6); display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-4);">
+                            <div>
+                                <div style="font-size: 0.85rem; color: var(--slate-400); text-transform: uppercase;">Total Booking Amount</div>
+                                <div style="font-family: var(--font-heading); font-size: 2.2rem; font-weight: 800; color: var(--accent-yellow);">₹${total}</div>
+                            </div>
+                            <button class="btn btn-accent" onclick="document.getElementById('confirmOrderBtn').click()"><i class="fas fa-arrow-right"></i> Proceed to Pay</button>
+                        </div>
+                    </div>`;
+                    bookingDetailsEl.innerHTML = htmlContent;
+                }
+            }
+
+            window.updateCartQty = (id, delta) => {
+                const item = cart.find(i => i.id === id);
+                if (item) {
+                    item.quantity += delta;
+                    if (item.quantity <= 0) {
+                        cart = cart.filter(i => i.id !== id);
+                    }
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    renderCartDetails();
+                }
+            };
+
+            async function renderMyOrders() {
+                pageTitleEl.textContent = "My Orders History";
+                pageSubtitleEl.textContent = "Track status and delivery details of your active and past orders.";
+                confirmOrderBtn.style.display = 'none';
+
+                let orders = [];
+                try {
+                    const res = await fetch('/api/orders');
+                    orders = await res.json();
+                } catch (e) {
+                    orders = JSON.parse(localStorage.getItem('myOrders') || '[]');
+                }
+
+                if (orders.length === 0) {
+                    bookingDetailsEl.innerHTML = `
+                        <div style="background: white; border-radius: var(--radius-lg); padding: 4rem 2rem; text-align: center; border: 1px solid var(--border);">
+                            <i class="fas fa-box-open" style="font-size: 3rem; color: var(--slate-400); margin-bottom: 1rem;"></i>
+                            <h3 style="font-size: 1.3rem; color: var(--slate-800);">No Past Orders Found</h3>
+                            <p style="color: var(--slate-500); margin-top: 4px;">Orders you complete will be tracked here!</p>
+                        </div>
+                    `;
+                } else {
+                    let htmlContent = '<div style="display: flex; flex-direction: column; gap: var(--space-4);">';
+                    orders.slice().reverse().forEach(order => {
+                        const orderSummary = order.productName ? `${order.productName} × ${order.quantity}` : (order.items ? order.items.map(item => `${item.name} (${item.quantity})`).join(', ') : 'Farm Fresh Produce');
+                        const totalAmount = order.totalAmount || (order.items ? order.items.reduce((t, i) => t + (i.price * i.quantity), 0) : 0);
+                        const status = order.status || 'PLACED';
+
+                        htmlContent += `
+                            <div style="background: white; border-radius: var(--radius-lg); padding: var(--space-5); border: 1px solid var(--border); box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-4);">
+                                <div>
+                                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                                        <h3 style="font-size: 1.1rem; color: var(--primary); font-weight: 700;">Order ID: ${order.id || order.orderId}</h3>
+                                        <span class="status-badge status-${status}">${status.replace('_',' ')}</span>
+                                    </div>
+                                    <div style="font-size: 0.9rem; color: var(--slate-900); font-weight:600; margin: 4px 0;">Item: ${orderSummary}</div>
+                                    <div style="font-size: 0.85rem; color: var(--slate-600);">Deliver to: <strong>${order.deliveryAddress || order.deliveryLocation || 'Chennai'}</strong> &bull; Date: ${new Date(order.createdAt || order.timestamp || Date.now()).toLocaleDateString()}</div>
+                                    <div style="font-size: 1.1rem; font-weight: 800; color: var(--accent); margin-top: 4px;">₹${totalAmount}</div>
+                                </div>
+                                <a href="/tracker.html?orderId=${order.id || order.orderId}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-map-marker-alt"></i> Track Live Status
+                                </a>
+                            </div>
+                        `;
+                    });
+                    htmlContent += '</div>';
+                    bookingDetailsEl.innerHTML = htmlContent;
+                }
+            }
+
+            document.addEventListener('click', (e) => {
+                if (e.target.id === 'confirmOrderBtn' || e.target.closest('#confirmOrderBtn')) {
+                    if (cart.length === 0) {
+                        alert('Your cart is empty.');
+                        return;
+                    }
+                    const orderId = generateOrderId();
+                    const totalAmount = calculateTotal();
+                    localStorage.setItem('currentOrder', JSON.stringify({ orderId, totalAmount, cart: cart, deliveryLocation: userLocation }));
+                    window.location.href = `/payment.html?orderId=${orderId}&amount=${totalAmount}`;
+                }
+
+                if (e.target.id === 'showOrdersBtn' || e.target.closest('#showOrdersBtn')) {
+                    renderMyOrders();
+                } else if (e.target.classList.contains('remove-item-btn') || e.target.closest('.remove-item-btn')) {
+                    const btn = e.target.classList.contains('remove-item-btn') ? e.target : e.target.closest('.remove-item-btn');
+                    const productIdToRemove = btn.dataset.productId;
+                    cart = cart.filter(item => item.id !== productIdToRemove);
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    renderCartDetails();
+                    if (window.showToast) window.showToast('Item removed from cart', 'info');
+                }
+            });
+
+            renderCartDetails();
+        });
+    </script>
+</body>
+</html>

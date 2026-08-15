@@ -1,0 +1,237 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "name": "Sanjay Kumar",
+      "role": "customer",
+      "email": "sanjay@farmora.in",
+      "location": "Madurai"
+    },
+    {
+      "id": "u2",
+      "name": "Kavitha S",
+      "role": "farmer",
+      "email": "kavitha@farmora.in",
+      "location": "Thanjavur"
+    },
+    {
+      "id": "u3",
+      "name": "Ramesh K",
+      "role": "delivery",
+      "email": "ramesh@farmora.in",
+      "location": "Madurai Central"
+    },
+    {
+      "id": "u4",
+      "name": "Selvi Farms",
+      "role": "vendor",
+      "email": "selvi@farmora.in",
+      "location": "Dindigul"
+    }
+  ],
+  "products": [
+    {
+      "id": "p1",
+      "name": "Fresh Organic Tomatoes",
+      "category": "Vegetables",
+      "price": 40,
+      "unit": "kg",
+      "quantity": 150,
+      "farmer": "Kavitha S",
+      "farmName": "Kavitha Farms",
+      "farmerLocation": "Thanjavur",
+      "description": "Sun-ripened organic tomatoes grown in Delta soil.",
+      "icon": "fas fa-apple-alt",
+      "season": "Kharif",
+      "active": true
+    },
+    {
+      "id": "p2",
+      "name": "Red Onions (Small)",
+      "category": "Vegetables",
+      "price": 55,
+      "unit": "kg",
+      "quantity": 200,
+      "farmer": "Selvi Farms",
+      "farmName": "Selvi Farms",
+      "farmerLocation": "Dindigul",
+      "description": "Freshly harvested Shallots / Small Onions.",
+      "icon": "fas fa-seedling",
+      "season": "Rabi",
+      "active": true
+    },
+    {
+      "id": "p3",
+      "name": "Farm Fresh Potatoes",
+      "category": "Vegetables",
+      "price": 35,
+      "unit": "kg",
+      "quantity": 180,
+      "farmer": "Muthu R",
+      "farmName": "Muthu Farms",
+      "farmerLocation": "Salem",
+      "description": "Clean, pesticide-free Salem table potatoes.",
+      "icon": "fas fa-carrot",
+      "season": "Kharif",
+      "active": true
+    },
+    {
+      "id": "p4",
+      "name": "Organic Green Chilies",
+      "category": "Vegetables",
+      "price": 60,
+      "unit": "kg",
+      "quantity": 80,
+      "farmer": "Kavitha S",
+      "farmName": "Kavitha Farms",
+      "farmerLocation": "Thanjavur",
+      "description": "Pungent green chilies harvested fresh.",
+      "icon": "fas fa-pepper-hot",
+      "season": "Zaid",
+      "active": true
+    },
+    {
+      "id": "p5",
+      "name": "Banana (Sevvazhai)",
+      "category": "Fruits",
+      "price": 70,
+      "unit": "dozen",
+      "quantity": 90,
+      "farmer": "Ramasamy M",
+      "farmName": "Ramasamy Farms",
+      "farmerLocation": "Tiruchirappalli",
+      "description": "Nutritious Red Banana bunches.",
+      "icon": "fas fa-lemon",
+      "season": "Perennial",
+      "active": true
+    },
+    {
+      "id": "p6",
+      "name": "Fresh Guava (Kg)",
+      "category": "Fruits",
+      "price": 50,
+      "unit": "kg",
+      "quantity": 110,
+      "farmer": "Kavitha S",
+      "farmName": "Kavitha Farms",
+      "farmerLocation": "Thanjavur",
+      "description": "Crisp white guava picked daily.",
+      "icon": "fas fa-leaf",
+      "season": "Perennial",
+      "active": true
+    }
+  ],
+  "categories": [
+    "All",
+    "Vegetables",
+    "Fruits",
+    "Grains",
+    "Spices"
+  ],
+  "orders": [
+    {
+      "id": "ORD-9001",
+      "customerId": "u1",
+      "customerName": "Sanjay Kumar",
+      "customerAddress": "42, North Street, Madurai",
+      "farmerName": "Kavitha S",
+      "deliveryBoyId": "db1",
+      "deliveryBoyName": "Ramesh K",
+      "items": [
+        {
+          "productId": "p1",
+          "name": "Fresh Organic Tomatoes",
+          "price": 40,
+          "unit": "kg",
+          "quantity": 2
+        }
+      ],
+      "totalAmount": 80,
+      "status": "DELIVERED",
+      "createdAt": "2026-08-14T10:00:00.000Z"
+    }
+  ],
+  "cart": [],
+  "deliveryBoys": [
+    {
+      "id": "db1",
+      "name": "Ramesh K",
+      "phone": "+91 98765 43210",
+      "area": "Madurai Central",
+      "active": true,
+      "assignedOrdersCount": 0
+    },
+    {
+      "id": "db2",
+      "name": "Karthik S",
+      "phone": "+91 98765 43211",
+      "area": "Thanjavur Town",
+      "active": true,
+      "assignedOrdersCount": 0
+    },
+    {
+      "id": "db3",
+      "name": "Senthil M",
+      "phone": "+91 98765 43212",
+      "area": "Coimbatore East",
+      "active": true,
+      "assignedOrdersCount": 0
+    }
+  ],
+  "diseaseDiagnoses": [
+    {
+      "id": "DIAG-101",
+      "farmerId": "Kavitha S",
+      "cropName": "Tomato",
+      "diseaseName": "Early Blight (Alternaria solani)",
+      "confidence": 92,
+      "severity": "Moderate",
+      "isHealthy": false,
+      "symptoms": [
+        "Dark brown concentric spots on leaves",
+        "Yellowing of leaf tissue surrounding spots"
+      ],
+      "recommendations": [
+        "Remove and destroy heavily affected lower leaves immediately.",
+        "Improve air circulation between plants.",
+        "Apply organic neem oil spray."
+      ],
+      "createdAt": "2026-08-14T11:00:00.000Z"
+    }
+  ],
+  "yieldPredictions": [
+    {
+      "id": "YIELD-101",
+      "farmerId": "Kavitha S",
+      "cropName": "Paddy (Rice)",
+      "landArea": 2,
+      "unit": "Acres",
+      "soilType": "Alluvial Soil",
+      "season": "Kharif (Monsoon)",
+      "irrigation": "Canal / Borewell",
+      "location": "Thanjavur",
+      "previousYield": 4,
+      "estimatedYield": "4.4 Tons",
+      "estimatedYieldNum": 4.4,
+      "expectedRange": "4.0 – 4.8 Tons",
+      "confidence": 88,
+      "recommendations": [
+        "Maintain 2-5 cm standing water layer during tillering phase.",
+        "Apply split dose of Nitrogen and Potassium at panicle initiation stage.",
+        "Monitor for stem borer and leaf folder symptoms weekly.",
+        "Ensure proper field drainage 10 days before scheduled harvest."
+      ],
+      "createdAt": "2026-08-14T12:00:00.000Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "n1",
+      "userId": "u1",
+      "title": "Welcome to Farmora",
+      "message": "Explore fresh farm produce directly from verified farmers.",
+      "read": false,
+      "createdAt": "2026-08-14T10:00:00.000Z"
+    }
+  ]
+}

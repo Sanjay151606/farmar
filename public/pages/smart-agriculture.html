@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FARMORA - Smart Agriculture Journey</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <style>
+    /* Custom Styling for Smart Agriculture Journey Page */
+    .journey-hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #15803d 100%);
+      color: white;
+      border-radius: var(--radius-xl);
+      padding: var(--space-8) var(--space-6);
+      margin-bottom: var(--space-8);
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+    }
+    .journey-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(74, 222, 128, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      padding: 4px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: var(--space-3);
+    }
+    
+    /* 8-Stage Timeline Grid & Connections */
+    .stage-timeline-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+      position: relative;
+    }
+    @media (max-width: 1024px) {
+      .stage-timeline-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .stage-timeline-grid { grid-template-columns: 1fr; }
+    }
+
+    .stage-card {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .stage-card:hover, .stage-card.active {
+      border-color: var(--primary);
+      box-shadow: 0 12px 28px rgba(22, 163, 74, 0.2);
+      transform: translateY(-4px) scale(1.02);
+    }
+    .stage-card.active {
+      background: var(--primary-bg);
+    }
+    .stage-number {
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--slate-400);
+      margin-bottom: var(--space-2);
+    }
+    .stage-card.active .stage-number { color: var(--primary); }
+    
+    .stage-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: var(--slate-100);
+      color: var(--slate-700);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      margin-bottom: var(--space-3);
+      transition: all 0.25s ease;
+    }
+    .stage-card.active .stage-icon {
+      background: var(--primary);
+      color: white;
+      transform: scale(1.1);
+    }
+
+    /* Detailed Interactive Panel */
+    .stage-detail-panel {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-6);
+      box-shadow: var(--shadow-md);
+      margin-bottom: var(--space-8);
+      animation: scaleUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Journey Flow Diagrams */
+    .flow-step-chain {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow-x: auto;
+      padding: 12px 0;
+      margin-bottom: var(--space-6);
+    }
+    .flow-step-item {
+      background: var(--slate-50);
+      border: 1px solid var(--border);
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      white-space: nowrap;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--slate-800);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+    .flow-step-item:hover {
+      background: var(--primary-bg);
+      border-color: var(--primary-light);
+      transform: translateY(-2px);
+    }
+    .flow-arrow {
+      color: var(--slate-400);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header animate-entrance-header">
+    <nav class="nav">
+      <a href="/" class="logo">
+        <i class="fas fa-seedling"></i>
+        <span>FARMORA</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+        <li><a href="/smart-agriculture.html" class="active"><i class="fas fa-route"></i> Smart Journey</a></li>
+        <li><a href="/customer-shop.html"><i class="fas fa-store"></i> Shop</a></li>
+        <li><a href="/farmer-dashboard.html"><i class="fas fa-tractor"></i> Farmer</a></li>
+        <li><a href="/delivery-dashboard.html"><i class="fas fa-truck"></i> Delivery</a></li>
+        <li><a href="/tracker.html"><i class="fas fa-map-marker-alt"></i> Live Track</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="page-container">
+
+    <!-- Hero Section with Animated Particles -->
+    <div class="journey-hero animate-entrance-hero">
+      <div class="floating-blob" style="width: 300px; height: 300px; background: #4ade80; top: -40px; right: -40px;"></div>
+      <div class="journey-badge"><i class="fas fa-seedling"></i> Farmora Smart Agriculture Ecosystem</div>
+      <h1 style="font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; line-height: 1.15; margin-bottom: var(--space-3);">
+        From Seed to Doorstep
+      </h1>
+      <p style="font-size: 1.1rem; color: #cbd5e1; max-width: 680px; margin-bottom: var(--space-6); line-height: 1.6;">
+        Farmora connects intelligent farm planning, direct marketplace commerce, smart delivery fulfillment, and verified food traceability into one continuous digital agricultural journey.
+      </p>
+      <div style="display: flex; gap: var(--space-4); flex-wrap: wrap;">
+        <a href="#timelineSection" class="btn btn-primary"><i class="fas fa-compass"></i> Explore Journey</a>
+        <a href="/customer-shop.html" class="btn btn-secondary" style="background: rgba(255,255,255,0.15); color: white; border-color: rgba(255,255,255,0.25);"><i class="fas fa-store"></i> Go to Marketplace</a>
+      </div>
+    </div>
+
+    <!-- Live Farmora Data Card ("My Farm Journey") -->
+    <div class="reveal-on-scroll" style="background: white; border-radius: var(--radius-lg); padding: var(--space-6); border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: var(--space-8);">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border);">
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--slate-900); margin: 0;">
+          <i class="fas fa-chart-pie" style="color: var(--primary); margin-right: 8px;"></i> My Active Farmora Journey Data
+        </h2>
+        <span style="font-size: 0.85rem; font-weight: 700; background: var(--primary-bg); color: var(--primary); padding: 4px 12px; border-radius: 20px;" id="liveUserRole">
+          Role: Customer View
+        </span>
+      </div>
+
+      <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+        <div class="stat-card">
+          <div class="stat-card-label">Active Farm produce</div>
+          <div class="stat-card-value count-up" id="liveProdCount" style="color: var(--primary);">0</div>
+          <span style="font-size: 0.78rem; color: var(--slate-500);">Live catalog items</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Total Platform Orders</div>
+          <div class="stat-card-value count-up" id="liveOrderCount" style="color: #2563eb;">0</div>
+          <span style="font-size: 0.78rem; color: var(--slate-500);">Customer bookings</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Delivered Orders</div>
+          <div class="stat-card-value count-up" id="liveDeliveredCount" style="color: #10b981;">0</div>
+          <span style="font-size: 0.78rem; color: var(--slate-500);">Completed deliveries</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">District Logistics</div>
+          <div class="stat-card-value count-up" id="liveDeliveryBoyCount" style="color: #d97706;">38</div>
+          <span style="font-size: 0.78rem; color: var(--slate-500);">Tamil Nadu coverage</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8-Stage Interactive Lifecycle Section -->
+    <div id="timelineSection" class="reveal-on-scroll" style="margin-bottom: var(--space-8);">
+      <div style="text-align: center; margin-bottom: var(--space-6);">
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--slate-900);">The 8 Stages of Farmora Agriculture</h2>
+        <p style="color: var(--slate-600); font-size: 0.98rem; max-width: 600px; margin: 6px auto 0;">Click on any lifecycle stage to inspect its capabilities and live system workflows.</p>
+      </div>
+
+      <div class="stage-timeline-grid" id="stageGrid">
+        <!-- 8 Stage Cards rendered dynamically -->
+      </div>
+
+      <!-- Interactive Stage Detail Panel -->
+      <div class="stage-detail-panel" id="stageDetailPanel">
+        <!-- Dynamic detail content -->
+      </div>
+    </div>
+
+    <!-- Farmer Journey Section -->
+    <div class="reveal-on-scroll" style="background: white; border-radius: var(--radius-lg); padding: var(--space-6); border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: var(--space-8);">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: var(--space-5); padding-bottom: var(--space-4); border-bottom: 1px solid var(--border);">
+        <div>
+          <h2 style="font-size: 1.3rem; font-weight: 800; color: var(--slate-900); margin: 0;">
+            <i class="fas fa-tractor" style="color: var(--primary); margin-right: 8px;"></i> Farmer Digital Journey
+          </h2>
+          <p style="font-size: 0.88rem; color: var(--slate-500); margin: 4px 0 0;">End-to-end cultivator workflow from land preparation to sales cash flow.</p>
+        </div>
+        <a href="/farmer-dashboard.html" class="btn btn-primary btn-sm"><i class="fas fa-external-link-alt"></i> Open Farmer Dashboard</a>
+      </div>
+
+      <div class="flow-step-chain">
+        <div class="flow-step-item"><i class="fas fa-id-card" style="color:var(--primary);"></i> Farm Reg</div>
+        <i class="fas fa-chevron-right flow-arrow"></i>
+        <div class="flow-step-item"><i class="fas fa-map" style="color:var(--primary);"></i> Farm Profile</div>
+        <i class="fas fa-chevron-right flow-arrow"></i>
+        <div class="flow-step-item"><i class="fas fa-seedling" style="color:var(--primary);"></i> Crop Plan</div>
+        <i class="fas fa-chevron-right flow-arrow"></i>
+        <div class="flow-step-item"><i class="fas fa-sun" style="color:var(--primary);"></i> Cultivation</div>
+        <i class="fas fa-chevron-right flow-arrow"></i>
+        <div class="flow-step-item"><i class="fas fa-heartbeat" style="color:var(--primary);"></i> Monitoring</div>
+        <i class="fas fa-chevron-right flow-arrow"></i>
+        <div class="flow-step-item"><i class="fas fa-robot" style="color:var(--accent);"></i> AI Disease Detect</div>
+        <i class="fas fa-chevron-right flow-arrow"></i>
+        <div class="flow-step-item"><i class="fas fa-chart-line" style="color:var(--primary);"></i> Yield Predict</div>
+        <i class="fas fa-chevron-right flow-arrow"></i>
+        <div class="flow-step-item"><i class="fas fa-sickle" style="color:var(--primary);"></i> Harvest</div>
+        <i class="fas fa-chevron-right flow-arrow"></i>
+        <div class="flow-step-item" style="background:var(--primary-bg);color:var(--primary);"><i class="fas fa-store"></i> Marketplace Listing</div>
+      </div>
+    </div>
+
+    <!-- AI Intelligence Section with Scanner Animations -->
+    <div class="reveal-on-scroll" style="margin-bottom: var(--space-8);">
+      <div style="margin-bottom: var(--space-5);">
+        <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--slate-900);">
+          <i class="fas fa-brain" style="color: var(--primary); margin-right: 8px;"></i> AI-Powered Farming Intelligence
+        </h2>
+        <p style="color: var(--slate-600); font-size: 0.95rem;">Smart agricultural decision-making modules built into the Farmora platform.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--space-5);">
+        <div class="stat-card reveal-stagger-1" style="background: white;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+            <div style="width: 44px; height: 44px; border-radius: 10px; background: var(--primary-bg); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+              <i class="fas fa-robot"></i>
+            </div>
+            <span style="font-size: 0.75rem; font-weight: 700; background: #dcfce7; color: #15803d; padding: 2px 10px; border-radius: 12px;">Active</span>
+          </div>
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--slate-900); margin-bottom: 6px;">AI Crop Recommendation</h3>
+          <p style="font-size: 0.88rem; color: var(--slate-600); line-height: 1.5; margin-bottom: var(--space-4);">Recommends optimal crop varieties based on soil type, seasonal rainfall, and regional market demand.</p>
+          <a href="/chatbot.html" class="btn btn-sm btn-primary" style="width: 100%; text-align: center;"><i class="fas fa-comments"></i> Consult AI Assistant</a>
+        </div>
+
+        <div class="stat-card reveal-stagger-2 ai-scanner-box" style="background: white;">
+          <div class="ai-scan-line"></div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+            <div style="width: 44px; height: 44px; border-radius: 10px; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+              <i class="fas fa-microscope"></i>
+            </div>
+            <span style="font-size: 0.75rem; font-weight: 700; background: #fef3c7; color: #b45309; padding: 2px 10px; border-radius: 12px;">AI Scanning Active</span>
+          </div>
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--slate-900); margin-bottom: 6px;">Crop Disease Detection</h3>
+          <p style="font-size: 0.88rem; color: var(--slate-600); line-height: 1.5; margin-bottom: var(--space-4);">Analyzes leaf photos to diagnose early plant diseases, pest attacks, and nutrient deficiencies.</p>
+          <button disabled class="btn btn-sm btn-secondary" style="width: 100%; opacity: 0.85; cursor: not-allowed;"><i class="fas fa-microscope"></i> AI Vision Model Ready</button>
+        </div>
+
+        <div class="stat-card reveal-stagger-3" style="background: white;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+            <div style="width: 44px; height: 44px; border-radius: 10px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+              <i class="fas fa-chart-bar"></i>
+            </div>
+            <span style="font-size: 0.75rem; font-weight: 700; background: #e0f2fe; color: #0369a1; padding: 2px 10px; border-radius: 12px;">Active</span>
+          </div>
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--slate-900); margin-bottom: 6px;">Yield & Production Prediction</h3>
+          <p style="font-size: 0.88rem; color: var(--slate-600); line-height: 1.5; margin-bottom: var(--space-4);">Estimates expected harvest quantities (in kg/tonnes) using historical weather data and crop field logs.</p>
+          <a href="/transaction-dashboard.html" class="btn btn-sm btn-primary" style="width: 100%; text-align: center;"><i class="fas fa-chart-line"></i> View Analytics</a>
+        </div>
+
+        <div class="stat-card reveal-stagger-4" style="background: white;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+            <div style="width: 44px; height: 44px; border-radius: 10px; background: #f3e8ff; color: #7e22ce; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+              <i class="fas fa-calculator"></i>
+            </div>
+            <span style="font-size: 0.75rem; font-weight: 700; background: #f3e8ff; color: #6b21a8; padding: 2px 10px; border-radius: 12px;">Active</span>
+          </div>
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--slate-900); margin-bottom: 6px;">Profit & Pricing Intelligence</h3>
+          <p style="font-size: 0.88rem; color: var(--slate-600); line-height: 1.5; margin-bottom: var(--space-4);">Combines input cost, expected yield, and market rates to calculate net profit margins per harvest.</p>
+          <a href="/transaction-dashboard.html" class="btn btn-sm btn-accent" style="width: 100%; text-align: center;"><i class="fas fa-coins"></i> Inspect Profitability</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Traceability & QR Verification Section -->
+    <div class="reveal-on-scroll" style="background: white; border-radius: var(--radius-lg); padding: var(--space-6); border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: var(--space-8);">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-6); align-items: center;">
+        <div>
+          <div style="display: inline-block; background: #fef3c7; color: #b45309; font-size: 0.8rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; margin-bottom: 8px;">
+            <i class="fas fa-qrcode"></i> Product Verification & Transparency
+          </div>
+          <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--slate-900); margin-bottom: 8px;">
+            Know Where Your Food Comes From
+          </h2>
+          <p style="color: var(--slate-600); font-size: 0.95rem; line-height: 1.6; margin-bottom: var(--space-5);">
+            Farmora enables farm-to-consumer transparency by connecting verified product information with its agricultural harvest and delivery journey.
+          </p>
+          
+          <!-- Sample Audit Chain Log -->
+          <div style="background: var(--slate-50); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; font-size: 0.85rem; margin-bottom: var(--space-5);">
+            <div style="font-weight: 700; color: var(--slate-900); margin-bottom: 8px;"><i class="fas fa-shield-alt" style="color:var(--primary);"></i> Traceability Audit Trail:</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;color:var(--slate-700);">
+              <div>✓ Farm Registered</div>
+              <div>✓ Soil & Crop Recorded</div>
+              <div>✓ Quality Harvest Verified</div>
+              <div>✓ Listed on Marketplace</div>
+              <div>✓ Order Placed & Dispatched</div>
+              <div>✓ Delivered to Doorstep</div>
+            </div>
+          </div>
+
+          <a href="/tracker.html" class="btn btn-primary"><i class="fas fa-search-location"></i> Track Live Orders & Traceability</a>
+        </div>
+
+        <div class="ai-scanner-box" style="background: var(--slate-900); color: white; border-radius: var(--radius-xl); padding: var(--space-6); text-align: center; border: 1px solid var(--slate-800);">
+          <div class="ai-scan-line"></div>
+          <div style="background: white; padding: 16px; border-radius: var(--radius-md); display: inline-block; margin-bottom: var(--space-4);">
+            <i class="fas fa-qrcode" style="font-size: 7rem; color: var(--slate-900);"></i>
+          </div>
+          <div style="font-weight: 700; font-size: 1.1rem; color: #4ade80; margin-bottom: 4px;">FARM-TO-TABLE QR CODE</div>
+          <p style="font-size: 0.85rem; color: var(--slate-400); margin-bottom: var(--space-4);">Scan with your mobile camera to verify farm origin & cultivator credentials.</p>
+          <span style="font-size: 0.78rem; background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 20px; color: var(--accent-yellow);">
+            <i class="fas fa-check-circle"></i> Verification System Active
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Connected Roles Section -->
+    <div class="reveal-on-scroll" style="margin-bottom: var(--space-8);">
+      <div style="text-align: center; margin-bottom: var(--space-6);">
+        <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--slate-900);">One Platform. Four Connected Roles.</h2>
+        <p style="color: var(--slate-600); font-size: 0.95rem;">Empowering every stakeholder in the direct agricultural ecosystem.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-5);">
+        <div class="stat-card reveal-stagger-1" style="background: white; text-align: center;">
+          <div style="width: 54px; height: 54px; border-radius: 50%; background: var(--primary-bg); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin: 0 auto 12px;">
+            <i class="fas fa-tractor"></i>
+          </div>
+          <h3 style="font-size: 1.1rem; font-weight: 700;">Farmer</h3>
+          <p style="font-size: 0.85rem; color: var(--slate-600); margin-bottom: 14px;">Plan crops, manage harvest, and sell directly without middleman cuts.</p>
+          <a href="/farmer-dashboard.html" class="btn btn-sm btn-primary" style="width: 100%; text-align: center;">Farmer Portal</a>
+        </div>
+
+        <div class="stat-card reveal-stagger-2" style="background: white; text-align: center;">
+          <div style="width: 54px; height: 54px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin: 0 auto 12px;">
+            <i class="fas fa-shopping-basket"></i>
+          </div>
+          <h3 style="font-size: 1.1rem; font-weight: 700;">Customer</h3>
+          <p style="font-size: 0.85rem; color: var(--slate-600); margin-bottom: 14px;">Discover fresh farm produce, purchase transparently, and track live.</p>
+          <a href="/customer-shop.html" class="btn btn-sm btn-primary" style="width: 100%; text-align: center;">Customer Shop</a>
+        </div>
+
+        <div class="stat-card reveal-stagger-3" style="background: white; text-align: center;">
+          <div style="width: 54px; height: 54px; border-radius: 50%; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin: 0 auto 12px;">
+            <i class="fas fa-truck"></i>
+          </div>
+          <h3 style="font-size: 1.1rem; font-weight: 700;">Delivery Partner</h3>
+          <p style="font-size: 0.85rem; color: var(--slate-600); margin-bottom: 14px;">Accept farm orders, pick up fresh produce, and fulfill doorstep deliveries.</p>
+          <a href="/delivery-dashboard.html" class="btn btn-sm btn-primary" style="width: 100%; text-align: center;">Delivery App</a>
+        </div>
+
+        <div class="stat-card reveal-stagger-4" style="background: white; text-align: center;">
+          <div style="width: 54px; height: 54px; border-radius: 50%; background: #f3e8ff; color: #7e22ce; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin: 0 auto 12px;">
+            <i class="fas fa-chart-pie"></i>
+          </div>
+          <h3 style="font-size: 1.1rem; font-weight: 700;">Analytics / Admin</h3>
+          <p style="font-size: 0.85rem; color: var(--slate-600); margin-bottom: 14px;">Monitor platform transactions, pricing transparency, and supply metrics.</p>
+          <a href="/transaction-dashboard.html" class="btn btn-sm btn-primary" style="width: 100%; text-align: center;">Analytics Dashboard</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Final Bottom Hackathon Banner -->
+    <div class="reveal-on-scroll" style="background: linear-gradient(135deg, #15803d, #047857); color: white; border-radius: var(--radius-xl); padding: var(--space-8) var(--space-6); text-align: center; margin-bottom: var(--space-8); box-shadow: var(--shadow-lg);">
+      <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 8px;">From Farm Intelligence to Consumer Trust</h2>
+      <p style="font-size: 1rem; color: #a7f3d0; max-width: 640px; margin: 0 auto var(--space-6);">
+        Farmora brings farming, AI, direct commerce, logistics, and product traceability together into one connected agricultural ecosystem.
+      </p>
+      
+      <div style="font-weight: 800; font-size: 0.9rem; letter-spacing: 1px; color: var(--accent-yellow); margin-bottom: var(--space-6); text-transform: uppercase; word-break: break-word;">
+        PLAN &rarr; GROW &rarr; MONITOR &rarr; PREDICT &rarr; HARVEST &rarr; SELL &rarr; DELIVER &rarr; VERIFY
+      </div>
+
+      <div style="display: flex; gap: var(--space-4); justify-content: center; flex-wrap: wrap;">
+        <a href="/farmer-dashboard.html" class="btn btn-accent" style="height: 44px; padding: 0 24px;"><i class="fas fa-tractor"></i> Start Farming</a>
+        <a href="/customer-shop.html" class="btn btn-secondary" style="background: rgba(255,255,255,0.2); color: white; border-color: rgba(255,255,255,0.3); height: 44px; padding: 0 24px;"><i class="fas fa-store"></i> Explore Marketplace</a>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="assets/translations.js"></script>
+  <script src="assets/script.js"></script>
+  <script>
+    // 8-Stage Interactive Lifecycle Data Definition
+    const STAGES = [
+      {
+        id: 'PLAN',
+        num: '01',
+        icon: 'fas fa-lightbulb',
+        title: 'PLAN',
+        subtitle: 'AI-Powered Crop Planning',
+        desc: 'Use farm soil, water availability, location, and seasonal demand data to make optimal planting decisions.',
+        badge: 'AI Smart Feature',
+        capabilities: ['Farm Profile Setup', 'Soil & Water Assessment', 'Seasonal Weather Integration', 'AI Crop Variety Recommendation'],
+        ctaText: 'Consult AI Assistant',
+        ctaUrl: '/chatbot.html',
+        flow: ['Farm Location', 'Soil Data', 'AI Algorithm', 'Optimal Crop Selection']
+      },
+      {
+        id: 'GROW',
+        num: '02',
+        icon: 'fas fa-seedling',
+        title: 'GROW',
+        subtitle: 'Smart Cultivation & Field Care',
+        desc: 'Track crop growth milestones, field irrigation schedules, organic fertilizing, and agricultural activities.',
+        badge: 'Farmer Tool',
+        capabilities: ['Crop Planting Registration', 'Irrigation Management', 'Growth Stage Log', 'Nutrient Schedule'],
+        ctaText: 'Open Farmer Portal',
+        ctaUrl: '/farmer-dashboard.html',
+        flow: ['Seed Sowing', 'Irrigation', 'Growth Milestones', 'Crop Readiness']
+      },
+      {
+        id: 'MONITOR',
+        num: '03',
+        icon: 'fas fa-heartbeat',
+        title: 'MONITOR',
+        subtitle: 'Crop Health & Field Monitoring',
+        desc: 'Maintain digital records of field observations, pest alerts, and daily cultivation activities.',
+        badge: 'Active Monitoring',
+        capabilities: ['Field Activity Log', 'Pest Alert Monitoring', 'Weather Observation', 'Crop Health Status'],
+        ctaText: 'Open Analytics',
+        ctaUrl: '/transaction-dashboard.html',
+        flow: ['Daily Field Log', 'Visual Check', 'Health Score', 'Action Plan']
+      },
+      {
+        id: 'PREDICT',
+        num: '04',
+        icon: 'fas fa-robot',
+        title: 'PREDICT',
+        subtitle: 'AI Analytics & Yield Forecasting',
+        desc: 'Estimate expected harvest output (in kg), disease risks, and market profitability before harvest.',
+        badge: 'AI Engine',
+        capabilities: ['Disease Symptom Detection', 'Yield Tonnage Prediction', 'Market Price Estimation', 'Profitability Forecast'],
+        ctaText: 'Consult AI Assistant',
+        ctaUrl: '/chatbot.html',
+        flow: ['Crop Image/Data', 'AI Analysis', 'Yield Prediction', 'Market Estimate']
+      },
+      {
+        id: 'HARVEST',
+        num: '05',
+        icon: 'fas fa-sickle',
+        title: 'HARVEST',
+        subtitle: 'Digital Harvest Management',
+        desc: 'Record harvested crop quantity, grade quality, harvest date, and farmer lot credentials.',
+        badge: 'Farm Operation',
+        capabilities: ['Harvest Quantity Entry', 'Produce Quality Grading', 'Harvest Date Logging', 'Farm Lot ID Assignment'],
+        ctaText: 'Add Produce Listing',
+        ctaUrl: '/farmer-dashboard.html',
+        flow: ['Harvest Day', 'Weight & Grade', 'Quality Verification', 'Listing Creation']
+      },
+      {
+        id: 'SELL',
+        num: '06',
+        icon: 'fas fa-store',
+        title: 'SELL',
+        subtitle: 'Direct Farmer-to-Consumer Marketplace',
+        desc: 'Farmers publish fresh produce listings directly to consumers without middleman commissions.',
+        badge: 'Direct Commerce',
+        capabilities: ['Real-Time Product Catalog', 'Transparent Pricing per KG', 'District Location Tagging', 'Instant Cart Addition'],
+        ctaText: 'Browse Customer Shop',
+        ctaUrl: '/customer-shop.html',
+        flow: ['Listed Product', 'Customer Search', 'Cart Addition', 'Order Checkout']
+      },
+      {
+        id: 'DELIVER',
+        num: '07',
+        icon: 'fas fa-truck',
+        title: 'DELIVER',
+        subtitle: 'Connected District Delivery Network',
+        desc: 'Verified delivery partners accept farm orders, pick up fresh produce, and fulfill doorstep deliveries.',
+        badge: 'Logistics Network',
+        capabilities: ['38 District Delivery Coverage', 'Order Pickup Workflow', 'Status Lifecycle (Picked Up -> Delivered)', 'Live Order Tracking'],
+        ctaText: 'Delivery App View',
+        ctaUrl: '/delivery-dashboard.html',
+        flow: ['Order Placed', 'Partner Accepted', 'Farm Pickup', 'Doorstep Delivery']
+      },
+      {
+        id: 'VERIFY',
+        num: '08',
+        icon: 'fas fa-qrcode',
+        title: 'VERIFY',
+        subtitle: 'Farm-to-Consumer Product Traceability',
+        desc: 'Customers scan product QR codes or track order IDs to verify genuine farm origin and harvest history.',
+        badge: 'Transparency Active',
+        capabilities: ['QR Code Product Scan', 'Farmer & Farm Location Audit', 'Harvest Date Verification', 'Full Order Journey Log'],
+        ctaText: 'Track Live Status',
+        ctaUrl: '/tracker.html',
+        flow: ['Product Package', 'QR Code Scan', 'Farm Origin Verified', 'Consumer Trust']
+      }
+    ];
+
+    let selectedStageIndex = 0;
+
+    function renderStageCards() {
+      const grid = document.getElementById('stageGrid');
+      grid.innerHTML = STAGES.map((s, idx) => `
+        <div class="stage-card ${idx === selectedStageIndex ? 'active' : ''}" onclick="selectStage(${idx})">
+          <div class="stage-number">${s.num} &bull; ${s.id}</div>
+          <div class="stage-icon"><i class="${s.icon}"></i></div>
+          <div style="font-weight: 700; font-size: 1.05rem; color: var(--slate-900); margin-bottom: 4px;">${s.title}</div>
+          <div style="font-size: 0.82rem; color: var(--slate-600); line-height: 1.4;">${s.subtitle}</div>
+        </div>
+      `).join('');
+    }
+
+    function selectStage(index) {
+      selectedStageIndex = index;
+      renderStageCards();
+      renderStageDetail();
+    }
+
+    function renderStageDetail() {
+      const s = STAGES[selectedStageIndex];
+      const panel = document.getElementById('stageDetailPanel');
+
+      const capabilitiesHtml = s.capabilities.map(cap => `
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--slate-800); background: var(--slate-50); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <i class="fas fa-check-circle" style="color: var(--primary);"></i> ${cap}
+        </div>
+      `).join('');
+
+      const flowHtml = s.flow.map((item, idx) => `
+        <div class="flow-step-item">${item}</div>
+        ${idx < s.flow.length - 1 ? '<i class="fas fa-chevron-right flow-arrow"></i>' : ''}
+      `).join('');
+
+      panel.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: var(--space-4); border-bottom: 1px solid var(--border); padding-bottom: var(--space-4);">
+          <div>
+            <span style="font-size: 0.8rem; font-weight: 700; color: var(--primary); background: var(--primary-bg); padding: 4px 10px; border-radius: 12px; text-transform: uppercase;">
+              Stage ${s.num} &bull; ${s.badge}
+            </span>
+            <h3 style="font-size: 1.5rem; font-weight: 800; color: var(--slate-900); margin: 8px 0 4px;">${s.num} — ${s.subtitle}</h3>
+            <p style="color: var(--slate-600); font-size: 0.95rem; margin: 0; max-width: 640px;">${s.desc}</p>
+          </div>
+          <a href="${s.ctaUrl}" class="btn btn-primary"><i class="${s.icon}"></i> ${s.ctaText}</a>
+        </div>
+
+        <div style="margin-bottom: var(--space-5);">
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--slate-500); text-transform: uppercase; margin-bottom: 8px;">Process Lifecycle Flow Diagram:</div>
+          <div class="flow-step-chain" style="margin-bottom: 0;">${flowHtml}</div>
+        </div>
+
+        <div>
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--slate-500); text-transform: uppercase; margin-bottom: 8px;">Key System Capabilities:</div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
+            ${capabilitiesHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    async function loadLiveStats() {
+      try {
+        const session = window.getUserSession ? window.getUserSession() : { role: 'customer' };
+        document.getElementById('liveUserRole').textContent = `Role: ${session.role.toUpperCase()} (${session.name || 'Active User'})`;
+
+        const [prodRes, orderRes, dbRes] = await Promise.all([
+          fetch('/api/products'),
+          fetch('/api/orders'),
+          fetch('/api/delivery-boys')
+        ]);
+
+        if (prodRes.ok) {
+          const prods = await prodRes.json();
+          document.getElementById('liveProdCount').textContent = prods.length;
+        }
+        if (orderRes.ok) {
+          const orders = await orderRes.json();
+          document.getElementById('liveOrderCount').textContent = orders.length;
+          document.getElementById('liveDeliveredCount').textContent = orders.filter(o=>o.status==='DELIVERED').length;
+        }
+        if (dbRes.ok) {
+          const dbs = await dbRes.json();
+          document.getElementById('liveDeliveryBoyCount').textContent = dbs.length;
+        }
+      } catch (e) {
+        console.warn('Error loading live journey stats:', e);
+      }
+    }
+
+    // Initialize Page
+    renderStageCards();
+    renderStageDetail();
+    loadLiveStats();
+  </script>
+</body>
+</html>

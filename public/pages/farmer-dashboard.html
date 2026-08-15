@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FARMORA - Farmer Portal</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="page-container">
+    
+    <!-- Standardized Page Header -->
+    <div class="page-header animate-entrance-hero">
+      <div class="page-header-info">
+        <h1 data-i18n="nav_farmer_portal">Farmer Portal</h1>
+        <p>Manage your farm inventory, publish new harvest products, and process incoming customer orders.</p>
+      </div>
+      <div class="page-header-action">
+        <button onclick="openAddProductModal()" class="btn btn-primary" style="box-shadow: 0 4px 14px rgba(27, 94, 32, 0.3);">
+          <i class="fas fa-plus"></i> Add New Product
+        </button>
+      </div>
+    </div>
+
+    <!-- Equal-Height Statistics Cards with Glassmorphism -->
+    <div class="stats-grid animate-entrance-cards" style="margin-bottom: 24px;">
+      <div class="stat-card glass-card">
+        <div class="stat-card-label" data-i18n="total_products">Total Products</div>
+        <div class="stat-card-value count-up" id="statProducts" style="color: var(--primary);">0</div>
+        <span style="font-size:0.78rem;color:var(--success);font-weight:600;"><i class="fas fa-check-circle"></i> Active Catalog</span>
+      </div>
+      <div class="stat-card glass-card">
+        <div class="stat-card-label" data-i18n="pending_orders">Pending Orders</div>
+        <div class="stat-card-value count-up" id="statPending" style="color: #d97706;">0</div>
+        <span style="font-size:0.78rem;color:#b45309;font-weight:600;"><i class="fas fa-clock"></i> Requires Action</span>
+      </div>
+      <div class="stat-card glass-card">
+        <div class="stat-card-label" data-i18n="confirmed_orders">Active Deliveries</div>
+        <div class="stat-card-value count-up" id="statConfirmed" style="color: #2563eb;">0</div>
+        <span style="font-size:0.78rem;color:#1d4ed8;font-weight:600;"><i class="fas fa-truck"></i> In Transit</span>
+      </div>
+      <div class="stat-card glass-card">
+        <div class="stat-card-label" data-i18n="total_revenue">Total Revenue</div>
+        <div class="stat-card-value count-up" id="statRevenue" style="color: #10b981;">₹0</div>
+        <span style="font-size:0.78rem;color:#047857;font-weight:600;"><i class="fas fa-arrow-up"></i> Direct Settlement</span>
+      </div>
+    </div>
+
+    <!-- Farm Intelligence Suite Section -->
+    <div style="margin-bottom: 24px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+        <h2 style="font-size: 1.35rem; font-weight: 800; color: var(--slate-900); margin: 0; display: flex; align-items: center; gap: 8px;">
+          <i class="fas fa-brain" style="color: var(--primary);"></i> Farm Intelligence
+        </h2>
+        <span style="font-size: 0.85rem; color: var(--slate-500); font-weight: 600;">AI Agro-Diagnostics & Yield Estimation Engine</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+        
+        <!-- CARD 1: 🌿 Crop Disease Detection -->
+        <div class="reveal-on-scroll" style="background: linear-gradient(135deg, #0d3b13 0%, #16a34a 100%); color: white; border-radius: var(--radius-lg); padding: 22px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.2); color: #fde047; padding: 3px 12px; border-radius: 20px; font-weight: 700; font-size: 0.78rem; margin-bottom: 10px; backdrop-filter: blur(6px);">
+              <i class="fas fa-microscope"></i> AI CROP DIAGNOSTICS
+            </div>
+            <h3 style="font-size: 1.35rem; font-weight: 800; color: white; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              🌿 Crop Disease Detection
+            </h3>
+            <p style="color: rgba(255,255,255,0.9); font-size: 0.9rem; line-height: 1.5; margin-bottom: 16px;">
+              Upload a crop or leaf image to identify possible diseases with AI-powered symptoms checklist and organic remedies.
+            </p>
+            
+            <div style="background: rgba(0,0,0,0.22); padding: 10px 14px; border-radius: var(--radius-md); font-size: 0.82rem; margin-bottom: 16px;">
+              <span style="color: #a7f3d0; font-weight: 600;">Latest Assessment:</span> <strong id="dashRecentDiagnosis" style="color: #fde047; font-weight: 700;">Tomato &bull; Early Blight</strong>
+            </div>
+          </div>
+
+          <div>
+            <a href="/disease-detection.html" class="btn btn-accent" style="width: 100%; justify-content: center; padding: 12px 20px; font-size: 0.95rem; font-weight: 800; box-shadow: 0 4px 14px rgba(230, 81, 0, 0.4);">
+              <i class="fas fa-stethoscope"></i> Detect Crop Disease
+            </a>
+          </div>
+        </div>
+
+        <!-- CARD 2: 🌾 Crop Yield Prediction -->
+        <div class="reveal-on-scroll" style="background: linear-gradient(135deg, #14532d 0%, #15803d 100%); color: white; border-radius: var(--radius-lg); padding: 22px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.2); color: #fde047; padding: 3px 12px; border-radius: 20px; font-weight: 700; font-size: 0.78rem; margin-bottom: 10px; backdrop-filter: blur(6px);">
+              <i class="fas fa-calculator"></i> AI YIELD ESTIMATOR
+            </div>
+            <h3 style="font-size: 1.35rem; font-weight: 800; color: white; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              🌾 Crop Yield Prediction
+            </h3>
+            <p style="color: rgba(255,255,255,0.9); font-size: 0.9rem; line-height: 1.5; margin-bottom: 16px;">
+              Estimate your expected crop harvest output using farm land area, soil productivity, season, and irrigation method.
+            </p>
+            
+            <div style="background: rgba(0,0,0,0.22); padding: 10px 14px; border-radius: var(--radius-md); font-size: 0.82rem; margin-bottom: 16px;">
+              <span style="color: #a7f3d0; font-weight: 600;">Latest Prediction:</span> <strong id="dashRecentYield" style="color: #fde047; font-weight: 700;">Rice &bull; 4.4 Tons (88%)</strong>
+            </div>
+          </div>
+
+          <div>
+            <a href="/yield-prediction.html" class="btn btn-accent" style="width: 100%; justify-content: center; padding: 12px 20px; font-size: 0.95rem; font-weight: 800; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); border-color: #b45309; box-shadow: 0 4px 14px rgba(217, 119, 6, 0.4);">
+              <i class="fas fa-calculator"></i> Predict Yield
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Smart Demand Prediction & Market Intelligence Section -->
+    <div class="reveal-on-scroll" style="background: white; border-radius: var(--radius-lg); padding: 24px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: var(--space-5); padding-bottom: var(--space-4); border-bottom: 1px solid var(--border);">
+        <div>
+          <div style="display: inline-flex; align-items: center; gap: 6px; background: var(--primary-bg); color: var(--primary); font-weight: 700; font-size: 0.78rem; padding: 2px 10px; border-radius: 12px; margin-bottom: 4px;">
+            <i class="fas fa-chart-line"></i> REAL-TIME DEMAND PREDICTION
+          </div>
+          <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--slate-900); margin: 0;" data-i18n="market_intelligence">
+            Market Intelligence & Regional Demand
+          </h2>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 0.85rem; font-weight: 600; color: var(--slate-600);" data-i18n="select_region">Analyze Region:</span>
+          <select id="demandRegionSelect" class="form-select" style="min-width: 180px; font-weight: 600; font-size: 0.85rem; padding: 6px 12px;" onchange="loadDemandIntelligence(this.value)">
+            <option value="ALL" data-i18n="all_districts">All Tamil Nadu (Statewide)</option>
+            <option value="Thanjavur">Thanjavur</option>
+            <option value="Madurai">Madurai</option>
+            <option value="Coimbatore">Coimbatore</option>
+            <option value="Tiruchirappalli">Tiruchirappalli</option>
+            <option value="Salem">Salem</option>
+            <option value="Erode">Erode</option>
+            <option value="Dindigul">Dindigul</option>
+            <option value="Namakkal">Namakkal</option>
+            <option value="Chennai">Chennai</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Actionable Recommendation Alert Box -->
+      <div id="recommendationBox" style="background: #f0fdf4; border: 1px solid #86efac; border-radius: var(--radius-md); padding: 14px 16px; margin-bottom: var(--space-5); display: flex; align-items: flex-start; gap: 12px;">
+        <i class="fas fa-lightbulb" style="color: #16a34a; font-size: 1.4rem; margin-top: 2px;"></i>
+        <div>
+          <div style="font-weight: 700; color: #15803d; font-size: 0.92rem; margin-bottom: 2px;" data-i18n="recommendation">Farmora Actionable Recommendation:</div>
+          <p id="recommendationText" style="color: #166534; font-size: 0.88rem; margin: 0; line-height: 1.5;">Analyzing current market order flow...</p>
+        </div>
+      </div>
+
+      <!-- Regional Demand Grid Cards -->
+      <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));" id="demandCardsGrid">
+        <div style="grid-column: 1 / -1; text-align: center; color: var(--slate-400); padding: 2rem;">
+          <i class="fas fa-spinner fa-spin" style="font-size: 1.8rem; margin-bottom: 8px;"></i>
+          <p>Calculating regional demand metrics...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Available Products Section -->
+    <div class="reveal-on-scroll" style="background: white; border-radius: var(--radius-lg); padding: var(--space-6); border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: var(--space-8);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-5); padding-bottom: var(--space-4); border-bottom: 1px solid var(--border);">
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--slate-900); margin: 0;">
+          <i class="fas fa-boxes" style="color: var(--primary); margin-right: 8px;"></i> My Farm Produce Listings
+        </h2>
+        <span style="font-size: 0.85rem; color: var(--slate-500);">Live Backend Marketplace Synchronization</span>
+      </div>
+      <div class="product-grid" id="productGrid">
+        <div style="grid-column: 1 / -1; text-align: center; color: var(--slate-400); padding: var(--space-8);">
+          <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 8px;"></i>
+          <p>Loading inventory...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add / Edit Product Modal Window -->
+    <div class="modal" id="addProductModal">
+      <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);">
+          <h3 style="font-size: 1.2rem; color: var(--primary);" id="modalTitle"><i class="fas fa-plus-circle"></i> Add New Harvest Product</h3>
+          <button onclick="closeAddProductModal()" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--slate-400);">&times;</button>
+        </div>
+        <form id="addProductForm" onsubmit="handleAddProduct(event)">
+          <input type="hidden" id="editProductId" value="" />
+          <div class="form-group">
+            <label class="form-label">Product Name *</label>
+            <input type="text" id="newProdName" class="form-input" placeholder="e.g. Fresh Organic Tomatoes" required />
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3);">
+            <div class="form-group">
+              <label class="form-label">Price (₹) *</label>
+              <input type="number" id="newProdPrice" class="form-input" placeholder="40" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Unit *</label>
+              <input type="text" id="newProdUnit" class="form-input" placeholder="kg" required />
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3);">
+            <div class="form-group">
+              <label class="form-label">Stock Quantity *</label>
+              <input type="number" id="newProdQty" class="form-input" placeholder="300" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">District / Location *</label>
+              <input type="text" id="newProdLoc" class="form-input" placeholder="Madurai" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Farmer / Business Name *</label>
+            <input type="text" id="newProdFarmer" class="form-input" placeholder="Selvi Farms" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Product Description</label>
+            <textarea id="newProdDesc" class="form-input" rows="2" placeholder="Describe fresh quality, harvesting method..."></textarea>
+          </div>
+          <div style="display: flex; gap: var(--space-3); justify-content: flex-end; margin-top: var(--space-4);">
+            <button type="button" onclick="closeAddProductModal()" class="btn btn-secondary" data-i18n="btn_cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="saveProdBtn" data-i18n="btn_submit">Publish Product</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Incoming Orders Section -->
+    <div class="reveal-on-scroll" style="background: white; border-radius: var(--radius-lg); padding: var(--space-6); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+      <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--slate-900); margin-bottom: var(--space-5); padding-bottom: var(--space-4); border-bottom: 1px solid var(--border);">
+        <i class="fas fa-list-alt" style="color: var(--primary); margin-right: 8px;"></i> Incoming Customer Orders
+      </h2>
+      <div class="table-responsive mobile-card-table">
+        <table id="ordersTable">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Product</th>
+              <th>Qty</th>
+              <th>Customer</th>
+              <th>Address</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody">
+            <tr><td colspan="8" style="text-align: center; color: var(--slate-400); padding: 3rem;"><i class="fas fa-inbox" style="font-size: 2.5rem; display: block; margin-bottom: 8px;"></i> No incoming orders yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="assets/translations.js"></script>
+  <script src="assets/script.js"></script>
+  <script>
+    let deliveryBoys = [];
+    let allOrders = [];
+    let farmerProducts = [];
+
+    async function loadProducts() {
+      const res = await fetch('/api/products');
+      farmerProducts = await res.json();
+      const grid = document.getElementById('productGrid');
+      document.getElementById('statProducts').textContent = farmerProducts.length;
+
+      if (!farmerProducts.length) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--slate-400);padding:2rem;">No products listed yet. Click + Add New Product to start selling!</div>';
+        return;
+      }
+      grid.innerHTML = farmerProducts.map(p => `
+        <div class="product-card reveal-on-scroll">
+          <div class="product-card-img">
+            <span class="product-card-badge"><i class="fas fa-map-marker-alt"></i> ${p.farmerLocation}</span>
+            <i class="${p.icon}"></i>
+          </div>
+          <div class="product-card-body">
+            <div class="product-card-title">${p.name}</div>
+            <div class="product-card-farmer"><i class="fas fa-user"></i> ${p.farmer}</div>
+            <div style="font-size: 0.85rem; color: var(--slate-500); margin-bottom: 8px;">Stock: <strong>${p.quantity} ${p.unit}</strong></div>
+            <div class="product-card-footer" style="flex-wrap:wrap;gap:8px;">
+              <div class="product-card-price">₹${p.price} / ${p.unit}</div>
+              <div style="display:flex;gap:6px;">
+                <button class="btn btn-sm btn-secondary" onclick="openEditProductModal('${p.id}')"><i class="fas fa-edit"></i> Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>`).join('');
+    }
+
+    async function loadDeliveryBoys() {
+      const res = await fetch('/api/delivery-boys');
+      deliveryBoys = await res.json();
+    }
+
+    async function loadOrders() {
+      const res = await fetch('/api/orders');
+      allOrders = await res.json();
+      renderOrders();
+      updateStats();
+    }
+
+    async function loadDemandIntelligence(region = 'ALL') {
+      const grid = document.getElementById('demandCardsGrid');
+      const recText = document.getElementById('recommendationText');
+
+      try {
+        const url = region === 'ALL' ? '/api/demand/overview' : `/api/demand/region/${encodeURIComponent(region)}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('API Error');
+        
+        const data = await res.json();
+        
+        // Update Recommendation Text
+        if (data.potentialShortages && data.potentialShortages.length > 0) {
+          const topShort = data.potentialShortages[0];
+          recText.textContent = `${topShort.productName} demand in ${topShort.farmerLocation} is increasing (+${topShort.growthPercentage}%). Projected 7-day demand is ${topShort.predictedDemand} ${topShort.unit} vs current ${topShort.currentSupply} ${topShort.unit} available. Potential shortage: ${topShort.shortage} ${topShort.unit}. Consider expanding supply.`;
+        } else {
+          recText.textContent = `Market supply for produce in ${data.region} is balanced and sufficient. Continue regular harvesting schedules.`;
+        }
+
+        if (!data.allProducts || !data.allProducts.length) {
+          grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--slate-400); padding: 1.5rem;">${window.t ? window.t('insufficient_data') : 'Not enough data for this region.'}</div>`;
+          return;
+        }
+
+        grid.innerHTML = data.allProducts.slice(0, 4).map(p => {
+          let badgeColor = '#16a34a';
+          let badgeBg = '#dcfce7';
+          if (p.demandLevel === 'HIGH') { badgeColor = '#dc2626'; badgeBg = '#fee2e2'; }
+          else if (p.demandLevel === 'MEDIUM') { badgeColor = '#d97706'; badgeBg = '#fef3c7'; }
+
+          const trendIcon = p.trend === 'INCREASING' ? '📈 ↑' : p.trend === 'STABLE' ? '→' : '📉 ↓';
+          const shortageTag = p.shortage > 0 ? `<div style="font-size:0.78rem;font-weight:700;color:#dc2626;background:#fee2e2;padding:2px 8px;border-radius:10px;margin-top:4px;">⚠️ Shortage: ${p.shortage} ${p.unit}</div>` : `<div style="font-size:0.78rem;font-weight:600;color:#16a34a;margin-top:4px;">✓ Supply Sufficient</div>`;
+
+          return `
+            <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px; background: white;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div style="font-weight: 700; font-size: 1rem; color: var(--slate-900);"><i class="${p.icon}" style="color:var(--primary);margin-right:6px;"></i> ${p.productName}</div>
+                <span style="font-size: 0.75rem; font-weight: 800; background: ${badgeBg}; color: ${badgeColor}; padding: 2px 8px; border-radius: 12px;">${p.demandLevel} DEMAND</span>
+              </div>
+              <div style="font-size: 0.85rem; color: var(--slate-600); margin-bottom: 4px;">7-Day Projected Demand: <strong>${p.predictedDemand} ${p.unit}</strong> (${trendIcon} +${p.growthPercentage}%)</div>
+              <div style="font-size: 0.85rem; color: var(--slate-600);">Current Supply: <strong>${p.currentSupply} ${p.unit}</strong></div>
+              ${shortageTag}
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--slate-500); padding: 1.5rem;">${window.t ? window.t('market_unavailable') : 'Market intelligence temporarily unavailable.'} <button class="btn btn-sm btn-secondary" onclick="loadDemandIntelligence('${region}')">Try Again</button></div>`;
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('statPending').textContent   = allOrders.filter(o=>['PLACED','PENDING'].includes(o.status)).length;
+      document.getElementById('statConfirmed').textContent = allOrders.filter(o=>['CONFIRMED','ASSIGNED','PICKED_UP','OUT_FOR_DELIVERY'].includes(o.status)).length;
+      
+      const totalRev = allOrders.filter(o=>o.status==='DELIVERED').reduce((sum,o)=>sum + o.totalAmount, 0);
+      document.getElementById('statRevenue').textContent = '₹' + totalRev;
+    }
+
+    function renderOrders() {
+      const tbody = document.getElementById('ordersBody');
+      if (!allOrders.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--slate-400); padding: 3rem;"><i class="fas fa-inbox" style="font-size: 2.5rem; display: block; margin-bottom: 8px;"></i> No orders placed yet</td></tr>';
+        return;
+      }
+      tbody.innerHTML = allOrders.slice().reverse().map(o => {
+        let actionHtml = '';
+        if (o.status === 'PLACED' || o.status === 'PENDING') {
+          actionHtml = `<button class="btn btn-sm btn-primary" onclick="confirmOrder('${o.id}')"><i class="fas fa-check"></i> Accept Order</button>`;
+        } else if (o.status === 'CONFIRMED') {
+          const options = deliveryBoys.map(db => `<option value="${db.id}">${db.name} (${db.area})</option>`).join('');
+          actionHtml = `
+            <div style="display:flex;gap:6px;align-items:center;">
+              <select class="form-select" id="db_${o.id}" style="height:36px;font-size:0.8rem;padding:4px 8px;width:140px;">
+                <option value="">Delivery Boy</option>${options}
+              </select>
+              <button class="btn btn-sm btn-accent" onclick="assignOrder('${o.id}')"><i class="fas fa-truck"></i> Assign</button>
+            </div>`;
+        } else {
+          actionHtml = `<span style="color:var(--slate-400);font-size:0.82rem;font-weight:600">${o.status === 'DELIVERED' ? '✓ Delivered' : 'In Transit'}</span>`;
+        }
+        return `<tr>
+          <td data-label="Order ID"><strong>${o.id}</strong><br><span style="font-size:0.75rem;color:var(--slate-400)">${new Date(o.createdAt).toLocaleDateString()}</span></td>
+          <td data-label="Product"><i class="${o.icon || 'fas fa-seedling'}" style="color:var(--primary);margin-right:4px"></i><strong>${o.productName}</strong></td>
+          <td data-label="Qty">${o.quantity} ${o.unit}</td>
+          <td data-label="Customer"><strong>${o.customerName}</strong><br><span style="font-size:0.8rem;color:var(--slate-500)">${o.customerPhone}</span></td>
+          <td data-label="Address" style="max-width:160px;font-size:0.85rem">${o.deliveryAddress}</td>
+          <td data-label="Amount"><strong>₹${o.totalAmount}</strong></td>
+          <td data-label="Status"><span class="status-badge status-${o.status}">${o.status.replace('_',' ')}</span></td>
+          <td data-label="Action">${actionHtml}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    async function confirmOrder(orderId) {
+      await fetch(`/api/orders/${orderId}/status`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'CONFIRMED' })
+      });
+      if (window.showToast) window.showToast(`Order ${orderId} confirmed!`, 'success');
+      await loadOrders();
+    }
+
+    async function assignOrder(orderId) {
+      const select = document.getElementById('db_' + orderId);
+      if (!select.value) { alert('Please select a delivery boy'); return; }
+      await fetch(`/api/orders/${orderId}/status`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'ASSIGNED', deliveryBoyId: select.value })
+      });
+      if (window.showToast) window.showToast(`Order ${orderId} assigned to delivery boy!`, 'success');
+      await loadOrders();
+    }
+
+    function openAddProductModal() {
+      document.getElementById('editProductId').value = '';
+      document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Add New Harvest Product';
+      document.getElementById('saveProdBtn').textContent = 'Publish Product';
+      document.getElementById('addProductForm').reset();
+      document.getElementById('addProductModal').classList.add('show');
+    }
+
+    function openEditProductModal(id) {
+      const p = farmerProducts.find(item => item.id === id);
+      if (!p) return;
+      document.getElementById('editProductId').value = p.id;
+      document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Product';
+      document.getElementById('saveProdBtn').textContent = 'Update Product';
+      document.getElementById('newProdName').value = p.name;
+      document.getElementById('newProdPrice').value = p.price;
+      document.getElementById('newProdUnit').value = p.unit;
+      document.getElementById('newProdQty').value = p.quantity;
+      document.getElementById('newProdLoc').value = p.farmerLocation;
+      document.getElementById('newProdFarmer').value = p.farmer;
+      document.getElementById('newProdDesc').value = p.description || '';
+      document.getElementById('addProductModal').classList.add('show');
+    }
+
+    function closeAddProductModal() {
+      document.getElementById('addProductModal').classList.remove('show');
+    }
+
+    async function deleteProduct(id) {
+      if (!confirm('Are you sure you want to remove this product listing?')) return;
+      await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      if (window.showToast) window.showToast('Product removed', 'info');
+      await loadProducts();
+    }
+
+    async function handleAddProduct(e) {
+      e.preventDefault();
+      const editId = document.getElementById('editProductId').value;
+      const name = document.getElementById('newProdName').value;
+      const price = document.getElementById('newProdPrice').value;
+      const unit = document.getElementById('newProdUnit').value;
+      const quantity = document.getElementById('newProdQty').value;
+      const farmerLocation = document.getElementById('newProdLoc').value;
+      const farmer = document.getElementById('newProdFarmer').value;
+      const description = document.getElementById('newProdDesc').value;
+
+      try {
+        const url = editId ? `/api/products/${editId}` : '/api/products';
+        const method = editId ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, price, unit, quantity, farmer, farmerLocation, description })
+        });
+        if (res.ok) {
+          if (window.showToast) window.showToast(editId ? 'Product updated!' : 'Product published successfully!', 'success');
+          closeAddProductModal();
+          document.getElementById('addProductForm').reset();
+          await loadProducts();
+        } else {
+          alert('Failed to save product.');
+        }
+      } catch (err) {
+        alert('Error saving product.');
+      }
+    }
+
+    async function loadCropHealthStats() {
+      const session = window.getUserSession ? window.getUserSession() : {};
+      try {
+        const res = await fetch(`/api/farmer/disease-detection/history?farmerId=${encodeURIComponent(session.name || 'Kavitha S')}`, {
+          headers: {
+            'x-user-role': 'farmer',
+            'Authorization': `Bearer ${session.token || ''}`
+          }
+        });
+        const data = await res.json();
+        if (data.stats) {
+          const tot = document.getElementById('dashTotalAnalyses');
+          const rec = document.getElementById('dashRecentDiagnosis');
+          if (tot) tot.textContent = data.stats.totalAnalyses;
+          if (rec) rec.innerHTML = `${data.stats.recentCrop} &bull; ${data.stats.recentDisease}`;
+        }
+      } catch (err) {}
+    }
+
+    async function loadCropYieldStats() {
+      const session = window.getUserSession ? window.getUserSession() : {};
+      try {
+        const res = await fetch(`/api/farmer/yield-prediction/history?farmerId=${encodeURIComponent(session.name || 'Kavitha S')}`, {
+          headers: {
+            'x-user-role': 'farmer',
+            'Authorization': `Bearer ${session.token || ''}`
+          }
+        });
+        const data = await res.json();
+        if (data.stats) {
+          const rec = document.getElementById('dashRecentYield');
+          if (rec) {
+            if (data.stats.latestCrop !== 'None') {
+              rec.innerHTML = `${data.stats.latestCrop} &bull; ${data.stats.latestYield} (${data.stats.latestConfidence})`;
+            } else {
+              rec.textContent = 'No prediction yet';
+            }
+          }
+        }
+      } catch (err) {}
+    }
+
+    async function init() {
+      // Set default region selection to farmer's location if available
+      const session = window.getUserSession ? window.getUserSession() : {};
+      if (session.location) {
+        const sel = document.getElementById('demandRegionSelect');
+        if (sel) sel.value = session.location;
+      }
+      
+      await Promise.all([loadProducts(), loadDeliveryBoys(), loadOrders(), loadDemandIntelligence(), loadCropHealthStats(), loadCropYieldStats()]);
+      setInterval(loadOrders, 10000);
+    }
+
+    init();
+  </script>
+</body>
+</html>

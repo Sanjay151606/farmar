@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FARMORA - Direct Farmer-to-Consumer Platform</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+    <!-- Hero Section (Compact 2-Column Layout) -->
+    <section id="home" style="background: linear-gradient(135deg, #0d3b13 0%, #1b5e20 60%, #2e7d32 100%); color: white; padding: 3.5rem 0; overflow: hidden; position: relative;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2.5rem; align-items: center;">
+                
+                <!-- Left Column -->
+                <div class="animate-entrance-hero">
+                    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 5px 16px; border-radius: var(--radius-full); font-size: 0.85rem; font-weight: 700; color: var(--accent-yellow); margin-bottom: 1.2rem; backdrop-filter: blur(8px);">
+                        <i class="fas fa-award"></i> Direct AgriTech Marketplace of Tamil Nadu
+                    </div>
+                    <h1 style="font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1.15; font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em;">
+                        Connecting Farmers Directly With Customers
+                    </h1>
+                    <p style="font-size: clamp(1rem, 2vw, 1.18rem); opacity: 0.92; margin-bottom: 1.8rem; line-height: 1.6; font-weight: 500;">
+                        Discover fresh farm products, support local farmers, and get them delivered to your doorstep.
+                    </p>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <a href="/customer-shop.html" class="btn btn-accent" style="padding: 12px 28px; font-size: 1.02rem; font-weight: 700; box-shadow: 0 4px 14px rgba(230, 81, 0, 0.35);">
+                            <i class="fas fa-store"></i> Explore Marketplace
+                        </a>
+                        <a href="#workflow" class="btn btn-secondary" style="padding: 12px 28px; font-size: 1.02rem; background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); color: white; backdrop-filter: blur(6px);">
+                            <i class="fas fa-info-circle"></i> How Farmora Works
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right Column (Visual Showcase Card) -->
+                <div class="animate-entrance-cards" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius-xl); padding: 1.8rem; backdrop-filter: blur(12px); box-shadow: var(--shadow-lg);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--accent-yellow); color: var(--slate-900); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 800;">
+                                <i class="fas fa-seedling"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 800; font-size: 1.05rem; color: white;">Fresh Country Tomatoes</div>
+                                <div style="font-size: 0.82rem; color: #a7f3d0;">Selvi Organic Farm &bull; Thanjavur</div>
+                            </div>
+                        </div>
+                        <span style="background: #16a34a; color: white; font-weight: 800; font-size: 0.78rem; padding: 4px 10px; border-radius: 12px;">DIRECT FARM</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.2rem;">
+                        <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: var(--radius-md);">
+                            <div style="font-size: 0.78rem; color: #cbd5e1; text-transform: uppercase; font-weight: 700;">Direct Price</div>
+                            <div style="font-size: 1.5rem; font-weight: 800; color: var(--accent-yellow);">₹32 <span style="font-size: 0.8rem; color: white;">/ kg</span></div>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: var(--radius-md);">
+                            <div style="font-size: 0.78rem; color: #cbd5e1; text-transform: uppercase; font-weight: 700;">Delivery Time</div>
+                            <div style="font-size: 1.1rem; font-weight: 700; color: white; margin-top: 4px;"><i class="fas fa-truck" style="color:#60a5fa;"></i> Same Day</div>
+                        </div>
+                    </div>
+
+                    <a href="/customer-shop.html" class="btn btn-primary" style="width: 100%; text-align: center; justify-content: center; background: #16a34a; border-color: transparent;">
+                        <i class="fas fa-shopping-cart"></i> Order Fresh Produce Now
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Products Section -->
+    <section style="padding: 4rem 0; background: var(--slate-50);">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+                <div>
+                    <span style="font-size: 0.82rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em;">Fresh Harvest Catalog</span>
+                    <h2 style="font-size: 2rem; font-weight: 800; color: var(--slate-900); margin-top: 4px;">POPULAR PRODUCTS</h2>
+                </div>
+                <a href="/customer-shop.html" class="btn btn-outline" style="border-radius: var(--radius-full);"><i class="fas fa-arrow-right"></i> View Full Marketplace</a>
+            </div>
+
+            <div class="product-grid" id="popularProductsGrid">
+                <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--primary);">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 12px; display: block;"></i>
+                    <p>Loading fresh produce from verified farms...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How Farmora Works Section -->
+    <section id="workflow" style="background: white; padding: 4.5rem 0; border-top: 1px solid var(--border);">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px;">
+            <div class="reveal-on-scroll" style="text-align: center; margin-bottom: 3rem;">
+                <span style="font-size: 0.82rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em;">Transparent Supply Chain</span>
+                <h2 style="font-size: 2.2rem; color: var(--slate-900); font-weight: 800; margin-top: 4px;">HOW FARMORA WORKS</h2>
+                <p style="color: var(--slate-600); font-size: 1.05rem; max-width: 600px; margin: 6px auto 0;">Connecting verified Tamil Nadu cultivators with households in 5 simple steps.</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                <div class="stat-card reveal-on-scroll reveal-stagger-1" style="text-align: center; align-items: center; background: var(--slate-50);">
+                    <div style="width: 54px; height: 54px; border-radius: 50%; background: var(--primary-bg); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 1rem;">
+                        <i class="fas fa-tractor"></i>
+                    </div>
+                    <h3 style="font-size: 1.05rem; color: var(--slate-900); font-weight: 700;">1. Farmer</h3>
+                    <p style="font-size: 0.88rem; color: var(--slate-600); margin-top: 4px;">Cultivator lists fresh harvest produce with transparent pricing.</p>
+                </div>
+
+                <div class="stat-card reveal-on-scroll reveal-stagger-2" style="text-align: center; align-items: center; background: var(--slate-50);">
+                    <div style="width: 54px; height: 54px; border-radius: 50%; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 1rem;">
+                        <i class="fas fa-store"></i>
+                    </div>
+                    <h3 style="font-size: 1.05rem; color: var(--slate-900); font-weight: 700;">2. Marketplace</h3>
+                    <p style="font-size: 0.88rem; color: var(--slate-600); margin-top: 4px;">Live digital catalog displays items across 38 districts.</p>
+                </div>
+
+                <div class="stat-card reveal-on-scroll reveal-stagger-3" style="text-align: center; align-items: center; background: var(--slate-50);">
+                    <div style="width: 54px; height: 54px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 1rem;">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <h3 style="font-size: 1.05rem; color: var(--slate-900); font-weight: 700;">3. Customer</h3>
+                    <p style="font-size: 0.88rem; color: var(--slate-600); margin-top: 4px;">Household selects fresh produce and places an order.</p>
+                </div>
+
+                <div class="stat-card reveal-on-scroll reveal-stagger-4" style="text-align: center; align-items: center; background: var(--slate-50);">
+                    <div style="width: 54px; height: 54px; border-radius: 50%; background: #f3e8ff; color: #7e22ce; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 1rem;">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <h3 style="font-size: 1.05rem; color: var(--slate-900); font-weight: 700;">4. Delivery Partner</h3>
+                    <p style="font-size: 0.88rem; color: var(--slate-600); margin-top: 4px;">Partner picks up fresh produce directly from the farm.</p>
+                </div>
+
+                <div class="stat-card reveal-on-scroll reveal-stagger-4" style="text-align: center; align-items: center; background: var(--slate-50);">
+                    <div style="width: 54px; height: 54px; border-radius: 50%; background: #d1fae5; color: #065f46; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 1rem;">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <h3 style="font-size: 1.05rem; color: var(--slate-900); font-weight: 700;">5. Doorstep</h3>
+                    <p style="font-size: 0.88rem; color: var(--slate-600); margin-top: 4px;">Order arrives with live GPS tracking and escrow payment release.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Farmora Section -->
+    <section id="features" style="padding: 4.5rem 0; background: var(--slate-50);">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px;">
+            <div class="reveal-on-scroll" style="text-align: center; margin-bottom: 3rem;">
+                <span style="font-size: 0.82rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em;">Core Value Proposition</span>
+                <h2 style="font-size: 2.2rem; color: var(--slate-900); font-weight: 800; margin-top: 4px;">WHY FARMORA</h2>
+                <p style="color: var(--slate-600); font-size: 1.05rem; max-width: 600px; margin: 6px auto 0;">Eliminating middleman exploitation while ensuring uncompromised quality.</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;">
+                <div class="stat-card reveal-on-scroll reveal-stagger-1" style="background: white;">
+                    <div style="font-size: 2.2rem; color: var(--primary); margin-bottom: 0.5rem;"><i class="fas fa-handshake"></i></div>
+                    <h3 style="font-size: 1.15rem; margin-bottom: 6px; font-weight: 700;">Direct Farmer Connection</h3>
+                    <p style="font-size: 0.92rem; color: var(--slate-600); line-height: 1.6;">Eliminates middleman cuts, guaranteeing 100% fair earnings for local cultivators.</p>
+                </div>
+                <div class="stat-card reveal-on-scroll reveal-stagger-2" style="background: white;">
+                    <div style="font-size: 2.2rem; color: var(--primary); margin-bottom: 0.5rem;"><i class="fas fa-tags"></i></div>
+                    <h3 style="font-size: 1.15rem; margin-bottom: 6px; font-weight: 700;">Fair Pricing</h3>
+                    <p style="font-size: 0.92rem; color: var(--slate-600); line-height: 1.6;">Transparent pricing per kg gives consumers fresh quality at fair market rates.</p>
+                </div>
+                <div class="stat-card reveal-on-scroll reveal-stagger-3" style="background: white;">
+                    <div style="font-size: 2.2rem; color: var(--primary); margin-bottom: 0.5rem;"><i class="fas fa-seedling"></i></div>
+                    <h3 style="font-size: 1.15rem; margin-bottom: 6px; font-weight: 700;">Fresh Products</h3>
+                    <p style="font-size: 0.92rem; color: var(--slate-600); line-height: 1.6;">Harvested fresh from verified farms and delivered without long warehouse storage.</p>
+                </div>
+                <div class="stat-card reveal-on-scroll reveal-stagger-4" style="background: white;">
+                    <div style="font-size: 2.2rem; color: var(--primary); margin-bottom: 0.5rem;"><i class="fas fa-truck-loading"></i></div>
+                    <h3 style="font-size: 1.15rem; margin-bottom: 6px; font-weight: 700;">Reliable Delivery</h3>
+                    <p style="font-size: 0.92rem; color: var(--slate-600); line-height: 1.6;">Connected network across 38 districts in Tamil Nadu with live GPS tracking.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="background: var(--slate-900); color: white; padding: 4rem 0 2rem;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+                <div>
+                    <h3 style="color: var(--accent-yellow); margin-bottom: 1rem; font-size: 1.2rem; font-family: var(--font-heading);">🌱 FARMORA</h3>
+                    <p style="color: var(--slate-400); font-size: 0.92rem; line-height: 1.6;">Direct farmer-to-consumer AgriTech platform empowering cultivators across Tamil Nadu.</p>
+                </div>
+                <div>
+                    <h3 style="color: white; margin-bottom: 1rem; font-size: 1.05rem; font-weight: 700;">Quick Navigation</h3>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
+                        <li><a href="/customer-shop.html" style="color: var(--slate-400); text-decoration: none;">Marketplace</a></li>
+                        <li><a href="/smart-agriculture.html" style="color: var(--slate-400); text-decoration: none;">Smart Agriculture Journey</a></li>
+                        <li><a href="/booking.html" style="color: var(--slate-400); text-decoration: none;">Cart & Orders</a></li>
+                        <li><a href="/tracker.html" style="color: var(--slate-400); text-decoration: none;">Live GPS Tracker</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 style="color: white; margin-bottom: 1rem; font-size: 1.05rem; font-weight: 700;">Farmer & Logistics</h3>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
+                        <li><a href="/farmer-dashboard.html" style="color: var(--slate-400); text-decoration: none;">Farmer Portal</a></li>
+                        <li><a href="/delivery-dashboard.html" style="color: var(--slate-400); text-decoration: none;">Delivery Partner App</a></li>
+                        <li><a href="/transaction-dashboard.html" style="color: var(--slate-400); text-decoration: none;">Analytics Dashboard</a></li>
+                        <li><a href="javascript:void(0)" onclick="openDeveloperDrawer()" style="color: var(--accent-yellow); text-decoration: none;">⚙ Developer Control</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div style="text-align: center; border-top: 1px solid var(--slate-800); padding-top: 2rem; color: var(--slate-500); font-size: 0.88rem;">
+                <p>&copy; 2025 FARMORA. Direct Farmer-to-Consumer Platform. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/product.js"></script>
+    <script src="assets/translations.js"></script>
+    <script src="assets/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const products = await fetchProductsFromAPI();
+            const grid = document.getElementById('popularProductsGrid');
+            if (grid) {
+                if (!products.length) {
+                    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--slate-400); padding: 2rem;">No popular products available right now.</div>';
+                    return;
+                }
+                grid.innerHTML = products.slice(0, 4).map(p => {
+                    const imageHtml = p.image 
+                        ? `<img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.parentNode.innerHTML='<i class=\\'${p.icon || 'fas fa-seedling'}\\'></i>';" />`
+                        : `<i class="${p.icon || 'fas fa-seedling'}"></i>`;
+
+                    return `
+                        <div class="product-card reveal-on-scroll">
+                            <div class="product-card-img">
+                                <span class="product-card-badge"><i class="fas fa-map-marker-alt"></i> ${p.farmerLocation}</span>
+                                ${imageHtml}
+                            </div>
+                            <div class="product-card-body">
+                                <div class="product-card-title">${p.name}</div>
+                                <div class="product-card-farmer"><i class="fas fa-user"></i> ${p.farmer}</div>
+                                <div style="font-size: 0.82rem; color: var(--slate-500); margin-bottom: 12px; display: flex; justify-content: space-between;">
+                                    <span><i class="fas fa-calendar-alt"></i> ${p.season || 'Fresh'}</span>
+                                    <span><i class="fas fa-check-circle" style="color:var(--success)"></i> In Stock (${p.quantity || 50} ${p.unit || 'kg'})</span>
+                                </div>
+                                <div class="product-card-footer">
+                                    <div class="product-card-price">₹${p.price} <span style="font-size:0.8rem;color:var(--slate-500)">/ ${p.unit || 'kg'}</span></div>
+                                    <button class="btn btn-sm btn-primary" onclick="addToCart({ id: '${p.id}', name: '${p.name}', price: ${p.price}, unit: '${p.unit || 'kg'}', quantity: 1 }); if (window.showToast) window.showToast('Added ${p.name} to cart!', 'success'); updateHeaderCartCount();">
+                                        <i class="fas fa-cart-plus"></i> Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        });
+    </script>
+</body>
+</html>

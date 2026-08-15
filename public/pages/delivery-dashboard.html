@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FARMORA - Delivery Partner App</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="page-container">
+
+    <!-- Login View -->
+    <div id="loginView" style="max-width: 440px; margin: 3rem auto;">
+      <div style="background: white; border-radius: var(--radius-lg); padding: var(--space-8); border: 1px solid var(--border); box-shadow: var(--shadow-md); text-align: center;">
+        <div style="width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, var(--slate-800), var(--slate-900)); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto var(--space-4);">
+          <i class="fas fa-motorcycle"></i>
+        </div>
+        <h2 style="color: var(--slate-900); font-size: 1.5rem; margin-bottom: var(--space-1);">Delivery Partner Login</h2>
+        <p style="color: var(--slate-500); font-size: 0.9rem; margin-bottom: var(--space-6);">Select your delivery profile to view assigned orders</p>
+        <div class="form-group" style="text-align: left;">
+          <label class="form-label">Delivery Partner Profile</label>
+          <select id="dbSelect" class="form-select">
+            <option value="">-- Choose Delivery Partner --</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="loginDeliveryBoy()" style="width: 100%; margin-top: var(--space-2);">
+          <i class="fas fa-sign-in-alt"></i> Login to Dashboard
+        </button>
+      </div>
+    </div>
+
+    <!-- Dashboard View -->
+    <div id="deliveryView" style="display: none;">
+      
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="page-header-info">
+          <h1 id="dbWelcome">Welcome, Delivery Partner</h1>
+          <p id="dbArea">Delivery Area: —</p>
+        </div>
+        <div class="page-header-action">
+          <button onclick="logout()" class="btn btn-secondary btn-sm">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+        </div>
+      </div>
+
+      <!-- Equal-Height Stats Row -->
+      <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="stat-card">
+          <div class="stat-card-label">Assigned</div>
+          <div class="stat-card-value" id="statAssigned" style="color: #2563eb;">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Picked Up</div>
+          <div class="stat-card-value" id="statPickedUp" style="color: #6b21a8;">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Out for Delivery</div>
+          <div class="stat-card-value" id="statOutForDelivery" style="color: #d97706;">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Delivered</div>
+          <div class="stat-card-value" id="statDelivered" style="color: #10b981;">0</div>
+        </div>
+      </div>
+
+      <!-- Available Orders Section -->
+      <div style="background: white; border-radius: var(--radius-lg); padding: var(--space-6); border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: var(--space-6);">
+        <h2 style="font-size: 1.2rem; font-weight: 700; color: var(--slate-900); margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border);">
+          <i class="fas fa-hand-holding" style="color: var(--primary); margin-right: 8px;"></i> Available Orders (Unassigned)
+        </h2>
+        <div id="availableList">
+          <div style="text-align: center; color: var(--slate-400); padding: 1.5rem;">No unassigned orders available at the moment.</div>
+        </div>
+      </div>
+
+      <!-- Deliveries List -->
+      <div style="background: white; border-radius: var(--radius-lg); padding: var(--space-6); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+        <h2 style="font-size: 1.2rem; font-weight: 700; color: var(--slate-900); margin-bottom: var(--space-5); padding-bottom: var(--space-4); border-bottom: 1px solid var(--border);">
+          <i class="fas fa-clipboard-list" style="color: var(--primary); margin-right: 8px;"></i> My Delivery Tasks
+        </h2>
+        <div id="deliveriesList">
+          <div style="text-align: center; color: var(--slate-400); padding: 3rem;"><i class="fas fa-box-open" style="font-size: 2.5rem; display: block; margin-bottom: 8px;"></i> No deliveries assigned yet</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="assets/script.js"></script>
+  <script>
+    let currentDb = null;
+    let myOrders = [];
+    let availableOrders = [];
+
+    async function initLogin() {
+      const res = await fetch('/api/delivery-boys');
+      const boys = await res.json();
+      const sel = document.getElementById('dbSelect');
+      boys.forEach(db => {
+        const opt = document.createElement('option');
+        opt.value = db.id;
+        opt.textContent = `${db.name} — (${db.area})`;
+        sel.appendChild(opt);
+      });
+
+      const saved = localStorage.getItem('deliveryBoyId');
+      if (saved) {
+        const found = boys.find(b => b.id === saved);
+        if (found) { currentDb = found; showDashboard(); }
+      }
+    }
+
+    async function loginDeliveryBoy() {
+      const sel = document.getElementById('dbSelect');
+      if (!sel.value) { alert('Please select your name'); return; }
+      const res = await fetch('/api/delivery-boys');
+      const boys = await res.json();
+      currentDb = boys.find(b => b.id === sel.value);
+      localStorage.setItem('deliveryBoyId', currentDb.id);
+      showDashboard();
+    }
+
+    function logout() {
+      localStorage.removeItem('deliveryBoyId');
+      currentDb = null;
+      document.getElementById('loginView').style.display = 'block';
+      document.getElementById('deliveryView').style.display = 'none';
+    }
+
+    function showDashboard() {
+      document.getElementById('loginView').style.display = 'none';
+      document.getElementById('deliveryView').style.display = 'block';
+      document.getElementById('dbWelcome').textContent = `Welcome, ${currentDb.name}`;
+      document.getElementById('dbArea').textContent = `Assigned Region: ${currentDb.area}`;
+      loadDashboardData();
+      setInterval(loadDashboardData, 10000);
+    }
+
+    async function loadDashboardData() {
+      await Promise.all([loadAvailableOrders(), loadMyOrders()]);
+      updateStats();
+    }
+
+    async function loadAvailableOrders() {
+      const res = await fetch('/api/orders/available');
+      availableOrders = await res.json();
+      renderAvailableOrders();
+    }
+
+    async function loadMyOrders() {
+      const res = await fetch(`/api/orders/delivery/${currentDb.id}`);
+      myOrders = await res.json();
+      renderDeliveries();
+    }
+
+    function updateStats() {
+      document.getElementById('statAssigned').textContent       = myOrders.filter(o=>o.status==='ASSIGNED').length;
+      document.getElementById('statPickedUp').textContent       = myOrders.filter(o=>o.status==='PICKED_UP').length;
+      document.getElementById('statOutForDelivery').textContent = myOrders.filter(o=>o.status==='OUT_FOR_DELIVERY').length;
+      document.getElementById('statDelivered').textContent      = myOrders.filter(o=>o.status==='DELIVERED').length;
+    }
+
+    function renderAvailableOrders() {
+      const container = document.getElementById('availableList');
+      if (!availableOrders.length) {
+        container.innerHTML = '<div style="text-align: center; color: var(--slate-400); padding: 1.5rem;">No unassigned orders available at the moment.</div>';
+        return;
+      }
+      container.innerHTML = availableOrders.map(o => `
+        <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: var(--slate-50);">
+          <div>
+            <strong>${o.id}</strong> — ${o.productName} × ${o.quantity} ${o.unit} (₹${o.totalAmount})
+            <div style="font-size: 0.8rem; color: var(--slate-500);">Pickup: ${o.farmerName} (${o.farmerLocation}) &rarr; Deliver to: ${o.deliveryAddress}</div>
+          </div>
+          <button class="btn btn-sm btn-primary" onclick="acceptAvailableOrder('${o.id}')">
+            <i class="fas fa-check"></i> Accept Order
+          </button>
+        </div>
+      `).join('');
+    }
+
+    async function acceptAvailableOrder(orderId) {
+      const res = await fetch(`/api/orders/${orderId}/accept`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deliveryBoyId: currentDb.id })
+      });
+      if (res.ok) {
+        if (window.showToast) window.showToast(`Accepted order ${orderId}!`, 'success');
+        await loadDashboardData();
+      } else {
+        alert('Could not accept order.');
+      }
+    }
+
+    function renderDeliveries() {
+      const container = document.getElementById('deliveriesList');
+      if (!myOrders.length) {
+        container.innerHTML = '<div style="text-align: center; color: var(--slate-400); padding: 3rem;"><i class="fas fa-box-open" style="font-size: 2.5rem; display: block; margin-bottom: 8px;"></i> No deliveries assigned yet</div>';
+        return;
+      }
+      container.innerHTML = myOrders.slice().reverse().map(o => {
+        let actionHtml = '';
+        if (o.status === 'ASSIGNED') {
+          actionHtml = `<button class="btn btn-primary" onclick="updateStatus('${o.id}','PICKED_UP')" style="width:100%;height:44px;"><i class="fas fa-box"></i> Mark As Picked Up</button>`;
+        } else if (o.status === 'PICKED_UP') {
+          actionHtml = `<button class="btn btn-primary" onclick="updateStatus('${o.id}','OUT_FOR_DELIVERY')" style="width:100%;height:44px;"><i class="fas fa-truck"></i> Mark As Out For Delivery</button>`;
+        } else if (o.status === 'OUT_FOR_DELIVERY') {
+          actionHtml = `<button class="btn btn-accent" onclick="updateStatus('${o.id}','DELIVERED')" style="width:100%;height:44px;"><i class="fas fa-check-circle"></i> Mark As Delivered</button>`;
+        } else if (o.status === 'DELIVERED') {
+          actionHtml = `<div style="text-align:center;color:var(--success);font-weight:700;padding:8px;"><i class="fas fa-check-double"></i> Order Successfully Delivered</div>`;
+        }
+
+        return `
+          <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-5); margin-bottom: var(--space-4); background: white;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); border-bottom: 1px solid var(--slate-100); padding-bottom: 8px;">
+              <span style="font-weight: 800; font-size: 1.05rem; color: var(--slate-900);"><i class="fas fa-hashtag"></i> ${o.id}</span>
+              <span class="status-badge status-${o.status}">${o.status.replace('_',' ')}</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: var(--space-4); font-size: 0.9rem;">
+              <div><i class="fas fa-box" style="color:var(--primary);margin-right:6px;"></i><strong>${o.productName}</strong> × ${o.quantity} ${o.unit}</div>
+              <div><i class="fas fa-rupee-sign" style="color:var(--accent);margin-right:6px;"></i>Amount: <strong>₹${o.totalAmount}</strong></div>
+              <div><i class="fas fa-tractor" style="color:var(--primary);margin-right:6px;"></i>Pickup: ${o.farmerName}, ${o.farmerLocation}</div>
+              <div><i class="fas fa-user" style="color:var(--primary);margin-right:6px;"></i>Customer: ${o.customerName}</div>
+              <div><i class="fas fa-phone" style="color:var(--primary);margin-right:6px;"></i>Phone: <a href="tel:${o.customerPhone}" style="color:var(--primary);font-weight:700;">${o.customerPhone} <i class="fas fa-phone-volume"></i></a></div>
+              <div><i class="fas fa-map-marker-alt" style="color:var(--accent);margin-right:6px;"></i>Deliver To: <strong>${o.deliveryAddress}</strong></div>
+            </div>
+            <div>${actionHtml}</div>
+          </div>`;
+      }).join('');
+    }
+
+    async function updateStatus(orderId, newStatus) {
+      await fetch(`/api/orders/${orderId}/status`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (window.showToast) window.showToast(`Order ${orderId} status set to ${newStatus.replace('_', ' ')}!`, 'success');
+      await loadDashboardData();
+    }
+
+    initLogin();
+  </script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FARMORA - Checkout & Payment</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        .pay-method-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+        }
+        .pay-method-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .pay-method-card:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+        .pay-method-card.active {
+            border-color: var(--primary);
+            background: var(--primary-bg);
+            box-shadow: var(--shadow-sm);
+        }
+        .pay-method-card i {
+            font-size: 1.6rem;
+            color: var(--primary);
+            margin-bottom: 6px;
+            display: block;
+        }
+        .pay-method-card .method-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--slate-900);
+        }
+        .pay-method-card .method-subtitle {
+            font-size: 0.78rem;
+            color: var(--slate-500);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <a href="/" class="logo">
+                <i class="fas fa-seedling"></i>
+                <span>FARMORA</span>
+            </a>
+            <a href="/booking.html" class="btn btn-secondary btn-sm" style="color: white; border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.1);">
+                <i class="fas fa-arrow-left"></i> Back to Cart
+            </a>
+        </nav>
+    </header>
+
+    <div class="page-container" style="max-width: 580px; margin-top: 2rem;">
+        <div style="background: white; border-radius: var(--radius-lg); padding: var(--space-8); border: 1px solid var(--border); box-shadow: var(--shadow-md);">
+            
+            <h1 style="font-size: 1.5rem; color: var(--slate-900); font-weight: 800; text-align: center; margin-bottom: var(--space-1);">Select Payment Method</h1>
+            <p style="color: var(--slate-500); font-size: 0.9rem; text-align: center; margin-bottom: var(--space-6);">Choose Cash on Delivery or Instant UPI Payment</p>
+
+            <!-- Payment Method Selector Tabs -->
+            <div class="pay-method-grid">
+                <div class="pay-method-card active" id="tabCod" onclick="selectPaymentMethod('COD')">
+                    <i class="fas fa-money-bill-wave" style="color: var(--primary);"></i>
+                    <div class="method-title">Cash on Delivery</div>
+                    <div class="method-subtitle">Pay cash upon arrival</div>
+                </div>
+                <div class="pay-method-card" id="tabUpi" onclick="selectPaymentMethod('UPI')">
+                    <i class="fas fa-qrcode" style="color: var(--accent);"></i>
+                    <div class="method-title">UPI QR Code</div>
+                    <div class="method-subtitle">Pay via GPay / PhonePe</div>
+                </div>
+            </div>
+
+            <!-- Booking Order Summary Box -->
+            <div style="background: var(--slate-50); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-4); margin-bottom: var(--space-6); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-size: 0.8rem; color: var(--slate-500); text-transform: uppercase;">Booking Reference</div>
+                    <div style="font-weight: 800; font-size: 1.1rem; color: var(--primary);" id="orderIdDisplay">ORD-1000</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 0.8rem; color: var(--slate-500); text-transform: uppercase;">Total Payable</div>
+                    <div style="font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800; color: var(--accent);" id="totalAmountDisplay">₹0</div>
+                </div>
+            </div>
+
+            <!-- COD View -->
+            <div id="codView" style="text-align: center; background: var(--primary-bg); border: 1px solid var(--primary-light); border-radius: var(--radius-md); padding: var(--space-6); margin-bottom: var(--space-6);">
+                <i class="fas fa-hand-holding-usd" style="font-size: 2.8rem; color: var(--primary); margin-bottom: var(--space-3);"></i>
+                <h3 style="font-size: 1.15rem; color: var(--primary); font-weight: 700; margin-bottom: 4px;">Pay with Cash on Delivery</h3>
+                <p style="font-size: 0.9rem; color: var(--slate-600);">No online payment needed now! Hand over cash directly to our delivery partner when your fresh produce is delivered.</p>
+            </div>
+
+            <!-- UPI View -->
+            <div id="upiView" style="display: none; text-align: center; border: 1px dashed var(--border); border-radius: var(--radius-md); padding: var(--space-5); margin-bottom: var(--space-6);">
+                <div style="display: flex; justify-content: center; margin-bottom: var(--space-3);">
+                    <div id="qrcode"></div>
+                </div>
+                <div style="font-size: 0.88rem; color: var(--slate-600);">
+                    UPI VPA: <strong>farmora_market@upi</strong>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="submitOrderBtn" style="width: 100%; height: 48px; font-size: 1.05rem;">
+                <i class="fas fa-check-circle"></i> Confirm Cash on Delivery Order
+            </button>
+        </div>
+    </div>
+
+    <script src="assets/script.js"></script>
+    <script>
+        let selectedMethod = 'COD';
+
+        function selectPaymentMethod(method) {
+            selectedMethod = method;
+            const tabCod = document.getElementById('tabCod');
+            const tabUpi = document.getElementById('tabUpi');
+            const codView = document.getElementById('codView');
+            const upiView = document.getElementById('upiView');
+            const submitBtn = document.getElementById('submitOrderBtn');
+
+            if (method === 'COD') {
+                tabCod.classList.add('active');
+                tabUpi.classList.remove('active');
+                codView.style.display = 'block';
+                upiView.style.display = 'none';
+                submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Cash on Delivery Order';
+                submitBtn.className = 'btn btn-primary';
+            } else {
+                tabUpi.classList.add('active');
+                tabCod.classList.remove('active');
+                codView.style.display = 'none';
+                upiView.style.display = 'block';
+                submitBtn.innerHTML = '<i class="fas fa-qrcode"></i> Complete UPI Payment';
+                submitBtn.className = 'btn btn-accent';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('orderId');
+            const totalAmount = urlParams.get('amount');
+            
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const userLocation = localStorage.getItem('userLocation') || 'Chennai';
+
+            if (orderId && totalAmount && cart.length > 0) {
+                document.getElementById('orderIdDisplay').textContent = orderId;
+                document.getElementById('totalAmountDisplay').textContent = `₹${totalAmount}`;
+
+                const upiUrl = `upi://pay?pa=ssanjay41571@okhdfcbank&pn=FARMORA&mc=1234&tid=${orderId}&am=${totalAmount}`;
+                new QRCode(document.getElementById('qrcode'), {
+                    text: upiUrl,
+                    width: 170,
+                    height: 170,
+                });
+            } else {
+                alert('No active order found.');
+                window.location.href = '/customer-shop.html';
+            }
+
+            document.getElementById('submitOrderBtn').addEventListener('click', async () => {
+                const customerProfile = JSON.parse(localStorage.getItem('customerProfile') || '{}');
+                const cName = customerProfile.customerName || 'Sanjay Kumar';
+                const cPhone = customerProfile.phoneNumber || '9876543210';
+                const session = window.getUserSession ? window.getUserSession() : {};
+
+                try {
+                    const res = await fetch('/api/orders', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-user-role': 'customer',
+                            'Authorization': `Bearer ${session.token || ''}`
+                        },
+                        body: JSON.stringify({
+                            customerId: session.name || 'u1',
+                            customerName: cName,
+                            customerPhone: cPhone,
+                            customerAddress: userLocation,
+                            items: cart,
+                            totalAmount: totalAmount,
+                            paymentMethod: selectedMethod === 'COD' ? 'Cash on Delivery' : 'UPI Payment'
+                        })
+                    });
+
+                    const data = await res.json();
+                    if (!res.ok) {
+                        if (window.showToast) window.showToast(data.error || 'Failed to place order', 'error');
+                        return;
+                    }
+
+                    const orders = JSON.parse(localStorage.getItem('myOrders') || '[]');
+                    const newOrder = data.order || {
+                        id: orderId,
+                        items: cart,
+                        totalAmount: totalAmount,
+                        deliveryAddress: userLocation,
+                        paymentMethod: selectedMethod === 'COD' ? 'Cash on Delivery' : 'UPI Payment',
+                        createdAt: new Date().toISOString()
+                    };
+                    orders.push(newOrder);
+                    localStorage.setItem('myOrders', JSON.stringify(orders));
+                    localStorage.removeItem('cart');
+                    localStorage.removeItem('currentOrder');
+
+                    const msg = selectedMethod === 'COD' 
+                        ? 'Order placed successfully with Cash on Delivery!' 
+                        : 'UPI Payment completed & order placed successfully!';
+
+                    if (window.showToast) window.showToast(msg, 'success');
+                    setTimeout(() => {
+                        window.location.href = `/tracker.html?orderId=${newOrder.id || orderId}`;
+                    }, 1000);
+
+                } catch (e) {
+                    console.error('Error submitting order', e);
+                    if (window.showToast) window.showToast('Network error submitting order.', 'error');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

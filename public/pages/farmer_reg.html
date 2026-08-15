@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FARMORA - Farmer Registration | விவசாயி பதிவு</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+    <div class="language-selector">
+        <select id="languageSelect" onchange="changeLanguage('farmer')">
+            <option value="en">English</option>
+            <option value="ta">தமிழ்</option>
+            <option value="hi">हिंदी</option>
+        </select>
+    </div>
+    <header class="header">
+        <nav class="nav">
+            <a href="/" class="logo">
+                <i class="fas fa-seedling"></i>
+                <span id="logoText">FARMORA</span>
+            </a>
+            <a href="/" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                <span id="backText">Back to Home</span>
+            </a>
+        </nav>
+    </header>
+    <div class="container">
+        <div class="registration-card fade-in">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-tractor"></i>
+                </div>
+                <h1 class="card-title" id="cardTitle">Farmer Registration</h1>
+                <p class="card-subtitle" id="cardSubtitle">Join FARMORA and connect directly with consumers</p>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-steps">
+                    <span class="progress-step active" id="step1">Personal Info</span>
+                    <span class="progress-step" id="step2">Farm Details</span>
+                    <span class="progress-step" id="step3">Verification</span>
+                </div>
+            </div>
+            <form id="farmerRegistrationForm" novalidate>
+                <div class="form-step active" id="formStep1">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-user"></i>
+                            <span id="personalInfoTitle">Personal Information</span>
+                        </h3>
+                        <div class="form-row">
+                            <div class="form-group voice-input-group">
+                                <label class="form-label" id="nameLabel" for="farmerName">Full Name *</label>
+                                <input type="text" id="farmerName" name="farmerName" class="form-input" required>
+                                <button type="button" class="voice-btn" onclick="startVoiceInput('farmerName')" title="Voice Input">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
+                                <div class="error-message" id="nameError" style="display: none;">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span>Please enter your full name</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row two-col">
+                            <div class="form-group">
+                                <label class="form-label" id="phoneLabel" for="phoneNumber">Phone Number *</label>
+                                <input type="tel" id="phoneNumber" name="phoneNumber" class="form-input" 
+                                       pattern="[0-9]{10}" maxlength="10" required>
+                                <div class="error-message" id="phoneError" style="display: none;">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span>Please enter a valid 10-digit phone number</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" id="aadhaarLabel" for="aadhaarNumber">Aadhaar Number *</label>
+                                <input type="text" id="aadhaarNumber" name="aadhaarNumber" class="form-input" 
+                                       pattern="[0-9]{12}" maxlength="12" required>
+                                <div class="error-message" id="aadhaarError" style="display: none;">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span>Please enter a valid 12-digit Aadhaar number</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group district-search">
+                                <label class="form-label" id="districtLabel" for="district">District *</label>
+                                <input type="text" id="district" name="district" class="form-input" 
+                                       placeholder="Search Tamil Nadu district..." autocomplete="off" required>
+                                <div class="district-dropdown" id="districtDropdown"></div>
+                                <div class="error-message" id="districtError" style="display: none;">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span>Please select your district</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row two-col">
+                            <div class="form-group voice-input-group">
+                                <label class="form-label" id="villageLabel" for="village">Village/Town *</label>
+                                <input type="text" id="village" name="village" class="form-input" required>
+                                <button type="button" class="voice-btn" onclick="startVoiceInput('village')" title="Voice Input">
+                                    <i class="fas fa-microphone"></i>
+                                </button>
+                                <div class="error-message" id="villageError" style="display: none;">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span>Please enter your village/town</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" id="pincodeLabel" for="pincode">Pincode *</label>
+                                <input type="text" id="pincode" name="pincode" class="form-input" 
+                                       pattern="[0-9]{6}" maxlength="6" required>
+                                <div class="error-message" id="pincodeError" style="display: none;">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span>Please enter a valid 6-digit pincode</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-step" id="formStep2" style="display: none;">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-seedling"></i>
+                            <span id="farmDetailsTitle">Farm Details</span>
+                        </h3>
+                        <div class="form-row two-col">
+                            <div class="form-group">
+                                <label class="form-label" id="farmSizeLabel" for="farmSize">Farm Size (in acres) *</label>
+                                <input type="number" id="farmSize" name="farmSize" class="form-input" 
+                                       min="0.1" step="0.1" required>
+                                <div class="error-message" id="farmSizeError" style="display: none;">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span>Please enter your farm size</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" id="farmTypeLabel" for="farmType">Farm Type *</label>
+                                <select id="farmType" name="farmType" class="form-input" required>
+                                    <option value="" id="farmTypePlaceholder">Select farm type</option>
+                                    <option value="organic" id="farmTypeOrganic">Organic</option>
+                                    <option value="traditional" id="farmTypeTraditional">Traditional</option>
+                                    <option value="mixed" id="farmTypeMixed">Mixed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" id="cropsLabel">What crops do you grow? *</label>
+                            <div class="crops-grid">
+                                <div class="crop-item" onclick="toggleCrop('rice')">
+                                    <input type="checkbox" name="crops[]" value="rice" id="crop_rice">
+                                    <i class="fas fa-seedling"></i>
+                                    <span id="cropRice">Rice</span>
+                                </div>
+                                <div class="crop-item" onclick="toggleCrop('wheat')">
+                                    <input type="checkbox" name="crops[]" value="wheat" id="crop_wheat">
+                                    <i class="fas fa-wheat-awn"></i>
+                                    <span id="cropWheat">Wheat</span>
+                                </div>
+                                <div class="crop-item" onclick="toggleCrop('tomato')">
+                                    <input type="checkbox" name="crops[]" value="tomato" id="crop_tomato">
+                                    <i class="fas fa-tomato"></i>
+                                    <span id="cropTomato">Tomato</span>
+                                </div>
+                                <div class="crop-item" onclick="toggleCrop('onion')">
+                                    <input type="checkbox" name="crops[]" value="onion" id="crop_onion">
+                                    <i class="fas fa-circle"></i>
+                                    <span id="cropOnion">Onion</span>
+                                </div>
+                                <div class="crop-item" onclick="toggleCrop('chili')">
+                                    <input type="checkbox" name="crops[]" value="chili" id="crop_chili">
+                                    <i class="fas fa-pepper-hot"></i>
+                                    <span id="cropChili">Chili</span>
+                                </div>
+                                <div class="crop-item" onclick="toggleCrop('banana')">
+                                    <input type="checkbox" name="crops[]" value="banana" id="crop_banana">
+                                    <i class="fas fa-leaf"></i>
+                                    <span id="cropBanana">Banana</span>
+                                </div>
+                                <div class="crop-item" onclick="toggleCrop('coconut')">
+                                    <input type="checkbox" name="crops[]" value="coconut" id="crop_coconut">
+                                    <i class="fas fa-circle-dot"></i>
+                                    <span id="cropCoconut">Coconut</span>
+                                </div>
+                                <div class="crop-item" onclick="toggleCrop('sugarcane')">
+                                    <input type="checkbox" name="crops[]" value="sugarcane" id="crop_sugarcane">
+                                    <i class="fas fa-seedling"></i>
+                                    <span id="cropSugarcane">Sugarcane</span>
+                                </div>
+                            </div>
+                            <div class="error-message" id="cropsError" style="display: none;">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>Please select at least one crop</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" id="farmPhotoLabel">Farm Photo</label>
+                                <div class="file-input-group" onclick="document.getElementById('farmPhoto').click()">
+                                    <input type="file" id="farmPhoto" name="farmPhoto" accept="image/*">
+                                    <i class="file-icon fas fa-camera"></i>
+                                    <p id="farmPhotoText">Click to upload farm photo</p>
+                                    <small id="farmPhotoHint">Optional but helps build trust</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-step" id="formStep3" style="display: none;">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-shield-check"></i>
+                            <span id="verificationTitle">Verification</span>
+                        </h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" id="bankAccountLabel" for="bankAccount">Bank Account Number</label>
+                                <input type="text" id="bankAccount" name="bankAccount" class="form-input">
+                                <small id="bankAccountHint">For receiving payments (can be added later)</small>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" id="ifscLabel" for="ifscCode">IFSC Code</label>
+                                <input type="text" id="ifscCode" name="ifscCode" class="form-input" style="text-transform: uppercase;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" id="termsLabel">
+                                <input type="checkbox" id="agreeTerms" name="agreeTerms" style="margin-right: 10px;" required>
+                                <span id="termsText">I agree to the Terms of Service and Privacy Policy</span>
+                            </label>
+                            <div class="error-message" id="termsError" style="display: none;">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>Please accept the terms and conditions</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" id="prevBtn" onclick="changeStep(-1, validateCurrentStep)" style="display: none;">
+                        <i class="fas fa-arrow-left"></i>
+                        <span id="prevBtnText">Previous</span>
+                    </button>
+                    <button type="button" class="btn btn-primary" id="nextBtn" onclick="changeStep(1, validateCurrentStep)">
+                        <span id="nextBtnText">Next</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">
+                        <span id="submitBtnText">Register</span>
+                        <i class="fas fa-check"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal" id="otpModal">
+        <div class="modal-content">
+            <h3 id="otpTitle">Verify Your Phone Number</h3>
+            <p id="otpSubtitle">Enter the 6-digit OTP sent to your phone</p>
+            <div class="otp-inputs">
+                <input type="text" class="otp-input" maxlength="1" id="otp1">
+                <input type="text" class="otp-input" maxlength="1" id="otp2">
+                <input type="text" class="otp-input" maxlength="1" id="otp3">
+                <input type="text" class="otp-input" maxlength="1" id="otp4">
+                <input type="text" class="otp-input" maxlength="1" id="otp5">
+                <input type="text" class="otp-input" maxlength="1" id="otp6">
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" id="resendOtp">
+                    <span id="resendText">Resend OTP</span>
+                </button>
+                <button type="button" class="btn btn-primary" id="verifyOtp">
+                    <span id="verifyText">Verify</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="assets/register.js"></script>
+    <script src="assets/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedLanguage('farmer');
+            setupCropSelection();
+            setupFileUpload();
+            setupDistrictSearch();
+            setupOTPInputs();
+            updateProgress();
+            updateNavigationButtons();
+            setupRippleEffects();
+
+            window.validateCurrentStep = function() {
+                if (currentStep === 1) return validatePersonalInfo();
+                if (currentStep === 2) return validateFarmDetails();
+                if (currentStep === 3) return validateVerification();
+                return true;
+            };
+
+            function validatePersonalInfo() {
+                let isValid = true;
+                const name = document.getElementById('farmerName').value.trim();
+                if (name.length < 2) { showError('nameError', 'Please enter a valid name'); isValid = false; } else { hideError('nameError'); }
+                const phone = document.getElementById('phoneNumber').value.trim();
+                if (!/^[0-9]{10}$/.test(phone)) { showError('phoneError', 'Please enter a valid 10-digit phone number'); isValid = false; } else { hideError('phoneError'); }
+                const aadhaar = document.getElementById('aadhaarNumber').value.trim();
+                if (!/^[0-9]{12}$/.test(aadhaar)) { showError('aadhaarError', 'Please enter a valid 12-digit Aadhaar number'); isValid = false; } else { hideError('aadhaarError'); }
+                const district = document.getElementById('district').value.trim();
+                if (!tamilNaduDistricts.includes(district)) { showError('districtError', 'Please select a valid Tamil Nadu district'); isValid = false; } else { hideError('districtError'); }
+                const village = document.getElementById('village').value.trim();
+                if (village.length < 2) { showError('villageError', 'Please enter your village/town'); isValid = false; } else { hideError('villageError'); }
+                const pincode = document.getElementById('pincode').value.trim();
+                if (!/^[0-9]{6}$/.test(pincode)) { showError('pincodeError', 'Please enter a valid 6-digit pincode'); isValid = false; } else { hideError('pincodeError'); }
+                return isValid;
+            }
+
+            function validateFarmDetails() {
+                let isValid = true;
+                const farmSize = document.getElementById('farmSize').value.trim();
+                if (!farmSize || parseFloat(farmSize) <= 0) { showError('farmSizeError', 'Please enter a valid farm size'); isValid = false; } else { hideError('farmSizeError'); }
+                const selectedCrops = document.querySelectorAll('input[name="crops[]"]:checked');
+                if (selectedCrops.length === 0) { showError('cropsError', 'Please select at least one crop'); isValid = false; } else { hideError('cropsError'); }
+                return isValid;
+            }
+
+            function validateVerification() {
+                let isValid = true;
+                const bankAccount = document.getElementById('bankAccount').value.trim();
+                if (!/^[0-9]{9,18}$/.test(bankAccount)) { showError('bankAccountError', 'Please enter a valid bank account number'); isValid = false; } else { hideError('bankAccountError'); }
+                const ifscCode = document.getElementById('ifscCode').value.trim();
+                if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifscCode.toUpperCase())) { showError('ifscError', 'Please enter a valid IFSC code'); isValid = false; } else { hideError('ifscError'); }
+                const agreeTerms = document.getElementById('agreeTerms').checked;
+                if (!agreeTerms) { showError('termsError', 'Please accept the terms and conditions'); isValid = false; } else { hideError('termsError'); }
+                return isValid;
+            }
+            
+            document.getElementById('farmerRegistrationForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (!validateCurrentStep()) return;
+                const submitBtn = document.getElementById('submitBtn');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<div class="loading-spinner"></div> Registering...';
+                submitBtn.disabled = true;
+                setTimeout(() => {
+                    document.getElementById('otpModal').classList.add('show');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    document.getElementById('otp1').focus();
+                }, 2000);
+            });
+
+            document.getElementById('verifyOtp').addEventListener('click', function() {
+                const otpValues = Array.from(document.querySelectorAll('.otp-input')).map(input => input.value);
+                const otp = otpValues.join('');
+                if (otp.length !== 6) { alert('Please enter complete OTP'); return; }
+                this.innerHTML = '<div class="loading-spinner"></div> Verifying...';
+                this.disabled = true;
+                setTimeout(() => {
+                    if (window.showToast) window.showToast('Farmer profile registered successfully!', 'success');
+                    window.location.href = '/farmer-dashboard.html';
+                }, 1200);
+            });
+        });
+    </script>
+</body>
+</html>

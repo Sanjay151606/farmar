@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FARMORA - Live Order Tracking</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <header class="header animate-entrance-header">
+    <nav class="nav">
+      <a href="/" class="logo">
+        <i class="fas fa-seedling"></i>
+        <span>FARMORA</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+        <li><a href="/customer-shop.html"><i class="fas fa-store"></i> Shop</a></li>
+        <li><a href="/booking.html"><i class="fas fa-shopping-bag"></i> Cart & Orders</a></li>
+        <li><a href="/tracker.html" class="active"><i class="fas fa-map-marker-alt"></i> Live Track</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="page-container">
+    
+    <!-- Page Header -->
+    <div class="page-header animate-entrance-hero">
+      <div class="page-header-info">
+        <h1>Live Order Tracking</h1>
+        <p>Track your fresh harvest delivery in real time from farm dispatch to your doorstep.</p>
+      </div>
+    </div>
+
+    <!-- Search Input -->
+    <div class="glass-card animate-entrance-cards" style="padding: var(--space-6); margin-bottom: var(--space-6);">
+      <label class="form-label" style="font-weight: 700;"><i class="fas fa-search-location" style="color:var(--primary);margin-right:6px;"></i> Enter Your Order ID</label>
+      <div style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+        <input type="text" id="orderIdInput" class="form-input" placeholder="e.g. ORD-1001" style="flex: 1; min-width: 220px;" />
+        <button id="trackBtn" class="btn btn-accent" style="box-shadow: 0 4px 14px rgba(230, 81, 0, 0.3);"><i class="fas fa-satellite-dish"></i> Track Delivery</button>
+      </div>
+    </div>
+
+    <!-- Interactive Status Timeline -->
+    <div id="timelineContainer" class="reveal-on-scroll" style="display: none; background: white; border-radius: var(--radius-lg); padding: var(--space-6); border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: var(--space-6);">
+      <h3 style="font-size: 1.1rem; color: var(--slate-900); margin-bottom: var(--space-4);"><i class="fas fa-tasks" style="color: var(--primary); margin-right: 8px;"></i> Order Progress Lifecycle Timeline</h3>
+      <div style="display: flex; justify-content: space-between; position: relative; margin: 1.5rem 0; padding: 0 10px;">
+        <div style="position: absolute; top: 18px; left: 40px; right: 40px; height: 4px; background: #e2e8f0; z-index: 1;"></div>
+        <div class="step-item" id="stepPlaced" style="position: relative; z-index: 2; text-align: center; flex: 1;">
+          <div class="step-icon" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; font-size: 0.9rem; transition: var(--transition);"><i class="fas fa-check"></i></div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--slate-900);">PLACED</div>
+        </div>
+        <div class="step-item" id="stepAccepted" style="position: relative; z-index: 2; text-align: center; flex: 1;">
+          <div class="step-icon" style="width: 40px; height: 40px; border-radius: 50%; background: #e2e8f0; color: var(--slate-500); display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; font-size: 0.9rem; transition: var(--transition);"><i class="fas fa-user-check"></i></div>
+          <div style="font-size: 0.8rem; font-weight: 600; color: var(--slate-500);">ACCEPTED</div>
+        </div>
+        <div class="step-item" id="stepPicked" style="position: relative; z-index: 2; text-align: center; flex: 1;">
+          <div class="step-icon" style="width: 40px; height: 40px; border-radius: 50%; background: #e2e8f0; color: var(--slate-500); display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; font-size: 0.9rem; transition: var(--transition);"><i class="fas fa-box"></i></div>
+          <div style="font-size: 0.8rem; font-weight: 600; color: var(--slate-500);">PICKED UP</div>
+        </div>
+        <div class="step-item" id="stepDelivered" style="position: relative; z-index: 2; text-align: center; flex: 1;">
+          <div class="step-icon" style="width: 40px; height: 40px; border-radius: 50%; background: #e2e8f0; color: var(--slate-500); display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; font-size: 0.9rem; transition: var(--transition);"><i class="fas fa-home"></i></div>
+          <div style="font-size: 0.8rem; font-weight: 600; color: var(--slate-500);">DELIVERED</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map & Order Details Box -->
+    <div id="map" style="height: 420px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-sm); display: none; margin-bottom: var(--space-6);"></div>
+    <div id="detailsBox" class="glass-card" style="display: none; padding: var(--space-6);"></div>
+
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="assets/translations.js"></script>
+  <script src="assets/script.js"></script>
+  <script>
+    const productsData = {
+        chennai: { coords: [13.0827, 80.2707], name: "Chennai" },
+        madurai: { coords: [9.9252, 78.1198], name: "Madurai" },
+        coimbatore: { coords: [11.0168, 76.9558], name: "Coimbatore" },
+        trichy: { coords: [10.7905, 78.7047], name: "Trichy" },
+        salem: { coords: [11.6643, 78.1460], name: "Salem" }
+    };
+
+    const orderIdInput = document.getElementById('orderIdInput');
+    const trackBtn = document.getElementById('trackBtn');
+    const mapDiv = document.getElementById('map');
+    const detailsBox = document.getElementById('detailsBox');
+    const timelineDiv = document.getElementById('timelineContainer');
+
+    let map, deliveryMarker, vehicleMarker, routeLine;
+    let animationInterval;
+    const totalSteps = 80;
+    const stepDurationMs = 500;
+
+    const truckIcon = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/2554/2554978.png',
+      iconSize: [36, 36],
+      iconAnchor: [18, 36]
+    });
+
+    const deliveryIcon = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32]
+    });
+
+    async function geocodeLocation(location) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location + ', Tamil Nadu, India')}`);
+        const data = await res.json();
+        if (data && data.length > 0) {
+          return { coords: [parseFloat(data[0].lat), parseFloat(data[0].lon)], name: data[0].display_name };
+        }
+      } catch (e) {}
+      return { coords: [13.0827, 80.2707], name: location };
+    }
+
+    function interpolateCoords(start, end, steps) {
+      const points = [];
+      const latStep = (end[0] - start[0]) / steps;
+      const lngStep = (end[1] - start[1]) / steps;
+      for (let i = 0; i <= steps; i++) {
+        points.push([start[0] + latStep * i, start[1] + lngStep * i]);
+      }
+      return points;
+    }
+
+    function initMap(originCoords, destCoords) {
+      if (!map) {
+        map = L.map('map').setView(originCoords, 8);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
+      } else {
+        map.setView(originCoords, 8);
+        if (vehicleMarker) map.removeLayer(vehicleMarker);
+        if (deliveryMarker) map.removeLayer(deliveryMarker);
+        if (routeLine) map.removeLayer(routeLine);
+      }
+      deliveryMarker = L.marker(destCoords, { icon: deliveryIcon }).addTo(map);
+      vehicleMarker = L.marker(originCoords, { icon: truckIcon }).addTo(map);
+      routeLine = L.polyline([originCoords, destCoords], { color: '#e65100', weight: 4 }).addTo(map);
+    }
+
+    function updateTimeline(status) {
+      const setStep = (id, active) => {
+        const el = document.getElementById(id);
+        const icon = el.querySelector('.step-icon');
+        if (active) {
+          icon.style.background = 'var(--primary)';
+          icon.style.color = 'white';
+          icon.style.boxShadow = '0 0 12px rgba(22, 163, 74, 0.4)';
+        }
+      };
+      setStep('stepPlaced', true);
+      setStep('stepAccepted', ['CONFIRMED', 'ASSIGNED', 'PICKED_UP', 'DELIVERED'].includes(status));
+      setStep('stepPicked', ['PICKED_UP', 'DELIVERED'].includes(status));
+      setStep('stepDelivered', status === 'DELIVERED');
+    }
+
+    async function startTracking(order) {
+        if (animationInterval) clearInterval(animationInterval);
+        
+        mapDiv.style.display = 'block';
+        detailsBox.style.display = 'block';
+        timelineDiv.style.display = 'block';
+
+        updateTimeline(order.status || 'ASSIGNED');
+
+        const originDistrict = (order.farmerLocation || 'Madurai').toLowerCase();
+        const originCoords = productsData[originDistrict] ? productsData[originDistrict].coords : [9.9252, 78.1198];
+        const destData = await geocodeLocation(order.deliveryLocation || 'Chennai');
+
+        initMap(originCoords, destData.coords);
+
+        const route = interpolateCoords(originCoords, destData.coords, totalSteps);
+        routeLine.setLatLngs(route);
+
+        let currentIndex = 0;
+        animationInterval = setInterval(() => {
+            currentIndex++;
+            if (currentIndex >= route.length) {
+                clearInterval(animationInterval);
+                detailsBox.innerHTML = `
+                    <h3 style="color:var(--primary);margin-bottom:8px;">Order ID: ${order.orderId || order.id}</h3>
+                    <p style="margin-bottom:4px;"><strong>Status:</strong> <span class="status-badge status-DELIVERED">DELIVERED</span></p>
+                    <p><strong>Destination:</strong> ${destData.name}</p>
+                `;
+                vehicleMarker.setLatLng(route[route.length - 1]);
+                return;
+            }
+            vehicleMarker.setLatLng(route[currentIndex]);
+            detailsBox.innerHTML = `
+                <h3 style="color:var(--primary);margin-bottom:8px;">Order ID: ${order.orderId || order.id}</h3>
+                <p style="margin-bottom:4px;"><strong>Status:</strong> <span class="status-badge status-${order.status || 'ASSIGNED'}">${(order.status || 'IN TRANSIT').replace('_',' ')}</span></p>
+                <p style="margin-bottom:4px;"><strong>Delivery Destination:</strong> ${destData.name}</p>
+                <p><strong>Estimated Arrival:</strong> ${Math.ceil((totalSteps - currentIndex) * 0.5)} seconds</p>
+            `;
+        }, stepDurationMs);
+    }
+
+    trackBtn.addEventListener('click', async () => {
+        const orderId = orderIdInput.value.trim();
+        if (!orderId) { alert('Please enter a valid Order ID.'); return; }
+        
+        const localOrders = JSON.parse(localStorage.getItem('myOrders') || '[]');
+        let order = localOrders.find(o => o.orderId === orderId || o.id === orderId);
+
+        if (!order) {
+            try {
+                const res = await fetch('/api/orders');
+                const apiOrders = await res.json();
+                const found = apiOrders.find(o => o.id === orderId || o.orderId === orderId);
+                if (found) {
+                    order = {
+                        id: found.id,
+                        orderId: found.id,
+                        status: found.status,
+                        farmerLocation: found.farmerLocation || 'Madurai',
+                        deliveryLocation: found.deliveryAddress || 'Chennai'
+                    };
+                }
+            } catch (e) {}
+        }
+
+        if (order) {
+            if (window.showToast) window.showToast(`Tracking ${orderId}...`, 'info');
+            startTracking(order);
+        } else {
+            alert('Order ID not found. Try placing an order in Customer Shop first.');
+        }
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlOrderId = urlParams.get('orderId');
+    if (urlOrderId) {
+        orderIdInput.value = urlOrderId;
+        trackBtn.click();
+    }
+  </script>
+</body>
+</html>

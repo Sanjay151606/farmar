@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FARMORA - Transaction & Sales Analytics</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="page-container">
+        
+        <!-- Standardized Page Header -->
+        <div class="page-header">
+            <div class="page-header-info">
+                <h1>Analytics & Transaction History</h1>
+                <p>Track settlement payments, region-wise sales distributions, and order histories.</p>
+            </div>
+        </div>
+
+        <!-- Analytics Grid -->
+        <div class="product-grid" style="grid-template-columns: repeat(2, 1fr); gap: var(--space-6);">
+
+            <!-- Payments List -->
+            <div style="background: white; border-radius: var(--radius-lg); padding: var(--space-6); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+                <h3 style="font-size: 1.15rem; color: var(--slate-900); margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border);"><i class="fas fa-receipt" style="color: var(--primary); margin-right: 8px;"></i> Recent Payment Settlements</h3>
+                <div id="paymentsList"></div>
+            </div>
+
+            <!-- Order List -->
+            <div style="background: white; border-radius: var(--radius-lg); padding: var(--space-6); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+                <h3 style="font-size: 1.15rem; color: var(--slate-900); margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border);"><i class="fas fa-list-alt" style="color: var(--primary); margin-right: 8px;"></i> Customer Order History</h3>
+                <div id="orderList"></div>
+            </div>
+
+            <!-- Farmer's Product Sales -->
+            <div style="background: white; border-radius: var(--radius-lg); padding: var(--space-6); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+                <h3 style="font-size: 1.15rem; color: var(--slate-900); margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border);"><i class="fas fa-tractor" style="color: var(--primary); margin-right: 8px;"></i> Top Farmer Sales</h3>
+                <div id="farmerSalesList"></div>
+            </div>
+            
+            <!-- Frequently Bought Products -->
+            <div style="background: white; border-radius: var(--radius-lg); padding: var(--space-6); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+                <h3 style="font-size: 1.15rem; color: var(--slate-900); margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border);"><i class="fas fa-star" style="color: var(--primary); margin-right: 8px;"></i> Popular Crop Varieties</h3>
+                <div id="frequentProductsList"></div>
+            </div>
+            
+            <!-- Area of Confirmed Orders -->
+            <div style="grid-column: 1 / -1; background: white; border-radius: var(--radius-lg); padding: var(--space-6); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+                <h3 style="font-size: 1.15rem; color: var(--slate-900); margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border);"><i class="fas fa-map-marked-alt" style="color: var(--primary); margin-right: 8px;"></i> District Order Distribution</h3>
+                <div style="max-height: 320px;">
+                    <canvas id="ordersByAreaChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="assets/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const orders = JSON.parse(localStorage.getItem('myOrders') || '[]');
+
+            const paymentsListEl = document.getElementById('paymentsList');
+            const orderListEl = document.getElementById('orderList');
+            const farmerSalesListEl = document.getElementById('farmerSalesList');
+            const frequentProductsListEl = document.getElementById('frequentProductsList');
+            const ordersByAreaChartEl = document.getElementById('ordersByAreaChart');
+
+            function renderPaymentsList() {
+                if (orders.length === 0) {
+                    paymentsListEl.innerHTML = '<div style="color:var(--slate-400);padding:1rem;">No settlement records found yet.</div>';
+                    return;
+                }
+                
+                let html = '<div style="display:flex;flex-direction:column;gap:8px;">';
+                orders.forEach(order => {
+                    const totalAmount = order.totalAmount || (order.items ? order.items.reduce((total, item) => total + (item.price * item.quantity), 0) : 0);
+                    html += `
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid var(--slate-100);">
+                            <div>
+                                <strong>${order.orderId}</strong>
+                                <div style="font-size:0.78rem;color:var(--slate-500);">${new Date(order.timestamp).toLocaleDateString()}</div>
+                            </div>
+                            <span style="font-weight:800;color:var(--accent);">₹${totalAmount}</span>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                paymentsListEl.innerHTML = html;
+            }
+
+            function renderOrderList() {
+                if (orders.length === 0) {
+                    orderListEl.innerHTML = '<div style="color:var(--slate-400);padding:1rem;">No active customer orders found.</div>';
+                    return;
+                }
+                
+                let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
+                orders.forEach(order => {
+                    const totalAmount = order.totalAmount || (order.items ? order.items.reduce((total, item) => total + (item.price * item.quantity), 0) : 0);
+                    html += `
+                        <div style="border:1px solid var(--border);border-radius:var(--radius-md);padding:12px;display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <strong>${order.orderId}</strong> &bull; <span style="font-size:0.85rem;color:var(--slate-500);">${order.deliveryLocation || 'Chennai'}</span>
+                                <div style="font-weight:700;color:var(--primary);margin-top:2px;">₹${totalAmount}</div>
+                            </div>
+                            <a href="/tracker.html?orderId=${order.orderId}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-map-marker-alt"></i> Track
+                            </a>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                orderListEl.innerHTML = html;
+            }
+            
+            function renderFarmerSales() {
+                const salesData = {};
+                orders.forEach(order => {
+                    if (order.items) {
+                        order.items.forEach(item => {
+                            const farmer = item.farmer || 'Local Farm';
+                            if (!salesData[farmer]) salesData[farmer] = 0;
+                            salesData[farmer] += item.quantity;
+                        });
+                    }
+                });
+                
+                const entries = Object.entries(salesData);
+                if (entries.length === 0) {
+                    farmerSalesListEl.innerHTML = '<div style="color:var(--slate-400);padding:1rem;">No farm sales records available yet.</div>';
+                    return;
+                }
+                let html = '<ul style="list-style:none;display:flex;flex-direction:column;gap:8px;">';
+                entries.forEach(([farmer, count]) => {
+                    html += `<li style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--slate-100);"><span><strong>${farmer}</strong></span><span style="font-weight:700;color:var(--primary);">${count} units sold</span></li>`;
+                });
+                html += '</ul>';
+                farmerSalesListEl.innerHTML = html;
+            }
+
+            function renderFrequentProducts() {
+                const productCounts = {};
+                orders.forEach(order => {
+                    if (order.items) {
+                        order.items.forEach(item => {
+                            productCounts[item.name] = (productCounts[item.name] || 0) + item.quantity;
+                        });
+                    }
+                });
+
+                const sortedProducts = Object.entries(productCounts).sort(([, a], [, b]) => b - a);
+
+                if (sortedProducts.length === 0) {
+                    frequentProductsListEl.innerHTML = '<div style="color:var(--slate-400);padding:1rem;">No frequent crops recorded yet.</div>';
+                    return;
+                }
+                
+                let html = '<ul style="list-style:none;display:flex;flex-direction:column;gap:8px;">';
+                sortedProducts.forEach(([product, count]) => {
+                    html += `<li style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--slate-100);"><span>${product}</span><strong>${count} kg/pcs</strong></li>`;
+                });
+                html += '</ul>';
+                frequentProductsListEl.innerHTML = html;
+            }
+
+            function renderOrdersByAreaChart() {
+                const areaCounts = { 'Chennai': 4, 'Madurai': 3, 'Coimbatore': 2, 'Trichy': 1 };
+                orders.forEach(order => {
+                    const loc = order.deliveryLocation || 'Chennai';
+                    areaCounts[loc] = (areaCounts[loc] || 0) + 1;
+                });
+
+                const labels = Object.keys(areaCounts);
+                const data = Object.values(areaCounts);
+
+                new Chart(ordersByAreaChartEl, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Confirmed Customer Orders',
+                            data: data,
+                            backgroundColor: ['#1b5e20', '#2e7d32', '#e65100', '#f57c00'],
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            }
+
+            renderPaymentsList();
+            renderOrderList();
+            renderFarmerSales();
+            renderFrequentProducts();
+            renderOrdersByAreaChart();
+        });
+    </script>
+</body>
+</html>
