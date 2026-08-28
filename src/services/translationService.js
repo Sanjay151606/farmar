@@ -130,9 +130,10 @@ const AGRI_TAMIL_DICTIONARY = {
   'வெண்ணெய்': 'Country Butter',
   'நெய்': 'Pure Desi Cow Ghee',
   'நாட்டுக்கோழி முட்டை': 'Country Chicken Eggs',
-  'தேன்': 'Pure Forest Honey',
   'மரச்செக்கு நல்லெண்ணெய்': 'Cold-Pressed Sesame Oil',
+  'நல்லெண்ணெய்': 'Sesame Oil (Gingelly)',
   'மரச்செக்கு கடலை எண்ணெய்': 'Cold-Pressed Groundnut Oil',
+  'கடலை எண்ணெய்': 'Groundnut Oil (Peanut Oil)',
   'தேங்காய் எண்ணெய்': 'Pure Coconut Oil',
 
   // Descriptive & Quality Terms
@@ -144,9 +145,22 @@ const AGRI_TAMIL_DICTIONARY = {
   'செம்மண் பயிர்': 'Red Soil Cultivated',
   'வீட்டு தோட்டம்': 'Home Garden Grown',
 
+  // Units & Quantities
+  'கிலோ': 'kg',
+  'கிலோகிராம்': 'kg',
+  'கிராம்': 'grams',
+  'லிட்டர்': 'litres',
+  'மில்லி': 'ml',
+  'மூட்டை': 'bag (sack)',
+  'கட்டு': 'bunch',
+  'டஜன்': 'dozen',
+  'எண்ணிக்கை': 'units',
+
   // Tamil Nadu Districts & Locations
   'தஞ்சாவூர்': 'Thanjavur',
   'மதுரை': 'Madurai',
+  'சிவகாசி': 'Sivakasi',
+  'விருதுநகர்': 'Virudhunagar',
   'கோயம்புத்தூர்': 'Coimbatore',
   'சென்னை': 'Chennai',
   'திருச்சி': 'Trichy',
@@ -165,7 +179,6 @@ const AGRI_TAMIL_DICTIONARY = {
   'நாமக்கல்': 'Namakkal',
   'கன்னியாகுமரி': 'Kanyakumari',
   'தூத்துக்குடி': 'Tuticorin',
-  'விருதுநகர்': 'Virudhunagar',
   'சிவகங்கை': 'Sivaganga',
   'ராமநாதபுரம்': 'Ramanathapuram',
   'தர்மபுரி': 'Dharmapuri',
@@ -305,6 +318,53 @@ async function translateWithOpenAI(tamilText, apiKey) {
 }
 
 /**
+ * Translate using Sarvam AI (if VOICE_TRANSLATOR_API_KEY / SARVAM_API_KEY is provided)
+ */
+async function translateWithSarvam(tamilText, apiKey) {
+  return new Promise((resolve) => {
+    const postData = JSON.stringify({
+      input: tamilText,
+      source_language_code: 'ta-IN',
+      target_language_code: 'en-IN',
+      mode: 'formal',
+      model: 'mayura:v1'
+    });
+
+    const req = https.request({
+      hostname: 'api.sarvam.ai',
+      path: '/translate',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-subscription-key': apiKey,
+        'Content-Length': Buffer.byteLength(postData)
+      },
+      timeout: 5000
+    }, (res) => {
+      let data = '';
+      res.on('data', chunk => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed && parsed.translated_text) {
+            resolve({ success: true, text: parsed.translated_text, source: 'sarvam' });
+          } else {
+            resolve({ success: false });
+          }
+        } catch (e) {
+          resolve({ success: false });
+        }
+      });
+    });
+
+    req.on('error', () => resolve({ success: false }));
+    req.on('timeout', () => { req.destroy(); resolve({ success: false }); });
+    req.write(postData);
+    req.end();
+  });
+}
+
+/**
  * Main Translation Orchestrator
  */
 async function translateTamilToEnglish(tamilText) {
@@ -314,7 +374,21 @@ async function translateTamilToEnglish(tamilText) {
 
   const raw = cleanText(tamilText);
 
-  // 1. If OpenAI API Key is configured in environment, use OpenAI GPT-4o-mini
+  // 1. If Sarvam / Voice Translator API Key is configured, use Sarvam AI
+  const sarvamKey = process.env.VOICE_TRANSLATOR_API_KEY || process.env.SARVAM_API_KEY;
+  if (sarvamKey) {
+    const sarvamRes = await translateWithSarvam(raw, sarvamKey);
+    if (sarvamRes.success && sarvamRes.text) {
+      return {
+        success: true,
+        original: raw,
+        translatedText: sarvamRes.text,
+        source: 'sarvam_ai'
+      };
+    }
+  }
+
+  // 2. If OpenAI API Key is configured in environment, use OpenAI GPT-4o-mini
   const openAiKey = process.env.OPENAI_API_KEY;
   if (openAiKey) {
     const openAiRes = await translateWithOpenAI(raw, openAiKey);
@@ -328,7 +402,7 @@ async function translateTamilToEnglish(tamilText) {
     }
   }
 
-  // 2. Check specialized Agricultural Dictionary (instant zero-latency fallback)
+  // 3. Check specialized Agricultural Dictionary (instant zero-latency fallback)
   const dictMatch = lookupAgriDictionary(raw);
   if (dictMatch) {
     return {
@@ -339,7 +413,7 @@ async function translateTamilToEnglish(tamilText) {
     };
   }
 
-  // 3. Use Free MyMemory Translation API
+  // 4. Use Free MyMemory Translation API
   const myMemoryRes = await translateWithMyMemory(raw);
   if (myMemoryRes.success && myMemoryRes.text && myMemoryRes.text !== raw) {
     return {
@@ -350,7 +424,7 @@ async function translateTamilToEnglish(tamilText) {
     };
   }
 
-  // 4. Raw fallback if offline
+  // 5. Raw fallback if offline
   return {
     success: true,
     original: raw,
