@@ -328,34 +328,41 @@
     let farmerProducts = [];
 
     async function loadProducts() {
-      const res = await fetch('/api/products');
-      farmerProducts = await res.json();
-      const grid = document.getElementById('productGrid');
-      document.getElementById('statProducts').textContent = farmerProducts.length;
+      try {
+        const res = await fetch('/api/products');
+        const data = await res.json();
+        farmerProducts = Array.isArray(data) ? data : (data.products || []);
+        const grid = document.getElementById('productGrid');
+        const statEl = document.getElementById('statProducts');
+        if (statEl) statEl.textContent = farmerProducts.length;
 
-      if (!farmerProducts.length) {
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--slate-400);padding:2rem;">No products listed yet. Click + Add New Product to start selling!</div>';
-        return;
-      }
-      grid.innerHTML = farmerProducts.map(p => `
-        <div class="product-card reveal-on-scroll">
-          <div class="product-card-img">
-            <span class="product-card-badge"><i class="fas fa-map-marker-alt"></i> ${p.farmerLocation}</span>
-            <i class="${p.icon}"></i>
-          </div>
-          <div class="product-card-body">
-            <div class="product-card-title">${p.name}</div>
-            <div class="product-card-farmer"><i class="fas fa-user"></i> ${p.farmer}</div>
-            <div style="font-size: 0.85rem; color: var(--slate-500); margin-bottom: 8px;">Stock: <strong>${p.quantity} ${p.unit}</strong></div>
-            <div class="product-card-footer" style="flex-wrap:wrap;gap:8px;">
-              <div class="product-card-price">₹${p.price} / ${p.unit}</div>
-              <div style="display:flex;gap:6px;">
-                <button class="btn btn-sm btn-secondary" onclick="openEditProductModal('${p.id}')"><i class="fas fa-edit"></i> Edit</button>
-                <button class="btn btn-sm btn-danger" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
+        if (!grid) return;
+        if (!farmerProducts.length) {
+          grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--slate-400);padding:2rem;"><i class="fas fa-seedling" style="font-size:2rem;display:block;margin-bottom:8px;"></i>No products listed yet. Click + Add New Harvest Product to start selling!</div>';
+          return;
+        }
+        grid.innerHTML = farmerProducts.map(p => `
+          <div class="product-card reveal-on-scroll">
+            <div class="product-card-img">
+              <span class="product-card-badge"><i class="fas fa-map-marker-alt"></i> ${p.farmerLocation || 'Tamil Nadu'}</span>
+              <i class="${p.icon || 'fas fa-seedling'}"></i>
+            </div>
+            <div class="product-card-body">
+              <div class="product-card-title">${p.name}</div>
+              <div class="product-card-farmer"><i class="fas fa-user"></i> ${p.farmer || 'Verified Farmer'}</div>
+              <div style="font-size: 0.85rem; color: var(--slate-500); margin-bottom: 8px;">Stock: <strong>${p.quantity} ${p.unit || 'kg'}</strong></div>
+              <div class="product-card-footer" style="flex-wrap:wrap;gap:8px;">
+                <div class="product-card-price">₹${p.price} / ${p.unit || 'kg'}</div>
+                <div style="display:flex;gap:6px;">
+                  <button class="btn btn-sm btn-secondary" onclick="openEditProductModal('${p.id}')"><i class="fas fa-edit"></i> Edit</button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
+                </div>
               </div>
             </div>
-          </div>
-        </div>`).join('');
+          </div>`).join('');
+      } catch (err) {
+        console.warn('loadProducts error:', err);
+      }
     }
 
     async function loadDeliveryBoys() {
@@ -522,33 +529,60 @@
     async function handleAddProduct(e) {
       e.preventDefault();
       const editId = document.getElementById('editProductId').value;
-      const name = document.getElementById('newProdName').value;
-      const price = document.getElementById('newProdPrice').value;
-      const unit = document.getElementById('newProdUnit').value;
-      const quantity = document.getElementById('newProdQty').value;
-      const farmerLocation = document.getElementById('newProdLoc').value;
-      const farmer = document.getElementById('newProdFarmer').value;
-      const description = document.getElementById('newProdDesc').value;
+      const name = document.getElementById('newProdName').value.trim();
+      const price = Number(document.getElementById('newProdPrice').value);
+      const unit = document.getElementById('newProdUnit').value.trim() || 'kg';
+      const quantity = Number(document.getElementById('newProdQty').value);
+      const farmerLocation = document.getElementById('newProdLoc').value.trim() || 'Madurai';
+      const farmer = document.getElementById('newProdFarmer').value.trim() || 'Selvi Farms';
+      const description = document.getElementById('newProdDesc').value.trim();
+
+      if (!name || isNaN(price) || isNaN(quantity)) {
+        alert('Please fill all required fields with valid values.');
+        return;
+      }
+
+      const saveBtn = document.getElementById('saveProdBtn');
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+      }
 
       try {
         const url = editId ? `/api/products/${editId}` : '/api/products';
         const method = editId ? 'PUT' : 'POST';
+        const session = window.getUserSession ? window.getUserSession() : {};
 
         const res = await fetch(url, {
           method,
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-role': 'farmer',
+            'Authorization': `Bearer ${session.token || ''}`
+          },
           body: JSON.stringify({ name, price, unit, quantity, farmer, farmerLocation, description })
         });
+
         if (res.ok) {
-          if (window.showToast) window.showToast(editId ? 'Product updated!' : 'Product published successfully!', 'success');
+          const savedProduct = await res.json();
+          if (window.showToast) {
+            window.showToast(editId ? `✅ "${name}" updated successfully!` : `✅ "${name}" published to Marketplace!`, 'success');
+          }
           closeAddProductModal();
           document.getElementById('addProductForm').reset();
           await loadProducts();
         } else {
-          alert('Failed to save product.');
+          const errData = await res.json().catch(() => ({}));
+          alert('Failed to save product: ' + (errData.error || 'Server error'));
         }
       } catch (err) {
-        alert('Error saving product.');
+        console.error('Save error:', err);
+        alert('Network or server error while saving product.');
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = editId ? 'Update Product' : 'Publish Product';
+        }
       }
     }
 

@@ -31,6 +31,22 @@
   ],
   "products": [
     {
+      "id": "p08121",
+      "name": "Organic Fresh Country Brinjal",
+      "category": "Vegetables",
+      "icon": "fas fa-seedling",
+      "price": 35,
+      "unit": "kg",
+      "quantity": 120,
+      "farmer": "Kavitha S",
+      "farmName": "Kavitha S Farms",
+      "farmerLocation": "Madurai",
+      "description": "Handpicked fresh organic striped brinjals.",
+      "season": "Fresh Produce",
+      "active": true,
+      "createdAt": "2026-08-28T21:21:48.121Z"
+    },
+    {
       "id": "p1",
       "name": "Fresh Organic Tomatoes",
       "category": "Vegetables",

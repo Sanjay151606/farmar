@@ -24,7 +24,11 @@ const apiControllers = {
   getProducts(req, res) {
     try {
       const result = productService.getProducts(req.query);
-      res.json(result);
+      if (req.query.paginated === 'true') {
+        res.json(result);
+      } else {
+        res.json(result.products || []);
+      }
     } catch (err) {
       res.status(500).json({ error: err.message });
     }

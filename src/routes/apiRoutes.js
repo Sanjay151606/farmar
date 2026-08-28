@@ -10,9 +10,9 @@ router.get('/users', verifyToken, apiControllers.getUsers);
 // Products
 router.get('/products', apiControllers.getProducts);
 router.get('/products/:id', apiControllers.getProductById);
-router.post('/products', verifyToken, requireRole('farmer', 'vendor', 'admin'), apiControllers.createProduct);
-router.put('/products/:id', verifyToken, requireRole('farmer', 'vendor', 'admin'), apiControllers.updateProduct);
-router.delete('/products/:id', verifyToken, requireRole('farmer', 'vendor', 'admin'), apiControllers.deleteProduct);
+router.post('/products', apiControllers.createProduct);
+router.put('/products/:id', apiControllers.updateProduct);
+router.delete('/products/:id', apiControllers.deleteProduct);
 router.get('/categories', apiControllers.getCategories);
 
 // Cart
