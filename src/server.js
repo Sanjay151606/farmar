@@ -122,6 +122,15 @@ app.get("/dev", (req, res) => res.sendFile(path.join(__dirname, "../public/pages
 app.get("/select-role", (req, res) => res.sendFile(path.join(__dirname, "../public/pages/role-select.html")));
 
 if (process.env.NODE_ENV !== 'test') {
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`\n⚠️  Port ${PORT} is already in use by another running server instance.`);
+      console.error(`👉 Tip: Stop the other terminal tab or process using port ${PORT}.\n`);
+    } else {
+      console.error('Server error:', err);
+    }
+  });
+
   server.listen(PORT, HOST, () => {
     console.log(`Server is listening on ${HOST}:${PORT}`);
     console.log(`Health check: http://localhost:${PORT}/api/health`);
