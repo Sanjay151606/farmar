@@ -364,6 +364,38 @@
   ],
   "diseaseDiagnoses": [
     {
+      "id": "DIAG-499598",
+      "farmerId": "Kavitha S",
+      "farmerName": "Kavitha S",
+      "cropName": "Tomato",
+      "diseaseName": "Early Blight (Alternaria solani)",
+      "confidence": 93.5,
+      "severity": "Moderate",
+      "isHealthy": false,
+      "imageUrl": "https://vwgmxetvvufcrasysqlm.supabase.co/storage/v1/object/public/disease-scans/scans/1787953498219_leaf_scan.jpg",
+      "symptoms": [
+        "Dark brown to black concentric target rings on older lower leaves",
+        "Yellow chlorotic halos surrounding lesions",
+        "Premature defoliation starting from the base of the plant",
+        "Dark sunken leathery spots near stem ends of tomato fruit"
+      ],
+      "recommendations": [
+        "Spray Neem Seed Kernel Extract (NSKE 5%) or Trichoderma viride (10g/L) mixed in cow dung slurry once every 7 days.",
+        "Apply Mancozeb 75% WP @ 2g/L or Chlorothalonil 75% WP @ 2g/L on foliage during early morning.",
+        "Maintain 60cm plant spacing for adequate air circulation.",
+        "Drip irrigate at root zone; strictly avoid overhead sprinkler wetting.",
+        "Practice minimum 3-year crop rotation with non-solanaceous crops."
+      ],
+      "organicRemedy": "Spray Neem Seed Kernel Extract (NSKE 5%) or Trichoderma viride (10g/L) mixed in cow dung slurry once every 7 days.",
+      "chemicalRemedy": "Apply Mancozeb 75% WP @ 2g/L or Chlorothalonil 75% WP @ 2g/L on foliage during early morning.",
+      "preventativeTips": [
+        "Maintain 60cm plant spacing for adequate air circulation.",
+        "Drip irrigate at root zone; strictly avoid overhead sprinkler wetting.",
+        "Practice minimum 3-year crop rotation with non-solanaceous crops."
+      ],
+      "createdAt": "2026-08-28T21:44:59.598Z"
+    },
+    {
       "id": "DIAG-641653",
       "farmerId": "Kavitha S",
       "farmerName": "Kavitha S",
@@ -413,6 +445,62 @@
     }
   ],
   "yieldPredictions": [
+    {
+      "id": "YIELD-498197",
+      "farmerId": "Kavitha S",
+      "cropName": "Tomato",
+      "landArea": 2.5,
+      "unit": "Acres",
+      "soilType": "Red Soil",
+      "season": "Kharif (Monsoon)",
+      "irrigation": "Drip Irrigation",
+      "location": "Madurai",
+      "previousYield": null,
+      "estimatedYield": "26.2 Tons",
+      "estimatedYieldNum": 26.2,
+      "expectedRange": "23.6 – 28.8 Tons",
+      "confidence": 84,
+      "climateData": {
+        "temperature": "31°C",
+        "humidity": "64%",
+        "condition": "Optimal Growing Climate"
+      },
+      "recommendations": [
+        "Maintain optimal irrigation schedule tailored for Tomato during critical growth phases.",
+        "Monitor soil nitrogen, phosphorus, and potassium levels for Red Soil conditions in Madurai.",
+        "Implement integrated pest management (IPM) to safeguard expected harvest yield of 26.2 Tons.",
+        "Consult local Krishi Vigyan Kendra (KVK) advisory for regional weather and market trends."
+      ],
+      "createdAt": "2026-08-28T21:44:58.197Z"
+    },
+    {
+      "id": "YIELD-454208",
+      "farmerId": "Kavitha S",
+      "cropName": "Tomato",
+      "landArea": 2.5,
+      "unit": "Acres",
+      "soilType": "Red Soil",
+      "season": "Kharif (Monsoon)",
+      "irrigation": "Drip Irrigation",
+      "location": "Madurai",
+      "previousYield": null,
+      "estimatedYield": "26.2 Tons",
+      "estimatedYieldNum": 26.2,
+      "expectedRange": "23.6 – 28.8 Tons",
+      "confidence": 84,
+      "climateData": {
+        "temperature": "31°C",
+        "humidity": "64%",
+        "condition": "Optimal Growing Climate"
+      },
+      "recommendations": [
+        "Maintain optimal irrigation schedule tailored for Tomato during critical growth phases.",
+        "Monitor soil nitrogen, phosphorus, and potassium levels for Red Soil conditions in Madurai.",
+        "Implement integrated pest management (IPM) to safeguard expected harvest yield of 26.2 Tons.",
+        "Consult local Krishi Vigyan Kendra (KVK) advisory for regional weather and market trends."
+      ],
+      "createdAt": "2026-08-28T21:44:14.208Z"
+    },
     {
       "id": "YIELD-101",
       "farmerId": "Kavitha S",

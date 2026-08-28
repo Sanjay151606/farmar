@@ -212,47 +212,38 @@ async function uploadToSupabaseStorage(imageBase64, filename) {
   }
 }
 
-const diseaseService = {
-  async getHistory(farmerId) {
-    let diagnoses = [];
-
-    // Try Supabase PostgreSQL query first
-    if (isSupabaseEnabled()) {
-      try {
-        const { data, error } = await supabase
-          .from('diagnoses')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(20);
-
-        if (!error && data && data.length > 0) {
-          diagnoses = data.map(d => ({
-            id: d.id,
-            farmerId: d.farmer_name || d.farmer_id || farmerId,
-            cropName: d.crop_name,
-            diseaseName: d.disease_name,
-            confidence: Number(d.confidence),
-            severity: d.severity,
-            isHealthy: d.is_healthy,
-            imageUrl: d.image_url,
-            symptoms: d.symptoms || [],
-            recommendations: d.recommendations || [],
-            createdAt: d.created_at
-          }));
-        }
-      } catch (err) {
-        console.warn('Supabase fetch diagnoses note:', err.message);
+async function callCropDiseaseAI(image, cropHint, apiKey) {
+  if (!apiKey || !image) return null;
+  try {
+    const base64Clean = image.includes('base64,') ? image.split('base64,')[1] : image;
+    const res = await fetch('https://crop.kindwise.com/api/v1/identification', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Api-Key': apiKey
+      },
+      body: JSON.stringify({
+        images: [base64Clean],
+        similar_images: true
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.result && data.result.disease) {
+        return data.result.disease;
       }
     }
+  } catch (err) {
+    console.warn('Crop Disease AI API note:', err.message);
+  }
+  return null;
+}
 
-    // Fallback to local store
-    if (diagnoses.length === 0) {
-      diagnoses = store.getDiseaseDiagnoses(farmerId || 'Kavitha S');
-    }
-
+const diseaseService = {
+  getHistory(farmerId) {
+    const diagnoses = store.getDiseaseDiagnoses(farmerId || 'Kavitha S');
     const latest = diagnoses[0] || null;
     const healthyCount = diagnoses.filter(h => h.isHealthy).length;
-    const diseaseCount = diagnoses.length - healthyCount;
 
     return {
       diagnoses,
@@ -260,7 +251,7 @@ const diseaseService = {
       stats: {
         totalAnalyses: diagnoses.length,
         healthyCount,
-        diseaseCount,
+        diseaseCount: diagnoses.length - healthyCount,
         recentCrop: latest ? latest.cropName : 'None',
         recentDisease: latest ? latest.diseaseName : 'No diagnosis yet'
       }
@@ -280,7 +271,10 @@ const diseaseService = {
       storageUrl = image;
     }
 
-    // 2. Pathology Engine Match
+    // 2. AI Model & Pathology Engine Match
+    const diseaseApiKey = process.env.CROP_DISEASE_API_KEY;
+    const externalAiResult = await callCropDiseaseAI(image, cropHint, diseaseApiKey);
+
     let matched = CROP_PATHOLOGY_DATABASE[0];
 
     if (cropHint) {

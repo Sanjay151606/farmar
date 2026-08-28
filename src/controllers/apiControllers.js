@@ -171,9 +171,9 @@ const apiControllers = {
     res.json(yieldService.getHistory(farmerId));
   },
 
-  predictYield(req, res) {
+  async predictYield(req, res) {
     try {
-      const pred = yieldService.predictYield(req.body);
+      const pred = await yieldService.predictYield(req.body);
       res.json({ success: true, prediction: pred });
     } catch (err) {
       if (err.errors) {
