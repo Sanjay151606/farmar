@@ -110,7 +110,13 @@
       const saved = localStorage.getItem('deliveryBoyId');
       if (saved) {
         const found = boys.find(b => b.id === saved);
-        if (found) { currentDb = found; showDashboard(); }
+        if (found) { currentDb = found; showDashboard(); return; }
+      }
+      const session = window.getUserSession ? window.getUserSession() : {};
+      if (session.role === 'delivery' && boys.length > 0) {
+        currentDb = boys[0];
+        localStorage.setItem('deliveryBoyId', currentDb.id);
+        showDashboard();
       }
     }
 
