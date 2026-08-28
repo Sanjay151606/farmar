@@ -2,7 +2,7 @@
 -- FARMORA SUPABASE POSTGRESQL DATABASE SCHEMA MIGRATION
 -- File: supabase/migrations/20260815000000_farmora_schema.sql
 -- Description: Core Schema, Normalized Tables, RLS Policies, Storage Buckets, and Triggers
--- Compatibility: PostgreSQL 15+ / Supabase Auth & Storage
+-- Compatibility: PostgreSQL 15+ / Supabase Auth & Storage (100% Idempotent)
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
@@ -35,6 +35,14 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Ensure all columns exist on pre-existing profiles table
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS full_name TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'customer';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS location TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+
 DROP TRIGGER IF EXISTS trg_profiles_updated_at ON public.profiles;
 CREATE TRIGGER trg_profiles_updated_at
     BEFORE UPDATE ON public.profiles
@@ -50,6 +58,11 @@ CREATE TABLE IF NOT EXISTS public.categories (
     icon TEXT DEFAULT 'fas fa-seedling',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Ensure columns exist if table was created previously without them
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS icon TEXT DEFAULT 'fas fa-seedling';
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
 
 -- Seed Default Categories if not exist
 INSERT INTO public.categories (name, description, icon)
@@ -86,6 +99,23 @@ CREATE TABLE IF NOT EXISTS public.products (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Ensure all columns exist on pre-existing products table
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS farmer_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS category_id UUID REFERENCES public.categories(id) ON DELETE SET NULL;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'Vegetables';
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS price NUMERIC(12,2) DEFAULT 0.00;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS stock NUMERIC(12,2) DEFAULT 0.00;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS quantity NUMERIC(12,2) DEFAULT 0.00;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS unit TEXT DEFAULT 'kg';
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS farmer TEXT DEFAULT 'Selvi Organic Farms';
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS farm_name TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS farmer_location TEXT DEFAULT 'Tamil Nadu';
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS season TEXT DEFAULT 'Fresh Harvest';
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS icon TEXT DEFAULT 'fas fa-seedling';
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS image_url TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'ACTIVE';
+
 DROP TRIGGER IF EXISTS trg_products_updated_at ON public.products;
 CREATE TRIGGER trg_products_updated_at
     BEFORE UPDATE ON public.products
@@ -111,6 +141,19 @@ CREATE TABLE IF NOT EXISTS public.orders (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Ensure all columns exist on pre-existing orders table
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS customer_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS farmer_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS delivery_partner_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS customer_name TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS customer_address TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS farmer_name TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS delivery_partner_name TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS total_amount NUMERIC(12,2) DEFAULT 0.00;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'PENDING';
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS payment_method TEXT DEFAULT 'COD';
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'PENDING';
 
 DROP TRIGGER IF EXISTS trg_orders_updated_at ON public.orders;
 CREATE TRIGGER trg_orders_updated_at
@@ -222,7 +265,6 @@ ON CONFLICT (id) DO NOTHING;
 -- ----------------------------------------------------------------------------
 -- 12. ROW LEVEL SECURITY (RLS) POLICIES
 -- ----------------------------------------------------------------------------
--- Enable RLS on all tables
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
