@@ -10,22 +10,66 @@
 <body>
   <div class="page-container">
 
-    <!-- Login View -->
-    <div id="loginView" style="max-width: 440px; margin: 3rem auto;">
-      <div style="background: white; border-radius: var(--radius-lg); padding: var(--space-8); border: 1px solid var(--border); box-shadow: var(--shadow-md); text-align: center;">
-        <div style="width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, var(--slate-800), var(--slate-900)); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto var(--space-4);">
-          <i class="fas fa-motorcycle"></i>
+    <!-- Dynamic Delivery Partner Access & Location Onboarding -->
+    <div id="loginView" style="max-width: 520px; margin: 2rem auto;">
+      <div class="glass-card" style="background: white; border-radius: var(--radius-xl); padding: var(--space-8); border: 1px solid var(--border); box-shadow: var(--shadow-lg);">
+        <div style="width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #1e293b, #0f172a); color: #38bdf8; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto var(--space-4); box-shadow: var(--shadow-md);">
+          <i class="fas fa-location-dot"></i>
         </div>
-        <h2 style="color: var(--slate-900); font-size: 1.5rem; margin-bottom: var(--space-1);">Delivery Partner Login</h2>
-        <p style="color: var(--slate-500); font-size: 0.9rem; margin-bottom: var(--space-6);">Select your delivery profile to view assigned orders</p>
-        <div class="form-group" style="text-align: left;">
-          <label class="form-label">Delivery Partner Profile</label>
-          <select id="dbSelect" class="form-select">
-            <option value="">-- Choose Delivery Partner --</option>
+        <h2 style="color: var(--slate-900); font-size: 1.5rem; text-align: center; margin-bottom: var(--space-1); font-weight: 800;">Delivery Partner Access</h2>
+        <p style="color: var(--slate-500); font-size: 0.88rem; text-align: center; margin-bottom: var(--space-6);">Access delivery tasks dynamically based on your current operating location.</p>
+
+        <!-- Partner Name -->
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 700;">Delivery Partner Name</label>
+          <input type="text" id="partnerNameInput" class="form-input" placeholder="e.g. Ramesh Kumar" value="Ramesh K">
+        </div>
+
+        <!-- Phone Number -->
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 700;">Mobile Phone Number</label>
+          <input type="tel" id="partnerPhoneInput" class="form-input" placeholder="e.g. 9876543210" value="9876543210">
+        </div>
+
+        <!-- Operating District / Location -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label class="form-label" style="margin-bottom: 0; font-weight: 700;">Operating District / Zone</label>
+            <button type="button" onclick="detectPartnerLocation()" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 3px 8px; color: var(--primary); border-color: #86efac;">
+              <i class="fas fa-crosshairs"></i> Detect GPS Location
+            </button>
+          </div>
+          <select id="partnerDistrictSelect" class="form-select" style="font-weight: 600;">
+            <option value="All Tamil Nadu">🌐 All Tamil Nadu (Statewide Access)</option>
+            <option value="Madurai" selected>📍 Madurai (மதுரை)</option>
+            <option value="Thanjavur">📍 Thanjavur (தஞ்சாவூர்)</option>
+            <option value="Dindigul">📍 Dindigul (திண்டுக்கல்)</option>
+            <option value="Chennai">📍 Chennai (சென்னை)</option>
+            <option value="Coimbatore">📍 Coimbatore (கோயம்புத்தூர்)</option>
+            <option value="Trichy">📍 Trichy (திருச்சிராப்பள்ளி)</option>
+            <option value="Salem">📍 Salem (சேலம்)</option>
+            <option value="Tirunelveli">📍 Tirunelveli (திருநெல்வேலி)</option>
+            <option value="Erode">📍 Erode (ஈரோடு)</option>
+            <option value="Tiruppur">📍 Tiruppur (திருப்பூர்)</option>
+            <option value="Vellore">📍 Vellore (வேலூர்)</option>
+            <option value="Cuddalore">📍 Cuddalore (கடலூர்)</option>
+            <option value="Kanchipuram">📍 Kanchipuram (காஞ்சிபுரம்)</option>
           </select>
         </div>
-        <button class="btn btn-primary" onclick="loginDeliveryBoy()" style="width: 100%; margin-top: var(--space-2);">
-          <i class="fas fa-sign-in-alt"></i> Login to Dashboard
+
+        <!-- Vehicle Type -->
+        <div class="form-group">
+          <label class="form-label" style="font-weight: 700;">Vehicle Type</label>
+          <select id="partnerVehicleSelect" class="form-select">
+            <option value="Two-Wheeler / Bike">🛵 Motorcycle / Bike</option>
+            <option value="Three-Wheeler / Auto">🛺 3-Wheeler Auto / Mini Cargo</option>
+            <option value="Pickup Truck / Tata Ace">🚚 Mini Truck / Pickup</option>
+            <option value="Electric Scooter">⚡ Electric Vehicle (EV)</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary" onclick="loginDynamicDeliveryPartner()" style="width: 100%; margin-top: var(--space-3); font-weight: 700; height: 48px; font-size: 1rem;">
+          <i class="fas fa-shield-halved"></i> Enter Location Delivery Console
         </button>
       </div>
     </div>
@@ -33,15 +77,25 @@
     <!-- Dashboard View -->
     <div id="deliveryView" style="display: none;">
       
-      <!-- Page Header -->
-      <div class="page-header">
+      <!-- Page Header with Live Location Badge -->
+      <div class="page-header" style="flex-wrap: wrap; gap: 14px;">
         <div class="page-header-info">
-          <h1 id="dbWelcome">Welcome, Delivery Partner</h1>
-          <p id="dbArea">Delivery Area: —</p>
+          <h1 id="dbWelcome" style="margin-bottom: 4px;">Welcome, Delivery Partner</h1>
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span id="dbArea" style="background: #e0f2fe; color: #0369a1; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.85rem;">
+              <i class="fas fa-location-dot"></i> Operating Zone: Madurai
+            </span>
+            <span id="dbVehicle" style="background: #f1f5f9; color: #475569; padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;">
+              <i class="fas fa-motorcycle"></i> Two-Wheeler
+            </span>
+            <button onclick="changeOperatingRegionPrompt()" class="btn btn-outline btn-sm" style="padding: 2px 8px; font-size: 0.78rem;">
+              <i class="fas fa-arrows-rotate"></i> Change Region
+            </button>
+          </div>
         </div>
-        <div class="page-header-action">
+        <div class="page-header-action" style="display: flex; gap: 10px;">
           <button onclick="logout()" class="btn btn-secondary btn-sm">
-            <i class="fas fa-sign-out-alt"></i> Logout
+            <i class="fas fa-sign-out-alt"></i> Logout / Switch Profile
           </button>
         </div>
       </div>
@@ -94,11 +148,22 @@
         </div>
       </div>
 
-      <!-- Available Orders Section -->
+      <!-- Available Orders Section with Location Filter Controls -->
       <div style="background: white; border-radius: var(--radius-lg); padding: var(--space-6); border: 1px solid var(--border); box-shadow: var(--shadow-sm); margin-bottom: var(--space-6);">
-        <h2 style="font-size: 1.2rem; font-weight: 700; color: var(--slate-900); margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border);">
-          <i class="fas fa-hand-holding" style="color: var(--primary); margin-right: 8px;"></i> Available Orders (Unassigned)
-        </h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border);">
+          <h2 style="font-size: 1.2rem; font-weight: 700; color: var(--slate-900); margin: 0;">
+            <i class="fas fa-hand-holding" style="color: var(--primary); margin-right: 8px;"></i> Available Orders (Unassigned)
+          </h2>
+          <!-- Location Filter Tabs -->
+          <div style="display: flex; gap: 6px;">
+            <button id="filterLocalBtn" onclick="setLocationFilter('local')" class="btn btn-sm btn-primary" style="font-size: 0.8rem; padding: 4px 12px;">
+              <i class="fas fa-location-dot"></i> Near My Region
+            </button>
+            <button id="filterAllBtn" onclick="setLocationFilter('all')" class="btn btn-sm btn-outline" style="font-size: 0.8rem; padding: 4px 12px;">
+              <i class="fas fa-globe"></i> All Tamil Nadu
+            </button>
+          </div>
+        </div>
         <div id="availableList">
           <div style="text-align: center; color: var(--slate-400); padding: 1.5rem;">No unassigned orders available at the moment.</div>
         </div>
@@ -118,6 +183,8 @@
 
   </div>
 
+  </div>
+
   <!-- Real-time Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/socket.io/socket.io.js"></script>
@@ -131,6 +198,7 @@
     let socket = null;
     let supabaseClient = null;
     let supabaseChannel = null;
+    let locationFilterMode = 'local'; // 'local' or 'all'
 
     // Supabase Realtime Setup
     const SUPABASE_URL = 'https://vwgmxetvvufcrasysqlm.supabase.co';
@@ -154,43 +222,118 @@
       console.warn('Socket.IO init error:', e);
     }
 
-    async function initLogin() {
-      const res = await fetch('/api/delivery-boys');
-      const boys = await res.json();
-      const sel = document.getElementById('dbSelect');
-      boys.forEach(db => {
-        const opt = document.createElement('option');
-        opt.value = db.id;
-        opt.textContent = `${db.name} — (${db.area})`;
-        sel.appendChild(opt);
-      });
-
-      const saved = localStorage.getItem('deliveryBoyId');
+    // ─── DYNAMIC LOCATION ONBOARDING & GPS AUTO-DETECTION ───────────────────
+    function initLogin() {
+      const saved = localStorage.getItem('farmora_delivery_partner');
       if (saved) {
-        const found = boys.find(b => b.id === saved);
-        if (found) { currentDb = found; showDashboard(); return; }
+        try {
+          currentDb = JSON.parse(saved);
+          showDashboard();
+          return;
+        } catch (e) {}
       }
+
+      // Check session
       const session = window.getUserSession ? window.getUserSession() : {};
-      if (session.role === 'delivery' && boys.length > 0) {
-        currentDb = boys[0];
-        localStorage.setItem('deliveryBoyId', currentDb.id);
+      if (session.name && session.role === 'delivery') {
+        currentDb = {
+          id: 'dp_' + (session.phone || '9876543210'),
+          name: session.name,
+          phone: session.phone || '9876543210',
+          area: session.location || 'Madurai',
+          vehicle: 'Two-Wheeler / Bike'
+        };
+        localStorage.setItem('farmora_delivery_partner', JSON.stringify(currentDb));
         showDashboard();
       }
     }
 
-    async function loginDeliveryBoy() {
-      const sel = document.getElementById('dbSelect');
-      if (!sel.value) { alert('Please select your name'); return; }
-      const res = await fetch('/api/delivery-boys');
-      const boys = await res.json();
-      currentDb = boys.find(b => b.id === sel.value);
-      localStorage.setItem('deliveryBoyId', currentDb.id);
+    async function detectPartnerLocation() {
+      if (!navigator.geolocation) {
+        alert('Geolocation not supported on this device.');
+        return;
+      }
+      if (window.showToast) window.showToast('📍 Detecting your GPS location...', 'info');
+
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+          const data = await res.json();
+          const address = data.address || {};
+          const detectedCity = address.city || address.state_district || address.county || address.town || 'Madurai';
+
+          const select = document.getElementById('partnerDistrictSelect');
+          let matched = false;
+          for (let opt of select.options) {
+            if (opt.value.toLowerCase().includes(detectedCity.toLowerCase()) || detectedCity.toLowerCase().includes(opt.value.toLowerCase())) {
+              select.value = opt.value;
+              matched = true;
+              break;
+            }
+          }
+          if (window.showToast) {
+            window.showToast(`GPS Location Detected: ${matched ? select.value : detectedCity}`, 'success');
+          }
+        } catch (e) {
+          if (window.showToast) window.showToast('GPS Coordinates Captured (Tamil Nadu Region)', 'success');
+        }
+      }, (err) => {
+        alert('Could not detect GPS location: ' + err.message);
+      }, { enableHighAccuracy: true, timeout: 8000 });
+    }
+
+    function loginDynamicDeliveryPartner() {
+      const name = document.getElementById('partnerNameInput').value.trim();
+      const phone = document.getElementById('partnerPhoneInput').value.trim();
+      const district = document.getElementById('partnerDistrictSelect').value;
+      const vehicle = document.getElementById('partnerVehicleSelect').value;
+
+      if (!name) { alert('Please enter your Delivery Partner Name'); return; }
+      if (!phone) { alert('Please enter your Mobile Phone Number'); return; }
+
+      currentDb = {
+        id: 'dp_' + phone.replace(/[^\d]/g, ''),
+        name: name,
+        phone: phone,
+        area: district,
+        vehicle: vehicle
+      };
+
+      localStorage.setItem('farmora_delivery_partner', JSON.stringify(currentDb));
       showDashboard();
+      if (window.showToast) window.showToast(`Welcome ${name}! Operating in ${district}`, 'success');
+    }
+
+    function changeOperatingRegionPrompt() {
+      const newDistrict = prompt('Enter your new operating district (e.g. Madurai, Thanjavur, Chennai, Coimbatore, Dindigul, All Tamil Nadu):', currentDb.area);
+      if (newDistrict && newDistrict.trim()) {
+        currentDb.area = newDistrict.trim();
+        localStorage.setItem('farmora_delivery_partner', JSON.stringify(currentDb));
+        document.getElementById('dbArea').innerHTML = `<i class="fas fa-location-dot"></i> Operating Zone: ${currentDb.area}`;
+        if (window.showToast) window.showToast(`Operating zone updated to ${currentDb.area}!`, 'info');
+        renderAvailableOrders();
+      }
+    }
+
+    function setLocationFilter(mode) {
+      locationFilterMode = mode;
+      const localBtn = document.getElementById('filterLocalBtn');
+      const allBtn = document.getElementById('filterAllBtn');
+
+      if (mode === 'local') {
+        localBtn.className = 'btn btn-sm btn-primary';
+        allBtn.className = 'btn btn-sm btn-outline';
+      } else {
+        localBtn.className = 'btn btn-sm btn-outline';
+        allBtn.className = 'btn btn-sm btn-primary';
+      }
+      renderAvailableOrders();
     }
 
     function logout() {
       stopGpsBroadcasting();
-      localStorage.removeItem('deliveryBoyId');
+      localStorage.removeItem('farmora_delivery_partner');
       currentDb = null;
       document.getElementById('loginView').style.display = 'block';
       document.getElementById('deliveryView').style.display = 'none';
@@ -200,7 +343,9 @@
       document.getElementById('loginView').style.display = 'none';
       document.getElementById('deliveryView').style.display = 'block';
       document.getElementById('dbWelcome').textContent = `Welcome, ${currentDb.name}`;
-      document.getElementById('dbArea').textContent = `Assigned Region: ${currentDb.area}`;
+      document.getElementById('dbArea').innerHTML = `<i class="fas fa-location-dot"></i> Operating Zone: ${currentDb.area}`;
+      document.getElementById('dbVehicle').innerHTML = `<i class="fas fa-motorcycle"></i> ${currentDb.vehicle || 'Vehicle'}`;
+      
       loadDashboardData();
       setInterval(loadDashboardData, 10000);
     }
@@ -450,17 +595,49 @@
         container.innerHTML = '<div style="text-align: center; color: var(--slate-400); padding: 1.5rem;"><i class="fas fa-inbox" style="font-size: 1.5rem; display: block; margin-bottom: 6px;"></i>No unassigned orders available at the moment.</div>';
         return;
       }
-      container.innerHTML = availableOrders.map(o => {
+
+      let filteredList = availableOrders;
+      if (locationFilterMode === 'local' && currentDb && currentDb.area && currentDb.area !== 'All Tamil Nadu') {
+        const areaLower = currentDb.area.toLowerCase();
+        filteredList = availableOrders.filter(o => {
+          const farmLoc = (o.farmerLocation || '').toLowerCase();
+          const delivLoc = (o.deliveryAddress || o.customerAddress || '').toLowerCase();
+          return farmLoc.includes(areaLower) || delivLoc.includes(areaLower);
+        });
+      }
+
+      if (!filteredList.length) {
+        container.innerHTML = `
+          <div style="text-align: center; color: var(--slate-500); padding: 2rem 1rem;">
+            <i class="fas fa-map-location-dot" style="font-size: 2rem; color: #94a3b8; display: block; margin-bottom: 8px;"></i>
+            <strong>No active unassigned pickups in ${currentDb.area} right now</strong>
+            <p style="font-size: 0.85rem; color: var(--slate-400); margin: 6px 0 12px;">Switch to "All Tamil Nadu" to view available statewide farm harvests.</p>
+            <button onclick="setLocationFilter('all')" class="btn btn-sm btn-outline"><i class="fas fa-globe"></i> View All Statewide Orders</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filteredList.map(o => {
         const prodTitle = o.productName || (o.items && o.items[0] && o.items[0].name) || 'Fresh Produce';
         const qty = o.quantity || (o.items && o.items[0] && o.items[0].quantity) || 1;
         const unit = o.unit || (o.items && o.items[0] && o.items[0].unit) || 'kg';
         const pickupLoc = o.farmerLocation || 'Madurai';
         const dropLoc = o.deliveryAddress || o.customerAddress || 'Customer Address';
 
+        const isLocal = currentDb && currentDb.area && currentDb.area !== 'All Tamil Nadu' && 
+          ((pickupLoc.toLowerCase().includes(currentDb.area.toLowerCase())) || dropLoc.toLowerCase().includes(currentDb.area.toLowerCase()));
+
         return `
-          <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; background: var(--slate-50); box-shadow: var(--shadow-xs);">
+          <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; background: white; box-shadow: var(--shadow-xs);">
             <div>
-              <strong style="color: var(--primary); font-size: 1rem;">${o.id}</strong> — <strong>${prodTitle}</strong> × ${qty} ${unit} (<span style="color: var(--accent); font-weight: 700;">₹${o.totalAmount}</span>)
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <strong style="color: var(--primary); font-size: 1rem;">${o.id}</strong>
+                ${isLocal ? `<span style="background:#dcfce7;color:#15803d;font-size:0.75rem;padding:2px 8px;border-radius:12px;font-weight:700;"><i class="fas fa-location-crosshairs"></i> In Your Zone (${currentDb.area})</span>` : `<span style="background:#f1f5f9;color:#64748b;font-size:0.75rem;padding:2px 8px;border-radius:12px;font-weight:600;"><i class="fas fa-map-pin"></i> ${pickupLoc}</span>`}
+              </div>
+              <div style="font-size:0.95rem;font-weight:700;color:var(--slate-800);">
+                ${prodTitle} × ${qty} ${unit} (<span style="color: var(--accent);">₹${o.totalAmount}</span>)
+              </div>
               <div style="font-size: 0.82rem; color: var(--slate-600); margin-top: 4px;">
                 <i class="fas fa-tractor" style="color: var(--primary);"></i> Pickup: <strong>${o.farmerName || 'Local Farm'}</strong> (${pickupLoc}) &rarr; <i class="fas fa-location-dot" style="color: var(--accent);"></i> Deliver to: <strong>${dropLoc}</strong>
               </div>
