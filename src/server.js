@@ -40,6 +40,9 @@ app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ limit: '15mb', extended: true }));
 
 // Serve static frontend files
+app.use('/assets', express.static(path.join(__dirname, "../public/assets")));
+app.use('/pages/assets', express.static(path.join(__dirname, "../public/assets")));
+app.use('/pages', express.static(path.join(__dirname, "../public/pages")));
 app.use(express.static(path.join(__dirname, "../public/pages")));
 app.use(express.static(path.join(__dirname, "../public/assets")));
 app.use(express.static(path.join(__dirname, "../public")));
@@ -108,10 +111,15 @@ app.get("/smart-agriculture", (req, res) => res.sendFile(path.join(__dirname, ".
 app.get("/smart-agriculture.html", (req, res) => res.sendFile(path.join(__dirname, "../public/pages/smart-agriculture.html")));
 app.get("/disease-detection", (req, res) => res.sendFile(path.join(__dirname, "../public/pages/disease-detection.html")));
 app.get("/disease-detection.html", (req, res) => res.sendFile(path.join(__dirname, "../public/pages/disease-detection.html")));
-app.get("/farmer/disease-detection", (req, res) => res.sendFile(path.join(__dirname, "../public/pages/disease-detection.html")));
 app.get("/yield-prediction", (req, res) => res.sendFile(path.join(__dirname, "../public/pages/yield-prediction.html")));
 app.get("/yield-prediction.html", (req, res) => res.sendFile(path.join(__dirname, "../public/pages/yield-prediction.html")));
 app.get("/farmer/yield-prediction", (req, res) => res.sendFile(path.join(__dirname, "../public/pages/yield-prediction.html")));
+app.get("/role-select", (req, res) => res.sendFile(path.join(__dirname, "../public/pages/role-select.html")));
+app.get("/role-select.html", (req, res) => res.sendFile(path.join(__dirname, "../public/pages/role-select.html")));
+app.get("/login", (req, res) => res.sendFile(path.join(__dirname, "../public/pages/role-select.html")));
+app.get("/login.html", (req, res) => res.sendFile(path.join(__dirname, "../public/pages/role-select.html")));
+app.get("/dev", (req, res) => res.sendFile(path.join(__dirname, "../public/pages/role-select.html")));
+app.get("/select-role", (req, res) => res.sendFile(path.join(__dirname, "../public/pages/role-select.html")));
 
 if (process.env.NODE_ENV !== 'test') {
   server.listen(PORT, HOST, () => {
