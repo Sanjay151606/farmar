@@ -1,4 +1,4 @@
-# 🌾 Farmora — Digital Agriculture & Direct Supply Chain Platform
+# Farmora — Digital Agriculture & Direct Supply Chain Platform
 
 > Full-stack agri-commerce platform connecting farmers directly to consumers, featuring atomic stock management, real-time WebSocket order tracking, and agricultural advisory services.
 
@@ -9,14 +9,14 @@
 
 ---
 
-## 📌 Overview & Problem Statement
+## Overview & Problem Statement
 Smallholder farmers frequently lose significant profit margins to supply-chain intermediaries and lack digital infrastructure to manage inventory, track order fulfillments in real-time, or access localized crop health advisory. 
 
 **Farmora** provides a direct-to-consumer marketplace with real-time stock synchronization, atomic inventory reservations to prevent checkout race conditions, and integrated crop management modules.
 
 ---
 
-## ✨ Key Features
+## Key Features
 - **Direct Marketplace:** Multi-role user portal (Farmers, Consumers, Delivery Partners) for listing and purchasing fresh produce.
 - **Atomic Stock Decrement:** PostgreSQL stored procedure (`reserve_stock_atomic`) preventing inventory overselling during concurrent checkouts.
 - **Real-Time Fulfillment Tracking:** Live order updates and delivery status dispatched via Socket.IO events.
@@ -25,7 +25,7 @@ Smallholder farmers frequently lose significant profit margins to supply-chain i
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 - **Frontend:** HTML5, CSS3, JavaScript (Modular ES6+)
 - **Backend:** Node.js, Express.js, Socket.IO, Helmet, CORS
 - **Database:** Supabase (PostgreSQL with RLS & PL/pgSQL Stored Procedures)
@@ -33,7 +33,7 @@ Smallholder farmers frequently lose significant profit margins to supply-chain i
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```
 [ Client Browser (Consumer / Farmer / Delivery) ]
@@ -61,14 +61,14 @@ Smallholder farmers frequently lose significant profit margins to supply-chain i
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 - `docs/screenshots/farmer_portal.png` — Farmer produce listing console.
 - `docs/screenshots/marketplace.png` — Consumer shopping & cart interface.
 - `docs/screenshots/delivery_dashboard.png` — Real-time order dispatch screen.
 
 ---
 
-## 🚀 Getting Started Locally
+## Getting Started Locally
 
 ### 1. Prerequisites
 - Node.js (v18.x+)
@@ -103,7 +103,7 @@ Open `http://localhost:5000` in your browser.
 
 ---
 
-## 🔌 API Documentation Summary
+## API Documentation Summary
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
@@ -116,7 +116,7 @@ Open `http://localhost:5000` in your browser.
 
 ---
 
-## 👤 Author
+## Author
 **Sanjay**  
 - LinkedIn: [linkedin.com/in/sanjayselvamani/](https://www.linkedin.com/in/sanjayselvamani/)  
 - Portfolio: [sanjay151606.github.io/new-portfolio/](https://sanjay151606.github.io/new-portfolio/)  
