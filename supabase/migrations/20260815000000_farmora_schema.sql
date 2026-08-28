@@ -397,7 +397,58 @@ BEGIN
         ALTER PUBLICATION supabase_realtime ADD TABLE public.products;
         ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
         ALTER PUBLICATION supabase_realtime ADD TABLE public.delivery_tracking;
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.carts;
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.cart_items;
     END IF;
 EXCEPTION WHEN OTHERS THEN
     NULL;
 END $$;
+
+-- ----------------------------------------------------------------------------
+-- 14. AUTOMATIC USER PROFILE & CART CREATION TRIGGER
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.profiles (id, full_name, email, phone, role, location)
+    VALUES (
+        NEW.id,
+        COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.email),
+        NEW.email,
+        COALESCE(NEW.raw_user_meta_data->>'phone', ''),
+        COALESCE(NEW.raw_user_meta_data->>'role', 'customer'),
+        COALESCE(NEW.raw_user_meta_data->>'location', 'Tamil Nadu')
+    )
+    ON CONFLICT (id) DO UPDATE SET
+        full_name = EXCLUDED.full_name,
+        email = EXCLUDED.email,
+        phone = EXCLUDED.phone,
+        role = EXCLUDED.role,
+        location = EXCLUDED.location,
+        updated_at = NOW();
+
+    -- Create default cart for new customer
+    INSERT INTO public.carts (customer_id)
+    VALUES (NEW.id)
+    ON CONFLICT DO NOTHING;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ----------------------------------------------------------------------------
+-- 15. CARTS & CART_ITEMS RLS POLICIES
+-- ----------------------------------------------------------------------------
+ALTER TABLE public.carts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cart_items ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public select carts" ON public.carts;
+CREATE POLICY "Public select carts" ON public.carts FOR ALL USING (true);
+
+DROP POLICY IF EXISTS "Public manage cart items" ON public.cart_items;
+CREATE POLICY "Public manage cart items" ON public.cart_items FOR ALL USING (true);

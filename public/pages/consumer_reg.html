@@ -255,22 +255,60 @@
                 }, 2000);
             });
 
-            document.getElementById('verifyOtp').addEventListener('click', function () {
+            document.getElementById('verifyOtp').addEventListener('click', async function () {
                 const otpValues = Array.from(document.querySelectorAll('.otp-input')).map(input => input.value);
                 const otp = otpValues.join('');
                 if (otp.length !== 6) { alert('Please enter complete OTP'); return; }
-                this.innerHTML = '<div class="loading-spinner"></div> Verifying...';
+                this.innerHTML = '<div class="loading-spinner"></div> Verifying & Syncing Supabase...';
                 this.disabled = true;
-                setTimeout(() => {
-                    const formData = new FormData(document.getElementById('customerRegistrationForm'));
-                    const customerProfile = {};
-                    formData.forEach((value, key) => { customerProfile[key] = value; });
-                    localStorage.setItem('customerProfile', JSON.stringify(customerProfile));
-                    if (window.showToast) window.showToast('Registration complete! Welcome to Farmora.', 'success');
-                    window.location.href = '/customer-shop.html';
-                }, 1200);
+
+                const name = document.getElementById('customerName').value.trim();
+                const phone = document.getElementById('phoneNumber').value.trim();
+                const email = document.getElementById('email').value.trim() || `${phone}@gmail.com`;
+                const address = document.getElementById('address').value.trim();
+                const district = document.getElementById('district').value.trim();
+                const city = document.getElementById('city').value.trim();
+                const pincode = document.getElementById('pincode').value.trim();
+
+                const customerProfile = { name, phone, email, address, district, city, pincode, role: 'customer' };
+
+                try {
+                    const res = await fetch('/api/auth/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: email.includes('@') ? email : `${phone}@gmail.com`,
+                            password: 'FarmoraUser@' + phone.slice(-4),
+                            name,
+                            phone,
+                            role: 'customer',
+                            location: district || city || 'Tamil Nadu'
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.user) {
+                        customerProfile.id = data.user.id;
+                        localStorage.setItem('userSession', JSON.stringify({
+                            id: data.user.id,
+                            name: data.user.name,
+                            email: data.user.email,
+                            role: 'customer',
+                            token: data.token,
+                            location: district
+                        }));
+                    }
+                } catch (e) {
+                    console.warn('Registration sync note:', e);
+                }
+
+                localStorage.setItem('customerProfile', JSON.stringify(customerProfile));
+                localStorage.setItem('userRole', 'customer');
+                if (window.showToast) window.showToast('Registration complete! Welcome to Farmora.', 'success');
+                setTimeout(() => { window.location.href = '/customer-shop.html'; }, 800);
             });
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/assets/supabase-client.js"></script>
 </body>
 </html>

@@ -3,17 +3,133 @@ const orderService = require('../services/orderService');
 const diseaseService = require('../services/diseaseService');
 const yieldService = require('../services/yieldService');
 const store = require('../models/store');
+const { supabase, isSupabaseEnabled } = require('../config/supabase');
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require('../middleware/auth');
 
 const apiControllers = {
   // Auth
-  login(req, res) {
-    const { role, name } = req.body;
-    const jwt = require('jsonwebtoken');
-    const { JWT_SECRET } = require('../middleware/auth');
+  async register(req, res) {
+    const { email, password, name, phone, role, location } = req.body;
+    const userRole = role || 'customer';
+    const userName = name || 'Farmora Member';
+    const userPhone = phone || '';
+    const userLocation = location || 'Tamil Nadu';
+
+    try {
+      let userId = 'usr_' + Date.now().toString().slice(-6);
+      let sessionToken = null;
+
+      // 1. If Supabase is enabled and email+password provided, register via Supabase Auth
+      if (isSupabaseEnabled() && email && password) {
+        const { data: authData, error: authErr } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: userName, phone: userPhone, role: userRole, location: userLocation }
+          }
+        });
+
+        if (authErr) {
+          return res.status(400).json({ error: authErr.message });
+        }
+
+        if (authData && authData.user) {
+          userId = authData.user.id;
+          sessionToken = authData.session ? authData.session.access_token : null;
+
+          // Upsert into public.profiles
+          await supabase.from('profiles').upsert({
+            id: userId,
+            full_name: userName,
+            email,
+            phone: userPhone,
+            role: userRole,
+            location: userLocation,
+            updated_at: new Date().toISOString()
+          });
+        }
+      }
+
+      if (!sessionToken) {
+        sessionToken = jwt.sign({ id: userId, name: userName, role: userRole, email, phone: userPhone, location: userLocation }, JWT_SECRET, { expiresIn: '7d' });
+      }
+
+      // Save to local store for fallback
+      if (store.readDb) {
+        const db = store.readDb();
+        if (!db.users) db.users = [];
+        db.users.push({ id: userId, name: userName, email, phone: userPhone, role: userRole, location: userLocation, createdAt: new Date().toISOString() });
+        store.writeDb(db);
+      }
+
+      res.status(201).json({
+        success: true,
+        token: sessionToken,
+        user: { id: userId, name: userName, email, phone: userPhone, role: userRole, location: userLocation }
+      });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+
+  async login(req, res) {
+    const { email, password, role, name } = req.body;
     const userRole = role || 'customer';
     const userName = name || (userRole === 'farmer' ? 'Kavitha S' : userRole === 'delivery' ? 'Ramesh K' : 'Sanjay Kumar');
-    const token = jwt.sign({ name: userName, role: userRole }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ success: true, token, user: { name: userName, role: userRole } });
+
+    try {
+      // 1. Supabase Auth with Email & Password
+      if (isSupabaseEnabled() && email && password) {
+        const { data: authData, error: authErr } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (!authErr && authData && authData.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', authData.user.id)
+            .maybeSingle();
+
+          const finalName = (profile && profile.full_name) || authData.user.user_metadata.full_name || userName;
+          const finalRole = (profile && profile.role) || authData.user.user_metadata.role || userRole;
+          const finalLocation = (profile && profile.location) || authData.user.user_metadata.location || 'Tamil Nadu';
+
+          return res.json({
+            success: true,
+            token: authData.session ? authData.session.access_token : jwt.sign({ id: authData.user.id, name: finalName, role: finalRole }, JWT_SECRET),
+            user: {
+              id: authData.user.id,
+              name: finalName,
+              email: authData.user.email,
+              phone: (profile && profile.phone) || '',
+              role: finalRole,
+              location: finalLocation
+            }
+          });
+        }
+      }
+
+      // 2. Role-based fallback login
+      const token = jwt.sign({ name: userName, role: userRole }, JWT_SECRET, { expiresIn: '7d' });
+      res.json({ success: true, token, user: { name: userName, role: userRole, location: 'Tamil Nadu' } });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+
+  async getProfile(req, res) {
+    if (isSupabaseEnabled() && req.user && req.user.id) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', req.user.id)
+        .maybeSingle();
+      if (profile) return res.json(profile);
+    }
+    res.json(req.user || { name: 'Guest User', role: 'customer' });
   },
 
   getUsers(req, res) {
@@ -65,14 +181,172 @@ const apiControllers = {
     res.json(['All', 'Vegetables', 'Fruits', 'Grains', 'Spices']);
   },
 
-  // Cart
-  getCart(req, res) {
+  // Cart (Supabase & Local Store Synced)
+  async getCart(req, res) {
+    const customerId = req.query.customerId || (req.user && req.user.id);
+    if (isSupabaseEnabled() && customerId) {
+      try {
+        const { data: cart } = await supabase
+          .from('carts')
+          .select('id')
+          .eq('customer_id', customerId)
+          .maybeSingle();
+
+        if (cart) {
+          const { data: items } = await supabase
+            .from('cart_items')
+            .select('id, product_id, quantity, products:product_id (id, name, price, unit, farmer, image_url, icon)')
+            .eq('cart_id', cart.id);
+
+          if (items && items.length > 0) {
+            const mapped = items.map(i => ({
+              id: i.product_id,
+              cartItemId: i.id,
+              name: i.products ? i.products.name : 'Produce',
+              price: i.products ? Number(i.products.price) : 0,
+              unit: i.products ? i.products.unit : 'kg',
+              quantity: i.quantity,
+              farmer: i.products ? i.products.farmer : '',
+              image: i.products ? i.products.image_url : null,
+              icon: i.products ? i.products.icon : 'fas fa-seedling'
+            }));
+            return res.json(mapped);
+          }
+        }
+      } catch (err) {
+        console.warn('Supabase getCart note:', err.message);
+      }
+    }
     res.json(store.getCart());
   },
 
-  saveCart(req, res) {
+  async saveCart(req, res) {
     const items = req.body.items || req.body;
+    const customerId = req.body.customerId || (req.user && req.user.id);
+
+    if (isSupabaseEnabled() && customerId && Array.isArray(items)) {
+      try {
+        let { data: cart } = await supabase
+          .from('carts')
+          .select('id')
+          .eq('customer_id', customerId)
+          .maybeSingle();
+
+        if (!cart) {
+          const { data: newCart } = await supabase
+            .from('carts')
+            .insert({ customer_id: customerId })
+            .select()
+            .single();
+          cart = newCart;
+        }
+
+        if (cart) {
+          await supabase.from('cart_items').delete().eq('cart_id', cart.id);
+          for (const item of items) {
+            if (item.id) {
+              await supabase.from('cart_items').insert({
+                cart_id: cart.id,
+                product_id: item.id,
+                quantity: item.quantity || 1
+              });
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Supabase saveCart note:', err.message);
+      }
+    }
+
     res.json(store.saveCart(items));
+  },
+
+  async addToCart(req, res) {
+    const { customerId, productId, quantity = 1 } = req.body;
+    if (isSupabaseEnabled() && customerId && productId) {
+      try {
+        let { data: cart } = await supabase
+          .from('carts')
+          .select('id')
+          .eq('customer_id', customerId)
+          .maybeSingle();
+
+        if (!cart) {
+          const { data: newCart } = await supabase
+            .from('carts')
+            .insert({ customer_id: customerId })
+            .select()
+            .single();
+          cart = newCart;
+        }
+
+        if (cart) {
+          const { data: existing } = await supabase
+            .from('cart_items')
+            .select('id, quantity')
+            .eq('cart_id', cart.id)
+            .eq('product_id', productId)
+            .maybeSingle();
+
+          if (existing) {
+            await supabase
+              .from('cart_items')
+              .update({ quantity: existing.quantity + quantity, updated_at: new Date().toISOString() })
+              .eq('id', existing.id);
+          } else {
+            await supabase
+              .from('cart_items')
+              .insert({ cart_id: cart.id, product_id: productId, quantity });
+          }
+        }
+      } catch (err) {
+        console.warn('Supabase addToCart note:', err.message);
+      }
+    }
+    res.json({ success: true, message: 'Item added to cart' });
+  },
+
+  async removeFromCart(req, res) {
+    const { customerId, productId } = req.body;
+    if (isSupabaseEnabled() && customerId && productId) {
+      try {
+        const { data: cart } = await supabase
+          .from('carts')
+          .select('id')
+          .eq('customer_id', customerId)
+          .maybeSingle();
+
+        if (cart) {
+          await supabase
+            .from('cart_items')
+            .delete()
+            .eq('cart_id', cart.id)
+            .eq('product_id', productId);
+        }
+      } catch (err) {
+        console.warn('Supabase removeFromCart note:', err.message);
+      }
+    }
+    res.json({ success: true, message: 'Item removed from cart' });
+  },
+
+  async clearCart(req, res) {
+    const customerId = req.body.customerId || (req.user && req.user.id);
+    if (isSupabaseEnabled() && customerId) {
+      try {
+        const { data: cart } = await supabase
+          .from('carts')
+          .select('id')
+          .eq('customer_id', customerId)
+          .maybeSingle();
+
+        if (cart) {
+          await supabase.from('cart_items').delete().eq('cart_id', cart.id);
+        }
+      } catch (err) {}
+    }
+    store.saveCart([]);
+    res.json({ success: true, message: 'Cart cleared' });
   },
 
   // Orders

@@ -4,7 +4,10 @@ const apiControllers = require('../controllers/apiControllers');
 const { verifyToken, requireRole } = require('../middleware/auth');
 
 // Auth & Users
+router.post('/auth/register', apiControllers.register);
+router.post('/auth/signup', apiControllers.register);
 router.post('/auth/login', apiControllers.login);
+router.get('/auth/profile', verifyToken, apiControllers.getProfile);
 router.get('/users', verifyToken, apiControllers.getUsers);
 
 // Products
@@ -18,6 +21,9 @@ router.get('/categories', apiControllers.getCategories);
 // Cart
 router.get('/cart', apiControllers.getCart);
 router.post('/cart', apiControllers.saveCart);
+router.post('/cart/add', apiControllers.addToCart);
+router.post('/cart/remove', apiControllers.removeFromCart);
+router.delete('/cart', apiControllers.clearCart);
 
 // Orders
 router.get('/orders', apiControllers.getOrders);
