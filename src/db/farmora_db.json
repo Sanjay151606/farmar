@@ -385,5 +385,25 @@
       "read": false,
       "createdAt": "2026-08-14T10:00:00.000Z"
     }
-  ]
+  ],
+  "deliveryTracking": {
+    "ORD-9004": {
+      "order_id": "ORD-9004",
+      "orderId": "ORD-9004",
+      "delivery_partner_id": "dp_9876543210",
+      "deliveryBoyId": "dp_9876543210",
+      "delivery_partner_name": "Ramesh Kumar",
+      "deliveryBoyName": "Ramesh Kumar",
+      "latitude": 9.9252,
+      "lat": 9.9252,
+      "longitude": 78.1198,
+      "lng": 78.1198,
+      "speed": 32,
+      "accuracy": 4,
+      "heading": 180,
+      "status": "OUT_FOR_DELIVERY",
+      "updated_at": "2026-08-28T20:59:56.290Z",
+      "updatedAt": "2026-08-28T20:59:56.292Z"
+    }
+  }
 }

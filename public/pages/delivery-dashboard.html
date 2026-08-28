@@ -452,46 +452,67 @@
       document.getElementById('statDelivered').textContent      = myOrders.filter(o=>o.status==='DELIVERED').length;
     }
 
-    // ─── GPS BROADCASTING CONTROLLER ──────────────────────────────────────
+    // ─── GPS BROADCASTING CONTROLLER (REAL DEVICE GEOLOCATION) ───────────
+    let activeTrackingOrderId = null;
+
     function toggleGpsBroadcasting() {
       if (isBroadcastingGps) {
         stopGpsBroadcasting();
       } else {
-        startGpsBroadcasting();
+        const activeOrder = myOrders.find(o => o.status === 'PICKED_UP' || o.status === 'OUT_FOR_DELIVERY');
+        startGpsBroadcasting(activeOrder ? activeOrder.id : (myOrders[0] ? myOrders[0].id : 'GENERAL'));
       }
     }
 
-    function startGpsBroadcasting() {
+    function startGpsBroadcasting(orderId) {
       if (!navigator.geolocation) {
         alert('Geolocation is not supported by your browser or device.');
         return;
       }
 
+      activeTrackingOrderId = orderId || activeTrackingOrderId || (myOrders[0] ? myOrders[0].id : 'GENERAL');
       isBroadcastingGps = true;
+
       const btn = document.getElementById('toggleGpsBtn');
       const icon = document.getElementById('gpsPulseIcon');
       const statusText = document.getElementById('gpsStatusText');
 
-      btn.className = 'btn btn-accent';
-      btn.style.background = '#dc2626';
-      btn.style.borderColor = '#b91c1c';
-      btn.innerHTML = '<i class="fas fa-stop-circle"></i> Stop GPS Sharing';
-
-      icon.style.background = 'rgba(34, 197, 94, 0.2)';
-      icon.style.borderColor = '#22c55e';
-      icon.style.color = '#22c55e';
-      icon.classList.add('recording');
-
-      statusText.innerHTML = '<strong style="color: #4ade80;">● LIVE GPS STREAMING</strong> — Broadcasting to Supabase & Customer Trackers';
-
-      if (window.showToast) {
-        window.showToast('📡 Live GPS Location Sharing Activated!', 'success');
+      if (btn) {
+        btn.className = 'btn btn-accent';
+        btn.style.background = '#dc2626';
+        btn.style.borderColor = '#b91c1c';
+        btn.innerHTML = '<i class="fas fa-stop-circle"></i> Stop GPS Sharing';
       }
 
+      if (icon) {
+        icon.style.background = 'rgba(34, 197, 94, 0.2)';
+        icon.style.borderColor = '#22c55e';
+        icon.style.color = '#22c55e';
+        icon.classList.add('recording');
+      }
+
+      if (statusText) {
+        statusText.innerHTML = `<strong style="color: #4ade80;">● LIVE GPS STREAMING (Order: ${activeTrackingOrderId})</strong> — Broadcasting Real Device Coordinates`;
+      }
+
+      if (window.showToast) {
+        window.showToast(`📡 Live GPS Tracking Active for Order ${activeTrackingOrderId}!`, 'success');
+      }
+
+      // Clear any previous watcher
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+
+      // Start continuous real device GPS watchPosition
       watchId = navigator.geolocation.watchPosition(
         handleGeoSuccess,
         handleGeoError,
-        { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
+        {
+          enableHighAccuracy: true,
+          maximumAge: 3000,
+          timeout: 10000
+        }
       );
     }
 
@@ -530,28 +551,44 @@
     }
 
     function handleGeoSuccess(position) {
-      const { latitude, longitude, accuracy, speed } = position.coords;
-      const speedKmh = speed ? Math.round(speed * 3.6) : (Math.floor(Math.random() * 15) + 20);
+      const { latitude, longitude, accuracy, speed, heading } = position.coords;
+      const speedKmh = speed !== null && speed !== undefined ? Math.round(speed * 3.6) : 0;
 
-      document.getElementById('gpsLat').textContent = latitude.toFixed(6);
-      document.getElementById('gpsLng').textContent = longitude.toFixed(6);
-      document.getElementById('gpsAccuracy').textContent = `±${Math.round(accuracy)}m`;
-      document.getElementById('gpsSpeed').textContent = `${speedKmh} km/h`;
-      document.getElementById('gpsLastPing').textContent = new Date().toLocaleTimeString();
+      const latEl = document.getElementById('gpsLat');
+      const lngEl = document.getElementById('gpsLng');
+      const accEl = document.getElementById('gpsAccuracy');
+      const spdEl = document.getElementById('gpsSpeed');
+      const pingEl = document.getElementById('gpsLastPing');
+      const statusText = document.getElementById('gpsStatusText');
 
-      const activeOrder = myOrders.find(o => o.status === 'PICKED_UP' || o.status === 'OUT_FOR_DELIVERY') || myOrders[0];
+      if (latEl) latEl.textContent = latitude.toFixed(6);
+      if (lngEl) lngEl.textContent = longitude.toFixed(6);
+      if (accEl) accEl.textContent = `±${Math.round(accuracy)}m`;
+      if (spdEl) spdEl.textContent = `${speedKmh} km/h`;
+      if (pingEl) pingEl.textContent = new Date().toLocaleTimeString();
+
+      if (statusText) {
+        statusText.innerHTML = `<strong style="color: #4ade80;">● LIVE GPS STREAMING (Order: ${activeTrackingOrderId || 'ACTIVE'})</strong> — Accuracy: ±${Math.round(accuracy)}m`;
+      }
+
+      const targetOrder = myOrders.find(o => o.id === activeTrackingOrderId) || 
+                          myOrders.find(o => o.status === 'PICKED_UP' || o.status === 'OUT_FOR_DELIVERY') || 
+                          myOrders[0];
+
       const payload = {
-        orderId: activeOrder ? activeOrder.id : 'ALL',
+        orderId: targetOrder ? targetOrder.id : (activeTrackingOrderId || 'ALL'),
         deliveryBoyId: currentDb ? currentDb.id : 'db1',
         deliveryBoyName: currentDb ? currentDb.name : 'Delivery Partner',
         lat: latitude,
         lng: longitude,
         accuracy: accuracy,
         speed: speedKmh,
+        heading: heading || 0,
+        status: targetOrder ? targetOrder.status : 'IN_TRANSIT',
         timestamp: new Date().toISOString()
       };
 
-      // 1. Send via Supabase Realtime Broadcast
+      // 1. Broadcast via Supabase Realtime Channel
       if (supabaseChannel) {
         supabaseChannel.send({
           type: 'broadcast',
@@ -560,33 +597,25 @@
         });
       }
 
-      // 2. Send via Socket.IO
+      // 2. Broadcast via Socket.IO
       if (socket) {
         socket.emit('update_delivery_location', payload);
       }
 
-      // 3. Fallback to REST backend
+      // 3. Upsert to Supabase PostgreSQL & Backend Database
       fetch('/api/delivery/location', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-      }).catch(() => {});
+      }).catch((e) => console.warn('Location sync note:', e));
     }
 
     function handleGeoError(err) {
-      console.warn('Geolocation error:', err.message);
-      // If permission is denied or in desktop without GPS, provide simulated coordinates around Tamil Nadu
-      const defaultLat = 9.925200 + (Math.random() - 0.5) * 0.005;
-      const defaultLng = 78.119800 + (Math.random() - 0.5) * 0.005;
-
-      handleGeoSuccess({
-        coords: {
-          latitude: defaultLat,
-          longitude: defaultLng,
-          accuracy: 5,
-          speed: 7.5
-        }
-      });
+      console.warn('Geolocation signal update:', err.message);
+      const statusText = document.getElementById('gpsStatusText');
+      if (statusText) {
+        statusText.innerHTML = `<strong style="color: #f59e0b;"><i class="fas fa-satellite-dish"></i> Location signal lost, reconnecting... (${err.message})</strong>`;
+      }
     }
 
     function renderAvailableOrders() {
@@ -675,6 +704,84 @@
       renderAvailableOrders();
       renderDeliveries();
       updateStats();
+    }
+
+    function renderDeliveries() {
+      const container = document.getElementById('deliveriesList');
+      if (!myOrders || !myOrders.length) {
+        container.innerHTML = '<div style="text-align: center; color: var(--slate-400); padding: 3rem;"><i class="fas fa-box-open" style="font-size: 2.5rem; display: block; margin-bottom: 8px;"></i> No deliveries assigned yet</div>';
+        return;
+      }
+      container.innerHTML = myOrders.slice().reverse().map(o => {
+        const prodTitle = o.productName || (o.items && o.items[0] && o.items[0].name) || 'Fresh Produce';
+        const qty = o.quantity || (o.items && o.items[0] && o.items[0].quantity) || 1;
+        const unit = o.unit || (o.items && o.items[0] && o.items[0].unit) || 'kg';
+        const pickupLoc = o.farmerLocation || 'Madurai';
+        const dropLoc = o.deliveryAddress || o.customerAddress || 'Customer Address';
+        const customerPh = o.customerPhone || '+91 98765 43210';
+
+        let actionHtml = '';
+        if (o.status === 'ASSIGNED' || o.status === 'CONFIRMED' || o.status === 'PENDING') {
+          actionHtml = `<button class="btn btn-primary" onclick="handleStartPickup('${o.id}')" style="width:100%;height:44px;font-weight:700;"><i class="fas fa-box"></i> Mark As Picked Up & Start GPS</button>`;
+        } else if (o.status === 'PICKED_UP') {
+          actionHtml = `<button class="btn btn-primary" onclick="updateStatus('${o.id}','OUT_FOR_DELIVERY')" style="width:100%;height:44px;font-weight:700;"><i class="fas fa-truck"></i> Mark As Out For Delivery</button>`;
+        } else if (o.status === 'OUT_FOR_DELIVERY') {
+          actionHtml = `<button class="btn btn-accent" onclick="handleFinishDelivery('${o.id}')" style="width:100%;height:44px;background:#16a34a;border-color:#15803d;font-weight:700;"><i class="fas fa-check-circle"></i> Mark As Delivered</button>`;
+        } else if (o.status === 'DELIVERED') {
+          actionHtml = `<div style="text-align:center;color:var(--success);font-weight:700;padding:8px;"><i class="fas fa-check-double"></i> Order Successfully Delivered</div>`;
+        }
+
+        return `
+          <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-5); margin-bottom: var(--space-4); background: white;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); border-bottom: 1px solid var(--slate-100); padding-bottom: 8px;">
+              <span style="font-weight: 800; font-size: 1.05rem; color: var(--slate-900);"><i class="fas fa-hashtag"></i> ${o.id}</span>
+              <span class="status-badge status-${o.status}">${o.status.replace('_',' ')}</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: var(--space-4); font-size: 0.9rem;">
+              <div><i class="fas fa-box" style="color:var(--primary);margin-right:6px;"></i><strong>${prodTitle}</strong> × ${qty} ${unit}</div>
+              <div><i class="fas fa-rupee-sign" style="color:var(--accent);margin-right:6px;"></i>Amount: <strong>₹${o.totalAmount}</strong></div>
+              <div><i class="fas fa-tractor" style="color:var(--primary);margin-right:6px;"></i>Pickup: ${o.farmerName || 'Farmer'}, ${pickupLoc}</div>
+              <div><i class="fas fa-user" style="color:var(--primary);margin-right:6px;"></i>Customer: ${o.customerName || 'Customer'}</div>
+              <div><i class="fas fa-phone" style="color:var(--primary);margin-right:6px;"></i>Phone: <a href="tel:${customerPh}" style="color:var(--primary);font-weight:700;">${customerPh} <i class="fas fa-phone-volume"></i></a></div>
+              <div><i class="fas fa-map-marker-alt" style="color:var(--accent);margin-right:6px;"></i>Deliver To: <strong>${dropLoc}</strong></div>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <div style="flex: 2; min-width: 180px;">${actionHtml}</div>
+              <a href="https://api.whatsapp.com/send?phone=${customerPh.replace(/[^\d]/g, '')}&text=${encodeURIComponent('Hello ' + (o.customerName || 'Customer') + ', your Farmora harvest order #' + o.id + ' is on the way! Live Tracking: https://farmar-lake.vercel.app/tracker.html?orderId=' + o.id)}" target="_blank" class="btn btn-secondary" style="background: #25d366; color: white; border-color: #22c55e; flex: 1; min-width: 140px; justify-content: center; height: 44px;">
+                <i class="fab fa-whatsapp"></i> WhatsApp Customer
+              </a>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function handleStartPickup(orderId) {
+      if (!navigator.geolocation) {
+        alert('Please enable location access on your device to start delivery tracking.');
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        () => {
+          // Permission granted, update status and start continuous GPS tracking
+          activeTrackingOrderId = orderId;
+          updateStatus(orderId, 'PICKED_UP');
+          startGpsBroadcasting(orderId);
+        },
+        (err) => {
+          alert('⚠️ Location permission required: Please enable location access in your browser settings to start delivery tracking.');
+        },
+        { enableHighAccuracy: true }
+      );
+    }
+
+    function handleFinishDelivery(orderId) {
+      updateStatus(orderId, 'DELIVERED');
+      // Stop tracking if no other active deliveries
+      const remainingActive = myOrders.filter(o => o.id !== orderId && (o.status === 'PICKED_UP' || o.status === 'OUT_FOR_DELIVERY'));
+      if (!remainingActive.length) {
+        stopGpsBroadcasting();
+      }
     }
 
     async function updateStatus(orderId, newStatus) {

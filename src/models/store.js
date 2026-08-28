@@ -138,6 +138,20 @@ const store = {
     db.notifications.unshift(notif);
     writeDb(db);
     return notif;
+  },
+
+  getDeliveryTracking(orderId) {
+    const db = readDb();
+    if (!db.deliveryTracking) db.deliveryTracking = {};
+    return db.deliveryTracking[orderId] || null;
+  },
+
+  saveDeliveryTracking(data) {
+    const db = readDb();
+    if (!db.deliveryTracking) db.deliveryTracking = {};
+    db.deliveryTracking[data.orderId || data.order_id] = data;
+    writeDb(db);
+    return data;
   }
 };
 

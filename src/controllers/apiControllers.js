@@ -198,33 +198,94 @@ const apiControllers = {
   },
 
   // Live GPS Tracking (Delivery Partner Location)
-  updateDeliveryLocation(req, res) {
-    const { orderId, deliveryBoyId, deliveryBoyName, lat, lng, speed, accuracy } = req.body;
+  async updateDeliveryLocation(req, res) {
+    const { orderId, deliveryBoyId, deliveryBoyName, lat, lng, speed, accuracy, heading, status } = req.body;
     
-    // Store in-memory / state
+    if (!orderId || lat === undefined || lng === undefined) {
+      return res.status(400).json({ error: 'orderId, lat, and lng are required' });
+    }
+
+    const { supabase, isSupabaseEnabled } = require('../config/supabase');
+
     const locationData = {
+      order_id: orderId,
       orderId,
+      delivery_partner_id: deliveryBoyId,
       deliveryBoyId,
+      delivery_partner_name: deliveryBoyName,
       deliveryBoyName,
+      latitude: Number(lat),
       lat: Number(lat),
+      longitude: Number(lng),
       lng: Number(lng),
       speed: Number(speed || 0),
       accuracy: Number(accuracy || 10),
+      heading: Number(heading || 0),
+      status: status || 'IN_TRANSIT',
+      updated_at: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
 
-    if (global.lastKnownLocations) {
-      global.lastKnownLocations[orderId || deliveryBoyId] = locationData;
-    } else {
-      global.lastKnownLocations = { [orderId || deliveryBoyId]: locationData };
+    // 1. Persist to LowDB / local memory
+    store.saveDeliveryTracking(locationData);
+
+    // 2. Persist to Supabase delivery_tracking table if enabled
+    if (isSupabaseEnabled()) {
+      try {
+        await supabase.from('delivery_tracking').upsert({
+          order_id: locationData.order_id,
+          delivery_partner_id: locationData.delivery_partner_id,
+          delivery_partner_name: locationData.delivery_partner_name,
+          latitude: locationData.latitude,
+          longitude: locationData.longitude,
+          speed: locationData.speed,
+          accuracy: locationData.accuracy,
+          heading: locationData.heading,
+          status: locationData.status,
+          updated_at: locationData.updated_at
+        }, { onConflict: 'order_id' });
+      } catch (err) {
+        console.warn('Supabase delivery tracking upsert note:', err.message);
+      }
     }
 
     res.json({ success: true, location: locationData });
   },
 
-  getDeliveryLocation(req, res) {
+  async getDeliveryLocation(req, res) {
     const { id } = req.params;
-    const loc = (global.lastKnownLocations && global.lastKnownLocations[id]) || null;
+    const { supabase, isSupabaseEnabled } = require('../config/supabase');
+
+    // Check Supabase first
+    if (isSupabaseEnabled()) {
+      try {
+        const { data, error } = await supabase
+          .from('delivery_tracking')
+          .select('*')
+          .eq('order_id', id)
+          .single();
+
+        if (!error && data) {
+          return res.json({
+            success: true,
+            location: {
+              orderId: data.order_id,
+              deliveryBoyId: data.delivery_partner_id,
+              deliveryBoyName: data.delivery_partner_name,
+              lat: Number(data.latitude),
+              lng: Number(data.longitude),
+              speed: Number(data.speed),
+              accuracy: Number(data.accuracy),
+              heading: Number(data.heading),
+              status: data.status,
+              updatedAt: data.updated_at
+            }
+          });
+        }
+      } catch (e) {}
+    }
+
+    const loc = store.getDeliveryTracking(id);
     res.json({ success: true, location: loc });
   },
 

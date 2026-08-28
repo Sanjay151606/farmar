@@ -364,6 +364,30 @@ DROP POLICY IF EXISTS "Authenticated upload profile avatars" ON storage.objects;
 CREATE POLICY "Authenticated upload profile avatars" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'profile-avatars');
 
 -- ----------------------------------------------------------------------------
+-- 10. CORE TABLE: DELIVERY TRACKING
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.delivery_tracking (
+    order_id TEXT PRIMARY KEY,
+    delivery_partner_id TEXT,
+    delivery_partner_name TEXT,
+    latitude NUMERIC(10, 7) NOT NULL,
+    longitude NUMERIC(10, 7) NOT NULL,
+    speed NUMERIC(6, 2) DEFAULT 0,
+    accuracy NUMERIC(8, 2) DEFAULT 10,
+    heading NUMERIC(6, 2) DEFAULT 0,
+    status TEXT DEFAULT 'IN_TRANSIT',
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.delivery_tracking ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public view delivery tracking" ON public.delivery_tracking;
+CREATE POLICY "Public view delivery tracking" ON public.delivery_tracking FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Delivery partners manage tracking" ON public.delivery_tracking;
+CREATE POLICY "Delivery partners manage tracking" ON public.delivery_tracking FOR ALL USING (true);
+
+-- ----------------------------------------------------------------------------
 -- 13. REALTIME REPLICATION ENABLEMENT
 -- ----------------------------------------------------------------------------
 DO $$
@@ -372,6 +396,7 @@ BEGIN
         ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
         ALTER PUBLICATION supabase_realtime ADD TABLE public.products;
         ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.delivery_tracking;
     END IF;
 EXCEPTION WHEN OTHERS THEN
     NULL;
