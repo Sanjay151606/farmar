@@ -130,11 +130,125 @@
   ],
   "orders": [
     {
+      "id": "ORD-9002",
+      "customerId": "u1",
+      "customerName": "Priya M",
+      "customerPhone": "+91 98401 23456",
+      "customerAddress": "15, Gandhi Nagar 2nd Street, Madurai",
+      "deliveryAddress": "15, Gandhi Nagar 2nd Street, Madurai",
+      "farmerName": "Selvi Farms",
+      "farmerLocation": "Dindigul",
+      "productName": "Red Onions (Small)",
+      "quantity": 5,
+      "unit": "kg",
+      "deliveryBoyId": null,
+      "deliveryBoyName": null,
+      "items": [
+        {
+          "productId": "p2",
+          "name": "Red Onions (Small)",
+          "price": 55,
+          "unit": "kg",
+          "quantity": 5
+        }
+      ],
+      "totalAmount": 275,
+      "status": "CONFIRMED",
+      "createdAt": "2026-08-28T18:30:00.000Z"
+    },
+    {
+      "id": "ORD-9003",
+      "customerId": "u1",
+      "customerName": "Arulmozhi V",
+      "customerPhone": "+91 94432 98765",
+      "customerAddress": "28, Raja Rajan Road, Thanjavur",
+      "deliveryAddress": "28, Raja Rajan Road, Thanjavur",
+      "farmerName": "Kavitha S",
+      "farmerLocation": "Thanjavur",
+      "productName": "Raw Sugarcane Jaggery",
+      "quantity": 3,
+      "unit": "kg",
+      "deliveryBoyId": null,
+      "deliveryBoyName": null,
+      "items": [
+        {
+          "productId": "p6",
+          "name": "Raw Sugarcane Jaggery",
+          "price": 90,
+          "unit": "kg",
+          "quantity": 3
+        }
+      ],
+      "totalAmount": 270,
+      "status": "PENDING",
+      "createdAt": "2026-08-28T19:00:00.000Z"
+    },
+    {
+      "id": "ORD-9004",
+      "customerId": "u1",
+      "customerName": "Sanjay Kumar",
+      "customerPhone": "+91 98765 43210",
+      "customerAddress": "42, North Street, Madurai",
+      "deliveryAddress": "42, North Street, Madurai",
+      "farmerName": "Kavitha S",
+      "farmerLocation": "Thanjavur",
+      "productName": "Fresh Organic Tomatoes",
+      "quantity": 4,
+      "unit": "kg",
+      "deliveryBoyId": "db1",
+      "deliveryBoyName": "Ramesh K",
+      "items": [
+        {
+          "productId": "p1",
+          "name": "Fresh Organic Tomatoes",
+          "price": 40,
+          "unit": "kg",
+          "quantity": 4
+        }
+      ],
+      "totalAmount": 160,
+      "status": "ASSIGNED",
+      "createdAt": "2026-08-28T19:15:00.000Z"
+    },
+    {
+      "id": "ORD-9005",
+      "customerId": "u1",
+      "customerName": "Divya N",
+      "customerPhone": "+91 98410 54321",
+      "customerAddress": "8, Lake View Avenue, Madurai",
+      "deliveryAddress": "8, Lake View Avenue, Madurai",
+      "farmerName": "Selvi Farms",
+      "farmerLocation": "Dindigul",
+      "productName": "Fresh Organic Tomatoes",
+      "quantity": 2,
+      "unit": "kg",
+      "deliveryBoyId": "db1",
+      "deliveryBoyName": "Ramesh K",
+      "items": [
+        {
+          "productId": "p1",
+          "name": "Fresh Organic Tomatoes",
+          "price": 40,
+          "unit": "kg",
+          "quantity": 2
+        }
+      ],
+      "totalAmount": 80,
+      "status": "OUT_FOR_DELIVERY",
+      "createdAt": "2026-08-28T19:30:00.000Z"
+    },
+    {
       "id": "ORD-9001",
       "customerId": "u1",
       "customerName": "Sanjay Kumar",
+      "customerPhone": "+91 98765 43210",
       "customerAddress": "42, North Street, Madurai",
+      "deliveryAddress": "42, North Street, Madurai",
       "farmerName": "Kavitha S",
+      "farmerLocation": "Thanjavur",
+      "productName": "Fresh Organic Tomatoes",
+      "quantity": 2,
+      "unit": "kg",
       "deliveryBoyId": "db1",
       "deliveryBoyName": "Ramesh K",
       "items": [

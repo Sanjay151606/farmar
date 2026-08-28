@@ -368,21 +368,31 @@
 
     function renderAvailableOrders() {
       const container = document.getElementById('availableList');
-      if (!availableOrders.length) {
-        container.innerHTML = '<div style="text-align: center; color: var(--slate-400); padding: 1.5rem;">No unassigned orders available at the moment.</div>';
+      if (!availableOrders || !availableOrders.length) {
+        container.innerHTML = '<div style="text-align: center; color: var(--slate-400); padding: 1.5rem;"><i class="fas fa-inbox" style="font-size: 1.5rem; display: block; margin-bottom: 6px;"></i>No unassigned orders available at the moment.</div>';
         return;
       }
-      container.innerHTML = availableOrders.map(o => `
-        <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: var(--slate-50);">
-          <div>
-            <strong>${o.id}</strong> — ${o.productName} × ${o.quantity} ${o.unit} (₹${o.totalAmount})
-            <div style="font-size: 0.8rem; color: var(--slate-500);">Pickup: ${o.farmerName} (${o.farmerLocation}) &rarr; Deliver to: ${o.deliveryAddress}</div>
+      container.innerHTML = availableOrders.map(o => {
+        const prodTitle = o.productName || (o.items && o.items[0] && o.items[0].name) || 'Fresh Produce';
+        const qty = o.quantity || (o.items && o.items[0] && o.items[0].quantity) || 1;
+        const unit = o.unit || (o.items && o.items[0] && o.items[0].unit) || 'kg';
+        const pickupLoc = o.farmerLocation || 'Madurai';
+        const dropLoc = o.deliveryAddress || o.customerAddress || 'Customer Address';
+
+        return `
+          <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; background: var(--slate-50); box-shadow: var(--shadow-xs);">
+            <div>
+              <strong style="color: var(--primary); font-size: 1rem;">${o.id}</strong> — <strong>${prodTitle}</strong> × ${qty} ${unit} (<span style="color: var(--accent); font-weight: 700;">₹${o.totalAmount}</span>)
+              <div style="font-size: 0.82rem; color: var(--slate-600); margin-top: 4px;">
+                <i class="fas fa-tractor" style="color: var(--primary);"></i> Pickup: <strong>${o.farmerName || 'Local Farm'}</strong> (${pickupLoc}) &rarr; <i class="fas fa-location-dot" style="color: var(--accent);"></i> Deliver to: <strong>${dropLoc}</strong>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="acceptAvailableOrder('${o.id}')" style="font-weight: 700; padding: 8px 16px;">
+              <i class="fas fa-check"></i> Accept Order
+            </button>
           </div>
-          <button class="btn btn-sm btn-primary" onclick="acceptAvailableOrder('${o.id}')">
-            <i class="fas fa-check"></i> Accept Order
-          </button>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     async function acceptAvailableOrder(orderId) {
@@ -401,18 +411,25 @@
 
     function renderDeliveries() {
       const container = document.getElementById('deliveriesList');
-      if (!myOrders.length) {
+      if (!myOrders || !myOrders.length) {
         container.innerHTML = '<div style="text-align: center; color: var(--slate-400); padding: 3rem;"><i class="fas fa-box-open" style="font-size: 2.5rem; display: block; margin-bottom: 8px;"></i> No deliveries assigned yet</div>';
         return;
       }
       container.innerHTML = myOrders.slice().reverse().map(o => {
+        const prodTitle = o.productName || (o.items && o.items[0] && o.items[0].name) || 'Fresh Produce';
+        const qty = o.quantity || (o.items && o.items[0] && o.items[0].quantity) || 1;
+        const unit = o.unit || (o.items && o.items[0] && o.items[0].unit) || 'kg';
+        const pickupLoc = o.farmerLocation || 'Madurai';
+        const dropLoc = o.deliveryAddress || o.customerAddress || 'Customer Address';
+        const customerPh = o.customerPhone || '+91 98765 43210';
+
         let actionHtml = '';
-        if (o.status === 'ASSIGNED') {
+        if (o.status === 'ASSIGNED' || o.status === 'CONFIRMED' || o.status === 'PENDING') {
           actionHtml = `<button class="btn btn-primary" onclick="updateStatus('${o.id}','PICKED_UP')" style="width:100%;height:44px;"><i class="fas fa-box"></i> Mark As Picked Up</button>`;
         } else if (o.status === 'PICKED_UP') {
           actionHtml = `<button class="btn btn-primary" onclick="updateStatus('${o.id}','OUT_FOR_DELIVERY')" style="width:100%;height:44px;"><i class="fas fa-truck"></i> Mark As Out For Delivery</button>`;
         } else if (o.status === 'OUT_FOR_DELIVERY') {
-          actionHtml = `<button class="btn btn-accent" onclick="updateStatus('${o.id}','DELIVERED')" style="width:100%;height:44px;"><i class="fas fa-check-circle"></i> Mark As Delivered</button>`;
+          actionHtml = `<button class="btn btn-accent" onclick="updateStatus('${o.id}','DELIVERED')" style="width:100%;height:44px;background:#16a34a;border-color:#15803d;"><i class="fas fa-check-circle"></i> Mark As Delivered</button>`;
         } else if (o.status === 'DELIVERED') {
           actionHtml = `<div style="text-align:center;color:var(--success);font-weight:700;padding:8px;"><i class="fas fa-check-double"></i> Order Successfully Delivered</div>`;
         }
@@ -424,16 +441,16 @@
               <span class="status-badge status-${o.status}">${o.status.replace('_',' ')}</span>
             </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: var(--space-4); font-size: 0.9rem;">
-              <div><i class="fas fa-box" style="color:var(--primary);margin-right:6px;"></i><strong>${o.productName}</strong> × ${o.quantity} ${o.unit}</div>
+              <div><i class="fas fa-box" style="color:var(--primary);margin-right:6px;"></i><strong>${prodTitle}</strong> × ${qty} ${unit}</div>
               <div><i class="fas fa-rupee-sign" style="color:var(--accent);margin-right:6px;"></i>Amount: <strong>₹${o.totalAmount}</strong></div>
-              <div><i class="fas fa-tractor" style="color:var(--primary);margin-right:6px;"></i>Pickup: ${o.farmerName}, ${o.farmerLocation}</div>
-              <div><i class="fas fa-user" style="color:var(--primary);margin-right:6px;"></i>Customer: ${o.customerName}</div>
-              <div><i class="fas fa-phone" style="color:var(--primary);margin-right:6px;"></i>Phone: <a href="tel:${o.customerPhone}" style="color:var(--primary);font-weight:700;">${o.customerPhone} <i class="fas fa-phone-volume"></i></a></div>
-              <div><i class="fas fa-map-marker-alt" style="color:var(--accent);margin-right:6px;"></i>Deliver To: <strong>${o.deliveryAddress}</strong></div>
+              <div><i class="fas fa-tractor" style="color:var(--primary);margin-right:6px;"></i>Pickup: ${o.farmerName || 'Farmer'}, ${pickupLoc}</div>
+              <div><i class="fas fa-user" style="color:var(--primary);margin-right:6px;"></i>Customer: ${o.customerName || 'Customer'}</div>
+              <div><i class="fas fa-phone" style="color:var(--primary);margin-right:6px;"></i>Phone: <a href="tel:${customerPh}" style="color:var(--primary);font-weight:700;">${customerPh} <i class="fas fa-phone-volume"></i></a></div>
+              <div><i class="fas fa-map-marker-alt" style="color:var(--accent);margin-right:6px;"></i>Deliver To: <strong>${dropLoc}</strong></div>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
               <div style="flex: 2; min-width: 180px;">${actionHtml}</div>
-              <a href="https://api.whatsapp.com/send?phone=${(o.customerPhone || '919876543210').replace(/[^\d]/g, '')}&text=${encodeURIComponent('Hello ' + (o.customerName || 'Customer') + ', your Farmora harvest order #' + o.id + ' is on the way! Live Tracking: https://farmar-lake.vercel.app/tracker.html?orderId=' + o.id)}" target="_blank" class="btn btn-secondary" style="background: #25d366; color: white; border-color: #22c55e; flex: 1; min-width: 140px; justify-content: center; height: 44px;">
+              <a href="https://api.whatsapp.com/send?phone=${customerPh.replace(/[^\d]/g, '')}&text=${encodeURIComponent('Hello ' + (o.customerName || 'Customer') + ', your Farmora harvest order #' + o.id + ' is on the way! Live Tracking: https://farmar-lake.vercel.app/tracker.html?orderId=' + o.id)}" target="_blank" class="btn btn-secondary" style="background: #25d366; color: white; border-color: #22c55e; flex: 1; min-width: 140px; justify-content: center; height: 44px;">
                 <i class="fab fa-whatsapp"></i> WhatsApp Customer
               </a>
             </div>

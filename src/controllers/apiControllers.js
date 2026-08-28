@@ -106,6 +106,30 @@ const apiControllers = {
     }
   },
 
+  getAvailableOrders(req, res) {
+    const all = store.getOrders();
+    const available = all.filter(o => !o.deliveryBoyId && (o.status === 'PENDING' || o.status === 'CONFIRMED' || o.status === 'ACCEPTED'));
+    res.json(available);
+  },
+
+  getDeliveryOrders(req, res) {
+    const { id } = req.params;
+    const all = store.getOrders();
+    const myOrders = all.filter(o => o.deliveryBoyId === id);
+    res.json(myOrders);
+  },
+
+  acceptOrder(req, res) {
+    try {
+      const { id } = req.params;
+      const { deliveryBoyId } = req.body;
+      const updated = orderService.assignDeliveryBoy(id, deliveryBoyId);
+      res.json({ success: true, order: updated });
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
+  },
+
   // Delivery
   getDeliveryBoys(req, res) {
     res.json(store.getDeliveryBoys());

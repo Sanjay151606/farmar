@@ -20,15 +20,19 @@ router.get('/cart', apiControllers.getCart);
 router.post('/cart', apiControllers.saveCart);
 
 // Orders
-router.get('/orders', verifyToken, apiControllers.getOrders);
-router.get('/orders/:id', verifyToken, apiControllers.getOrderById);
-router.post('/orders', verifyToken, apiControllers.createOrder);
-router.put('/orders/:id/status', verifyToken, apiControllers.updateOrderStatus);
+router.get('/orders', apiControllers.getOrders);
+router.get('/orders/available', apiControllers.getAvailableOrders);
+router.get('/orders/delivery/:id', apiControllers.getDeliveryOrders);
+router.post('/orders/:id/accept', apiControllers.acceptOrder);
+router.get('/orders/:id', apiControllers.getOrderById);
+router.post('/orders', apiControllers.createOrder);
+router.put('/orders/:id/status', apiControllers.updateOrderStatus);
+router.patch('/orders/:id/status', apiControllers.updateOrderStatus);
 
 // Delivery
 router.get('/delivery-boys', apiControllers.getDeliveryBoys);
-router.get('/delivery/orders', verifyToken, apiControllers.getOrders);
-router.post('/delivery/assign', verifyToken, apiControllers.assignDelivery);
+router.get('/delivery/orders', apiControllers.getOrders);
+router.post('/delivery/assign', apiControllers.assignDelivery);
 router.post('/delivery/location', apiControllers.updateDeliveryLocation);
 router.get('/delivery/location/:id', apiControllers.getDeliveryLocation);
 
