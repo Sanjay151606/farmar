@@ -122,14 +122,15 @@ const apiControllers = {
   },
 
   // Disease
-  getDiseaseHistory(req, res) {
+  async getDiseaseHistory(req, res) {
     const farmerId = req.query.farmerId || (req.user ? req.user.name : 'Kavitha S');
-    res.json(diseaseService.getHistory(farmerId));
+    const result = await diseaseService.getHistory(farmerId);
+    res.json(result);
   },
 
-  analyzeDisease(req, res) {
+  async analyzeDisease(req, res) {
     try {
-      const diag = diseaseService.analyzeCropImage(req.body);
+      const diag = await diseaseService.analyzeCropImage(req.body);
       res.json({ success: true, diagnosis: diag });
     } catch (err) {
       res.status(400).json({ error: err.message });

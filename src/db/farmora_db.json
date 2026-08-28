@@ -180,6 +180,35 @@
   ],
   "diseaseDiagnoses": [
     {
+      "id": "DIAG-641653",
+      "farmerId": "Kavitha S",
+      "farmerName": "Kavitha S",
+      "cropName": "Tomato",
+      "diseaseName": "Tomato Leaf Curl Virus (ToLCV)",
+      "confidence": 91.2,
+      "severity": "High",
+      "isHealthy": false,
+      "imageUrl": "https://vwgmxetvvufcrasysqlm.supabase.co/storage/v1/object/public/disease-scans/scans/1787949641162_test_leaf.jpg",
+      "symptoms": [
+        "Severe upward curling and puckering of leaf margins",
+        "Stunting of plant growth with bushy appearance",
+        "Interveinal chlorosis and reduced flower/fruit set"
+      ],
+      "recommendations": [
+        "Install yellow sticky traps (15 traps/acre) to control Whitefly vector. Spray 3% Panchagavya with Neem oil (5ml/L).",
+        "Spray Imidacloprid 17.8% SL @ 0.3ml/L or Acetamiprid 20% SP @ 0.5g/L to eliminate whitefly vectors.",
+        "Use border crops like Maize or Sorghum to block incoming insect vectors.",
+        "Remove and bury infected plants immediately to prevent field spread."
+      ],
+      "organicRemedy": "Install yellow sticky traps (15 traps/acre) to control Whitefly vector. Spray 3% Panchagavya with Neem oil (5ml/L).",
+      "chemicalRemedy": "Spray Imidacloprid 17.8% SL @ 0.3ml/L or Acetamiprid 20% SP @ 0.5g/L to eliminate whitefly vectors.",
+      "preventativeTips": [
+        "Use border crops like Maize or Sorghum to block incoming insect vectors.",
+        "Remove and bury infected plants immediately to prevent field spread."
+      ],
+      "createdAt": "2026-08-28T20:40:41.653Z"
+    },
+    {
       "id": "DIAG-101",
       "farmerId": "Kavitha S",
       "cropName": "Tomato",
