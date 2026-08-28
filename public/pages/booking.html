@@ -176,9 +176,14 @@
                                     <div style="font-size: 0.85rem; color: var(--slate-600);">Deliver to: <strong>${order.deliveryAddress || order.deliveryLocation || 'Chennai'}</strong> &bull; Date: ${new Date(order.createdAt || order.timestamp || Date.now()).toLocaleDateString()}</div>
                                     <div style="font-size: 1.1rem; font-weight: 800; color: var(--accent); margin-top: 4px;">₹${totalAmount}</div>
                                 </div>
-                                <a href="/tracker.html?orderId=${order.id || order.orderId}" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-map-marker-alt"></i> Track Live Status
-                                </a>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <a href="https://api.whatsapp.com/send?text=${encodeURIComponent('🌱 FARMORA Order ' + (order.id || order.orderId) + ': ' + orderSummary + ' (₹' + totalAmount + ') - Track Live: https://farmar-lake.vercel.app/tracker.html?orderId=' + (order.id || order.orderId))}" target="_blank" class="btn btn-secondary btn-sm" style="background: #25d366; color: white; border-color: #22c55e;">
+                                        <i class="fab fa-whatsapp"></i> WhatsApp Order
+                                    </a>
+                                    <a href="/tracker.html?orderId=${order.id || order.orderId}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-map-marker-alt"></i> Track Live Status
+                                    </a>
+                                </div>
                             </div>
                         `;
                     });

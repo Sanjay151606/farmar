@@ -46,6 +46,8 @@ router.post('/yield', verifyToken, apiControllers.predictYield);
 
 // Notifications
 router.get('/notifications', verifyToken, apiControllers.getNotifications);
+router.post('/notifications/send-sms', apiControllers.sendSms);
+router.post('/notifications/whatsapp-link', apiControllers.getWhatsAppLink);
 
 // Voice Translation
 router.post('/translate', apiControllers.translate);

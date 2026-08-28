@@ -202,6 +202,21 @@ const apiControllers = {
     const { id } = req.params;
     const loc = (global.lastKnownLocations && global.lastKnownLocations[id]) || null;
     res.json({ success: true, location: loc });
+  },
+
+  // SMS & WhatsApp Alerts
+  async sendSms(req, res) {
+    const { to, message } = req.body;
+    const notificationService = require('../services/notificationService');
+    const result = await notificationService.sendTwilioSms({ to, message });
+    res.json(result);
+  },
+
+  getWhatsAppLink(req, res) {
+    const { phone, message } = req.body;
+    const notificationService = require('../services/notificationService');
+    const link = notificationService.generateWhatsAppLink(phone, message);
+    res.json({ success: true, url: link });
   }
 };
 

@@ -94,8 +94,15 @@ const orderService = {
 
     store.saveOrder(newOrder);
 
-    // 4. Emit real-time Socket.IO event
+    // 4. Emit real-time Socket.IO event & dispatch SMS / WhatsApp notification
     broadcastOrderEvent('order_created', newOrder);
+
+    try {
+      const notificationService = require('./notificationService');
+      notificationService.notifyOrderEvent('order_created', newOrder);
+    } catch (e) {
+      console.warn('Order notification error:', e.message);
+    }
 
     return newOrder;
   },
@@ -114,6 +121,14 @@ const orderService = {
     // Broadcast status change event
     const eventName = `order_${newStatus.toLowerCase()}`;
     broadcastOrderEvent(eventName, updated);
+
+    // Dispatch SMS / WhatsApp alert
+    try {
+      const notificationService = require('./notificationService');
+      notificationService.notifyOrderEvent(eventName, updated);
+    } catch (e) {
+      console.warn('Status notification error:', e.message);
+    }
 
     return updated;
   },

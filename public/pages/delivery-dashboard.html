@@ -431,7 +431,12 @@
               <div><i class="fas fa-phone" style="color:var(--primary);margin-right:6px;"></i>Phone: <a href="tel:${o.customerPhone}" style="color:var(--primary);font-weight:700;">${o.customerPhone} <i class="fas fa-phone-volume"></i></a></div>
               <div><i class="fas fa-map-marker-alt" style="color:var(--accent);margin-right:6px;"></i>Deliver To: <strong>${o.deliveryAddress}</strong></div>
             </div>
-            <div>${actionHtml}</div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <div style="flex: 2; min-width: 180px;">${actionHtml}</div>
+              <a href="https://api.whatsapp.com/send?phone=${(o.customerPhone || '919876543210').replace(/[^\d]/g, '')}&text=${encodeURIComponent('Hello ' + (o.customerName || 'Customer') + ', your Farmora harvest order #' + o.id + ' is on the way! Live Tracking: https://farmar-lake.vercel.app/tracker.html?orderId=' + o.id)}" target="_blank" class="btn btn-secondary" style="background: #25d366; color: white; border-color: #22c55e; flex: 1; min-width: 140px; justify-content: center; height: 44px;">
+                <i class="fab fa-whatsapp"></i> WhatsApp Customer
+              </a>
+            </div>
           </div>`;
       }).join('');
     }

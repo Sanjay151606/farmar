@@ -255,6 +255,15 @@
   ],
   "notifications": [
     {
+      "id": "NOTIF-835145",
+      "orderId": "ORD-7788",
+      "title": "🌱 New Order ORD-7788 Placed!",
+      "message": "FARMORA: New Order ORD-7788 received for Organic Madurai Tomatoes (5 kg). Total: ₹350. Farmer: Kavitha S.\n\nFARMORA: புதிய ஆர்டர் ORD-7788 பெறப்பட்டது! பொருள்: Organic Madurai Tomatoes. தொகை: ₹350.",
+      "whatsappUrl": "https://api.whatsapp.com/send?phone=919876543210&text=FARMORA%3A%20New%20Order%20ORD-7788%20received%20for%20Organic%20Madurai%20Tomatoes%20(5%20kg).%20Total%3A%20%E2%82%B9350.%20Farmer%3A%20Kavitha%20S.%0A%0AFARMORA%3A%20%E0%AE%AA%E0%AF%81%E0%AE%A4%E0%AE%BF%E0%AE%AF%20%E0%AE%86%E0%AE%B0%E0%AF%8D%E0%AE%9F%E0%AE%B0%E0%AF%8D%20ORD-7788%20%E0%AE%AA%E0%AF%86%E0%AE%B1%E0%AE%AA%E0%AF%8D%E0%AE%AA%E0%AE%9F%E0%AF%8D%E0%AE%9F%E0%AE%A4%E0%AF%81!%20%E0%AE%AA%E0%AF%8A%E0%AE%B0%E0%AF%81%E0%AE%B3%E0%AF%8D%3A%20Organic%20Madurai%20Tomatoes.%20%E0%AE%A4%E0%AF%8A%E0%AE%95%E0%AF%88%3A%20%E2%82%B9350.",
+      "smsSent": false,
+      "createdAt": "2026-08-28T20:43:55.145Z"
+    },
+    {
       "id": "n1",
       "userId": "u1",
       "title": "Welcome to Farmora",

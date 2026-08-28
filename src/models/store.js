@@ -130,6 +130,14 @@ const store = {
     db.notifications.unshift(notif);
     writeDb(db);
     return notif;
+  },
+
+  saveNotification(notif) {
+    const db = readDb();
+    if (!db.notifications) db.notifications = [];
+    db.notifications.unshift(notif);
+    writeDb(db);
+    return notif;
   }
 };
 
