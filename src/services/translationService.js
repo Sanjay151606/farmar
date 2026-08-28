@@ -314,14 +314,11 @@ async function translateTamilToEnglish(tamilText) {
 
   const raw = cleanText(tamilText);
 
-  // 1. Check specialized Agricultural Dictionary (highest precision for farm produce)
-  const dictMatch = lookupAgriDictionary(raw);
-
-  // 2. Check OpenAI API Key if provided in environment
+  // 1. If OpenAI API Key is configured in environment, use OpenAI GPT-4o-mini
   const openAiKey = process.env.OPENAI_API_KEY;
-  if (openAiKey && !dictMatch) {
+  if (openAiKey) {
     const openAiRes = await translateWithOpenAI(raw, openAiKey);
-    if (openAiRes.success) {
+    if (openAiRes.success && openAiRes.text) {
       return {
         success: true,
         original: raw,
@@ -331,23 +328,8 @@ async function translateTamilToEnglish(tamilText) {
     }
   }
 
-  // 3. Use Free MyMemory Translation API
-  const myMemoryRes = await translateWithMyMemory(raw);
-  if (myMemoryRes.success && myMemoryRes.text && myMemoryRes.text !== raw) {
-    // If we also had dictionary context, refine the output
-    let finalOutput = myMemoryRes.text;
-    if (dictMatch && !finalOutput.toLowerCase().includes(dictMatch.toLowerCase().split(' ')[0])) {
-      finalOutput = `${dictMatch} (${finalOutput})`;
-    }
-    return {
-      success: true,
-      original: raw,
-      translatedText: finalOutput,
-      source: 'mymemory'
-    };
-  }
-
-  // 4. If dictionary matched, return it
+  // 2. Check specialized Agricultural Dictionary (instant zero-latency fallback)
+  const dictMatch = lookupAgriDictionary(raw);
   if (dictMatch) {
     return {
       success: true,
@@ -357,7 +339,18 @@ async function translateTamilToEnglish(tamilText) {
     };
   }
 
-  // 5. Fallback if offline/unreachable
+  // 3. Use Free MyMemory Translation API
+  const myMemoryRes = await translateWithMyMemory(raw);
+  if (myMemoryRes.success && myMemoryRes.text && myMemoryRes.text !== raw) {
+    return {
+      success: true,
+      original: raw,
+      translatedText: myMemoryRes.text,
+      source: 'mymemory'
+    };
+  }
+
+  // 4. Raw fallback if offline
   return {
     success: true,
     original: raw,
