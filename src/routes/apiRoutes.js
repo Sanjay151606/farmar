@@ -45,4 +45,7 @@ router.post('/yield', verifyToken, apiControllers.predictYield);
 // Notifications
 router.get('/notifications', verifyToken, apiControllers.getNotifications);
 
+// Voice Translation
+router.post('/translate', apiControllers.translate);
+
 module.exports = router;

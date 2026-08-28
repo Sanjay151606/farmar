@@ -1244,10 +1244,93 @@ td {
     color: var(--primary);
 }
 
-.profile-dropdown-divider {
-    height: 1px;
-    background: var(--border);
-    margin: 6px 0;
+/* ─── TAMIL VOICE-TO-ENGLISH TRANSLATION SYSTEM ───────────────────────── */
+.voice-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.voice-input-wrapper .form-input,
+.voice-input-wrapper textarea.form-input {
+    padding-right: 46px !important;
+}
+
+.voice-mic-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #1b5e20;
+    border: 1px solid #cbd5e1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.88rem;
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+.voice-mic-btn:hover {
+    background: #dcfce7;
+    color: #15803d;
+    border-color: #86efac;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.voice-mic-btn.recording {
+    background: #ef4444 !important;
+    color: white !important;
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    animation: micPulseGlow 1.2s infinite;
+}
+
+.voice-mic-btn.translating {
+    background: #fef3c7 !important;
+    color: #b45309 !important;
+    border-color: #fde68a !important;
+}
+
+@keyframes micPulseGlow {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        transform: translateY(-50%) scale(1);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+        transform: translateY(-50%) scale(1.15);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        transform: translateY(-50%) scale(1);
+    }
+}
+
+.voice-transcript-preview {
+    font-size: 0.78rem;
+    margin-top: 4px;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    color: #475569;
+    display: none;
+    align-items: center;
+    gap: 6px;
+}
+
+.voice-transcript-preview.show {
+    display: flex;
+}
+
+.voice-transcript-preview strong {
+    color: #1b5e20;
 }
 
 /* Accessibility Safety */

@@ -500,3 +500,145 @@ function initMobileBottomNav() {
 
     document.body.insertAdjacentHTML('beforeend', mobileNavHtml);
 }
+
+// ─── REUSABLE TAMIL VOICE-TO-ENGLISH TRANSLATION CONTROLLER ─────────────
+window.startTamilVoiceInput = function(inputId, btnEl) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+        const msg = 'Voice recognition is not supported in this browser. Please type directly or use Google Chrome / Microsoft Edge.';
+        if (window.showToast) window.showToast(msg, 'error');
+        else alert(msg);
+        return;
+    }
+
+    const inputField = document.getElementById(inputId);
+    if (!inputField) return;
+
+    const btn = btnEl || document.querySelector(`[onclick*="${inputId}"]`);
+    const previewEl = document.getElementById(`preview_${inputId}`);
+
+    // If currently recording, do nothing or stop
+    if (window._currentRecognition) {
+        try { window._currentRecognition.stop(); } catch(e) {}
+        window._currentRecognition = null;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'ta-IN'; // Tamil (India)
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    window._currentRecognition = recognition;
+
+    if (btn) {
+        btn.classList.add('recording');
+        btn.innerHTML = '<i class="fas fa-microphone-lines"></i>';
+        btn.title = 'பேசவும்... (Listening in Tamil...)';
+    }
+
+    if (window.showToast) {
+        window.showToast('🎤 தமிழில் பேசவும்... (Listening in Tamil...)', 'info');
+    }
+
+    recognition.onstart = function() {
+        if (btn) btn.classList.add('recording');
+    };
+
+    recognition.onresult = async function(event) {
+        const tamilTranscript = event.results[0][0].transcript;
+        if (!tamilTranscript) return;
+
+        if (btn) {
+            btn.classList.remove('recording');
+            btn.classList.add('translating');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.title = 'மொழிபெயர்க்கிறது... (Translating...)';
+        }
+
+        if (previewEl) {
+            previewEl.classList.add('show');
+            previewEl.innerHTML = `<i class="fas fa-spinner fa-spin" style="color:var(--accent);"></i> <span>மொழிபெயர்க்கிறது: <em>"${tamilTranscript}"</em>...</span>`;
+        }
+
+        try {
+            const res = await fetch('/api/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: tamilTranscript, from: 'ta', to: 'en' })
+            });
+
+            const data = await res.json();
+            const translatedEnglish = data.translatedText || tamilTranscript;
+
+            // Populate target field with translated English text
+            inputField.value = translatedEnglish;
+            inputField.dispatchEvent(new Event('input', { bubbles: true }));
+            inputField.dispatchEvent(new Event('change', { bubbles: true }));
+
+            // Update transcript preview bar showing original Tamil and translated English
+            if (previewEl) {
+                previewEl.classList.add('show');
+                previewEl.innerHTML = `
+                    <i class="fas fa-language" style="color:var(--primary);"></i>
+                    <span>தமிழ்: <em>"${tamilTranscript}"</em> ➔ <strong>${translatedEnglish}</strong></span>
+                `;
+            }
+
+            if (window.showToast) {
+                window.showToast(`✅ "${tamilTranscript}" ➔ ${translatedEnglish}`, 'success');
+            }
+        } catch (err) {
+            console.error('Translation error:', err);
+            // Fallback to raw transcript if API failed
+            inputField.value = tamilTranscript;
+            if (previewEl) {
+                previewEl.classList.add('show');
+                previewEl.innerHTML = `<i class="fas fa-comment"></i> <span>தமிழ்: <em>"${tamilTranscript}"</em></span>`;
+            }
+        } finally {
+            if (btn) {
+                btn.classList.remove('recording', 'translating');
+                btn.innerHTML = '<i class="fas fa-microphone"></i>';
+                btn.title = 'தமிழில் பேசவும் (Speak in Tamil)';
+            }
+            window._currentRecognition = null;
+        }
+    };
+
+    recognition.onerror = function(event) {
+        console.warn('Speech recognition error:', event.error);
+        if (btn) {
+            btn.classList.remove('recording', 'translating');
+            btn.innerHTML = '<i class="fas fa-microphone"></i>';
+            btn.title = 'தமிழில் பேசவும் (Speak in Tamil)';
+        }
+        window._currentRecognition = null;
+
+        if (event.error === 'not-allowed') {
+            const msg = 'Microphone permission blocked. Please allow microphone access in browser settings.';
+            if (window.showToast) window.showToast(msg, 'error');
+            else alert(msg);
+        } else if (event.error === 'no-speech') {
+            if (window.showToast) window.showToast('சத்தம் கேட்கவில்லை. மீண்டும் பேசவும் (No speech heard. Try again)', 'warning');
+        } else {
+            if (window.showToast) window.showToast(`Voice error: ${event.error}`, 'error');
+        }
+    };
+
+    recognition.onend = function() {
+        if (btn && !btn.classList.contains('translating')) {
+            btn.classList.remove('recording');
+            btn.innerHTML = '<i class="fas fa-microphone"></i>';
+            btn.title = 'தமிழில் பேசவும் (Speak in Tamil)';
+        }
+        window._currentRecognition = null;
+    };
+
+    try {
+        recognition.start();
+    } catch (e) {
+        console.error('Recognition start error:', e);
+    }
+};

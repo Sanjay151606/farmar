@@ -158,6 +158,18 @@ const apiControllers = {
   getNotifications(req, res) {
     const userId = req.query.userId || (req.user ? req.user.name : 'u1');
     res.json(store.getNotifications(userId));
+  },
+
+  // Voice Translation (Tamil -> English)
+  async translate(req, res) {
+    try {
+      const { text, from, to } = req.body;
+      const translationService = require('../services/translationService');
+      const result = await translationService.translateTamilToEnglish(text);
+      res.json(result);
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
   }
 };
 

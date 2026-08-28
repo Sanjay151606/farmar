@@ -206,10 +206,27 @@
         </div>
         <form id="addProductForm" onsubmit="handleAddProduct(event)">
           <input type="hidden" id="editProductId" value="" />
-          <div class="form-group">
-            <label class="form-label">Product Name *</label>
-            <input type="text" id="newProdName" class="form-input" placeholder="e.g. Fresh Organic Tomatoes" required />
+
+          <!-- Tamil Voice Guidance Banner -->
+          <div style="background: #f0fdf4; border: 1px dashed #86efac; border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 14px; font-size: 0.82rem; color: #166534; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-microphone" style="color: #15803d; font-size: 1rem;"></i>
+            <span><strong>தமிழில் பேசலாம்:</strong> மைக் பட்டனை அழுத்தி தமிழில் பேசினால் தானாகவே ஆங்கிலத்தில் எழுதப்படும்.</span>
           </div>
+
+          <div class="form-group">
+            <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Product Name *</span>
+              <span style="font-size: 0.75rem; color: var(--primary); font-weight: 600;"><i class="fas fa-language"></i> தமிழில் பேசலாம்</span>
+            </label>
+            <div class="voice-input-wrapper">
+              <input type="text" id="newProdName" class="form-input" placeholder="e.g. Fresh Organic Tomatoes / தக்காளி" required />
+              <button type="button" class="voice-mic-btn" onclick="startTamilVoiceInput('newProdName', this)" title="தமிழில் பேசவும் (Speak in Tamil)">
+                <i class="fas fa-microphone"></i>
+              </button>
+            </div>
+            <div class="voice-transcript-preview" id="preview_newProdName"></div>
+          </div>
+
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3);">
             <div class="form-group">
               <label class="form-label">Price (₹) *</label>
@@ -220,24 +237,53 @@
               <input type="text" id="newProdUnit" class="form-input" placeholder="kg" required />
             </div>
           </div>
+
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3);">
             <div class="form-group">
               <label class="form-label">Stock Quantity *</label>
               <input type="number" id="newProdQty" class="form-input" placeholder="300" required />
             </div>
             <div class="form-group">
-              <label class="form-label">District / Location *</label>
-              <input type="text" id="newProdLoc" class="form-input" placeholder="Madurai" required />
+              <label class="form-label" style="display: flex; justify-content: space-between;">
+                <span>District / Location *</span>
+              </label>
+              <div class="voice-input-wrapper">
+                <input type="text" id="newProdLoc" class="form-input" placeholder="e.g. Madurai / மதுரை" required />
+                <button type="button" class="voice-mic-btn" onclick="startTamilVoiceInput('newProdLoc', this)" title="தமிழில் பேசவும் (Speak in Tamil)">
+                  <i class="fas fa-microphone"></i>
+                </button>
+              </div>
+              <div class="voice-transcript-preview" id="preview_newProdLoc"></div>
             </div>
           </div>
+
           <div class="form-group">
-            <label class="form-label">Farmer / Business Name *</label>
-            <input type="text" id="newProdFarmer" class="form-input" placeholder="Selvi Farms" required />
+            <label class="form-label" style="display: flex; justify-content: space-between;">
+              <span>Farmer / Business Name *</span>
+            </label>
+            <div class="voice-input-wrapper">
+              <input type="text" id="newProdFarmer" class="form-input" placeholder="e.g. Selvi Farms / செல்வி இயற்கை பண்ணை" required />
+              <button type="button" class="voice-mic-btn" onclick="startTamilVoiceInput('newProdFarmer', this)" title="தமிழில் பேசவும் (Speak in Tamil)">
+                <i class="fas fa-microphone"></i>
+              </button>
+            </div>
+            <div class="voice-transcript-preview" id="preview_newProdFarmer"></div>
           </div>
+
           <div class="form-group">
-            <label class="form-label">Product Description</label>
-            <textarea id="newProdDesc" class="form-input" rows="2" placeholder="Describe fresh quality, harvesting method..."></textarea>
+            <label class="form-label" style="display: flex; justify-content: space-between;">
+              <span>Product Description</span>
+              <span style="font-size: 0.75rem; color: var(--primary); font-weight: 600;"><i class="fas fa-language"></i> தமிழில் பேசலாம்</span>
+            </label>
+            <div class="voice-input-wrapper">
+              <textarea id="newProdDesc" class="form-input" rows="2" placeholder="e.g. Freshly harvested using organic manure / இயற்கை உரம் கொண்டு விளைவிக்கப்பட்டது..."></textarea>
+              <button type="button" class="voice-mic-btn" style="top: 24px; transform: none;" onclick="startTamilVoiceInput('newProdDesc', this)" title="தமிழில் பேசவும் (Speak in Tamil)">
+                <i class="fas fa-microphone"></i>
+              </button>
+            </div>
+            <div class="voice-transcript-preview" id="preview_newProdDesc"></div>
           </div>
+
           <div style="display: flex; gap: var(--space-3); justify-content: flex-end; margin-top: var(--space-4);">
             <button type="button" onclick="closeAddProductModal()" class="btn btn-secondary" data-i18n="btn_cancel">Cancel</button>
             <button type="submit" class="btn btn-primary" id="saveProdBtn" data-i18n="btn_submit">Publish Product</button>
