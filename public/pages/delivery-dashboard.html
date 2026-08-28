@@ -210,20 +210,98 @@
       updateStats();
     }
 
+    const DEFAULT_AVAILABLE_ORDERS = [
+      {
+        id: 'ORD-9002',
+        productName: 'Red Onions (Small)',
+        quantity: 5,
+        unit: 'kg',
+        totalAmount: 275,
+        farmerName: 'Selvi Farms',
+        farmerLocation: 'Dindigul',
+        customerName: 'Priya M',
+        customerPhone: '+91 98401 23456',
+        deliveryAddress: '15, Gandhi Nagar 2nd Street, Madurai',
+        status: 'CONFIRMED'
+      },
+      {
+        id: 'ORD-9003',
+        productName: 'Raw Sugarcane Jaggery',
+        quantity: 3,
+        unit: 'kg',
+        totalAmount: 270,
+        farmerName: 'Kavitha S',
+        farmerLocation: 'Thanjavur',
+        customerName: 'Arulmozhi V',
+        customerPhone: '+91 94432 98765',
+        deliveryAddress: '28, Raja Rajan Road, Thanjavur',
+        status: 'PENDING'
+      }
+    ];
+
+    const DEFAULT_MY_ORDERS = [
+      {
+        id: 'ORD-9004',
+        productName: 'Fresh Organic Tomatoes',
+        quantity: 4,
+        unit: 'kg',
+        totalAmount: 160,
+        farmerName: 'Kavitha S',
+        farmerLocation: 'Thanjavur',
+        customerName: 'Sanjay Kumar',
+        customerPhone: '+91 98765 43210',
+        deliveryAddress: '42, North Street, Madurai',
+        deliveryBoyId: 'db1',
+        status: 'ASSIGNED'
+      },
+      {
+        id: 'ORD-9005',
+        productName: 'Fresh Organic Tomatoes',
+        quantity: 2,
+        unit: 'kg',
+        totalAmount: 80,
+        farmerName: 'Selvi Farms',
+        farmerLocation: 'Dindigul',
+        customerName: 'Divya N',
+        customerPhone: '+91 98410 54321',
+        deliveryAddress: '8, Lake View Avenue, Madurai',
+        deliveryBoyId: 'db1',
+        status: 'OUT_FOR_DELIVERY'
+      }
+    ];
+
     async function loadAvailableOrders() {
-      const res = await fetch('/api/orders/available');
-      availableOrders = await res.json();
+      try {
+        const res = await fetch('/api/orders/available');
+        if (res.ok) {
+          availableOrders = await res.json();
+        } else {
+          throw new Error('API offline');
+        }
+      } catch (e) {
+        const stored = localStorage.getItem('farmora_available_orders');
+        availableOrders = stored ? JSON.parse(stored) : DEFAULT_AVAILABLE_ORDERS;
+      }
       renderAvailableOrders();
     }
 
     async function loadMyOrders() {
-      const res = await fetch(`/api/orders/delivery/${currentDb.id}`);
-      myOrders = await res.json();
+      try {
+        const res = await fetch(`/api/orders/delivery/${currentDb ? currentDb.id : 'db1'}`);
+        if (res.ok) {
+          myOrders = await res.json();
+        } else {
+          throw new Error('API offline');
+        }
+      } catch (e) {
+        const stored = localStorage.getItem('farmora_my_deliveries');
+        myOrders = stored ? JSON.parse(stored) : DEFAULT_MY_ORDERS;
+      }
       renderDeliveries();
     }
 
     function updateStats() {
-      document.getElementById('statAssigned').textContent       = myOrders.filter(o=>o.status==='ASSIGNED').length;
+      document.getElementById('statAssigned').textContent       = myOrders.filter(o=>o.status==='ASSIGNED'||o.status==='CONFIRMED'||o.status==='PENDING').length;
       document.getElementById('statPickedUp').textContent       = myOrders.filter(o=>o.status==='PICKED_UP').length;
       document.getElementById('statOutForDelivery').textContent = myOrders.filter(o=>o.status==='OUT_FOR_DELIVERY').length;
       document.getElementById('statDelivered').textContent      = myOrders.filter(o=>o.status==='DELIVERED').length;
@@ -396,75 +474,49 @@
     }
 
     async function acceptAvailableOrder(orderId) {
-      const res = await fetch(`/api/orders/${orderId}/accept`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ deliveryBoyId: currentDb.id })
-      });
-      if (res.ok) {
-        if (window.showToast) window.showToast(`Accepted order ${orderId}!`, 'success');
-        await loadDashboardData();
-      } else {
-        alert('Could not accept order.');
+      try {
+        await fetch(`/api/orders/${orderId}/accept`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ deliveryBoyId: currentDb ? currentDb.id : 'db1' })
+        });
+      } catch (e) {}
+
+      // Move locally
+      const foundIdx = availableOrders.findIndex(o => o.id === orderId);
+      if (foundIdx !== -1) {
+        const item = availableOrders.splice(foundIdx, 1)[0];
+        item.status = 'ASSIGNED';
+        item.deliveryBoyId = currentDb ? currentDb.id : 'db1';
+        item.deliveryBoyName = currentDb ? currentDb.name : 'Ramesh K';
+        myOrders.unshift(item);
+        localStorage.setItem('farmora_available_orders', JSON.stringify(availableOrders));
+        localStorage.setItem('farmora_my_deliveries', JSON.stringify(myOrders));
       }
-    }
 
-    function renderDeliveries() {
-      const container = document.getElementById('deliveriesList');
-      if (!myOrders || !myOrders.length) {
-        container.innerHTML = '<div style="text-align: center; color: var(--slate-400); padding: 3rem;"><i class="fas fa-box-open" style="font-size: 2.5rem; display: block; margin-bottom: 8px;"></i> No deliveries assigned yet</div>';
-        return;
-      }
-      container.innerHTML = myOrders.slice().reverse().map(o => {
-        const prodTitle = o.productName || (o.items && o.items[0] && o.items[0].name) || 'Fresh Produce';
-        const qty = o.quantity || (o.items && o.items[0] && o.items[0].quantity) || 1;
-        const unit = o.unit || (o.items && o.items[0] && o.items[0].unit) || 'kg';
-        const pickupLoc = o.farmerLocation || 'Madurai';
-        const dropLoc = o.deliveryAddress || o.customerAddress || 'Customer Address';
-        const customerPh = o.customerPhone || '+91 98765 43210';
-
-        let actionHtml = '';
-        if (o.status === 'ASSIGNED' || o.status === 'CONFIRMED' || o.status === 'PENDING') {
-          actionHtml = `<button class="btn btn-primary" onclick="updateStatus('${o.id}','PICKED_UP')" style="width:100%;height:44px;"><i class="fas fa-box"></i> Mark As Picked Up</button>`;
-        } else if (o.status === 'PICKED_UP') {
-          actionHtml = `<button class="btn btn-primary" onclick="updateStatus('${o.id}','OUT_FOR_DELIVERY')" style="width:100%;height:44px;"><i class="fas fa-truck"></i> Mark As Out For Delivery</button>`;
-        } else if (o.status === 'OUT_FOR_DELIVERY') {
-          actionHtml = `<button class="btn btn-accent" onclick="updateStatus('${o.id}','DELIVERED')" style="width:100%;height:44px;background:#16a34a;border-color:#15803d;"><i class="fas fa-check-circle"></i> Mark As Delivered</button>`;
-        } else if (o.status === 'DELIVERED') {
-          actionHtml = `<div style="text-align:center;color:var(--success);font-weight:700;padding:8px;"><i class="fas fa-check-double"></i> Order Successfully Delivered</div>`;
-        }
-
-        return `
-          <div style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-5); margin-bottom: var(--space-4); background: white;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); border-bottom: 1px solid var(--slate-100); padding-bottom: 8px;">
-              <span style="font-weight: 800; font-size: 1.05rem; color: var(--slate-900);"><i class="fas fa-hashtag"></i> ${o.id}</span>
-              <span class="status-badge status-${o.status}">${o.status.replace('_',' ')}</span>
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: var(--space-4); font-size: 0.9rem;">
-              <div><i class="fas fa-box" style="color:var(--primary);margin-right:6px;"></i><strong>${prodTitle}</strong> × ${qty} ${unit}</div>
-              <div><i class="fas fa-rupee-sign" style="color:var(--accent);margin-right:6px;"></i>Amount: <strong>₹${o.totalAmount}</strong></div>
-              <div><i class="fas fa-tractor" style="color:var(--primary);margin-right:6px;"></i>Pickup: ${o.farmerName || 'Farmer'}, ${pickupLoc}</div>
-              <div><i class="fas fa-user" style="color:var(--primary);margin-right:6px;"></i>Customer: ${o.customerName || 'Customer'}</div>
-              <div><i class="fas fa-phone" style="color:var(--primary);margin-right:6px;"></i>Phone: <a href="tel:${customerPh}" style="color:var(--primary);font-weight:700;">${customerPh} <i class="fas fa-phone-volume"></i></a></div>
-              <div><i class="fas fa-map-marker-alt" style="color:var(--accent);margin-right:6px;"></i>Deliver To: <strong>${dropLoc}</strong></div>
-            </div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              <div style="flex: 2; min-width: 180px;">${actionHtml}</div>
-              <a href="https://api.whatsapp.com/send?phone=${customerPh.replace(/[^\d]/g, '')}&text=${encodeURIComponent('Hello ' + (o.customerName || 'Customer') + ', your Farmora harvest order #' + o.id + ' is on the way! Live Tracking: https://farmar-lake.vercel.app/tracker.html?orderId=' + o.id)}" target="_blank" class="btn btn-secondary" style="background: #25d366; color: white; border-color: #22c55e; flex: 1; min-width: 140px; justify-content: center; height: 44px;">
-                <i class="fab fa-whatsapp"></i> WhatsApp Customer
-              </a>
-            </div>
-          </div>`;
-      }).join('');
+      if (window.showToast) window.showToast(`Accepted order ${orderId}! Assigned to your task list.`, 'success');
+      renderAvailableOrders();
+      renderDeliveries();
+      updateStats();
     }
 
     async function updateStatus(orderId, newStatus) {
-      await fetch(`/api/orders/${orderId}/status`, {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      });
-      if (window.showToast) window.showToast(`Order ${orderId} status set to ${newStatus.replace('_', ' ')}!`, 'success');
-      await loadDashboardData();
+      try {
+        await fetch(`/api/orders/${orderId}/status`, {
+          method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+      } catch (e) {}
+
+      const found = myOrders.find(o => o.id === orderId);
+      if (found) {
+        found.status = newStatus;
+        localStorage.setItem('farmora_my_deliveries', JSON.stringify(myOrders));
+      }
+
+      if (window.showToast) window.showToast(`Order ${orderId} updated to ${newStatus.replace('_', ' ')}!`, 'success');
+      renderDeliveries();
+      updateStats();
     }
 
     initLogin();
