@@ -67,13 +67,31 @@
       </div>
     </div>
 
+    <!-- Telemetry & Live Telematics HUD -->
+    <div id="liveTelemetryHud" style="display: none; background: #0f172a; color: white; border-radius: var(--radius-lg); padding: var(--space-4) var(--space-6); margin-bottom: var(--space-4); border: 1px solid rgba(255,255,255,0.1); box-shadow: var(--shadow-md);">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 12px; height: 12px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 10px #22c55e; animation: pulseGlow 1.2s infinite;"></div>
+          <span style="font-weight: 700; font-size: 0.9rem; color: #4ade80;" id="hudSignalStatus">📡 SUPABASE REALTIME LIVE GPS STREAM ACTIVE</span>
+        </div>
+        <div style="display: flex; gap: 16px; font-size: 0.82rem; color: #94a3b8;">
+          <span>Driver: <strong id="hudDriverName" style="color:white;">Ramesh K</strong></span>
+          <span>Speed: <strong id="hudSpeed" style="color:#facc15;">24 km/h</strong></span>
+          <span>Accuracy: <strong id="hudAccuracy" style="color:#38bdf8;">±4m</strong></span>
+          <span>Ping: <strong id="hudPing" style="color:#cbd5e1;">Just now</strong></span>
+        </div>
+      </div>
+    </div>
+
     <!-- Map & Order Details Box -->
-    <div id="map" style="height: 420px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-sm); display: none; margin-bottom: var(--space-6);"></div>
+    <div id="map" style="height: 440px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: var(--shadow-sm); display: none; margin-bottom: var(--space-6); position: relative; z-index: 1;"></div>
     <div id="detailsBox" class="glass-card" style="display: none; padding: var(--space-6);"></div>
 
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/socket.io/socket.io.js"></script>
   <script src="/assets/translations.js"></script>
   <script src="/assets/script.js"></script>
   <script>
@@ -82,7 +100,9 @@
         madurai: { coords: [9.9252, 78.1198], name: "Madurai" },
         coimbatore: { coords: [11.0168, 76.9558], name: "Coimbatore" },
         trichy: { coords: [10.7905, 78.7047], name: "Trichy" },
-        salem: { coords: [11.6643, 78.1460], name: "Salem" }
+        salem: { coords: [11.6643, 78.1460], name: "Salem" },
+        thanjavur: { coords: [10.7870, 79.1378], name: "Thanjavur" },
+        dindigul: { coords: [10.3673, 77.9803], name: "Dindigul" }
     };
 
     const orderIdInput = document.getElementById('orderIdInput');
@@ -90,23 +110,116 @@
     const mapDiv = document.getElementById('map');
     const detailsBox = document.getElementById('detailsBox');
     const timelineDiv = document.getElementById('timelineContainer');
+    const liveTelemetryHud = document.getElementById('liveTelemetryHud');
 
-    let map, deliveryMarker, vehicleMarker, routeLine;
+    let map, deliveryMarker, vehicleMarker, routeLine, pulseCircle;
     let animationInterval;
-    const totalSteps = 80;
-    const stepDurationMs = 500;
+    let currentTrackingOrder = null;
+
+    // Supabase Realtime Setup
+    const SUPABASE_URL = 'https://vwgmxetvvufcrasysqlm.supabase.co';
+    const SUPABASE_ANON = 'sb_publishable_gxRkZ_OCSAtB-ek9TqYcCA_ipHnL7YW';
+    let supabaseClient = null;
+    let supabaseChannel = null;
+    let socket = null;
+
+    try {
+      if (window.supabase) {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+        supabaseChannel = supabaseClient.channel('delivery_gps');
+        supabaseChannel.on('broadcast', { event: 'location_update' }, payload => {
+          if (payload && payload.payload) {
+            handleLiveLocationBroadcast(payload.payload);
+          }
+        }).subscribe();
+      }
+    } catch(e) {
+      console.warn('Supabase Realtime init:', e);
+    }
+
+    try {
+      if (typeof io !== 'undefined') {
+        socket = io();
+        socket.on('delivery_location_update', handleLiveLocationBroadcast);
+      }
+    } catch(e) {
+      console.warn('Socket.IO init:', e);
+    }
 
     const truckIcon = L.icon({
       iconUrl: 'https://cdn-icons-png.flaticon.com/512/2554/2554978.png',
-      iconSize: [36, 36],
-      iconAnchor: [18, 36]
+      iconSize: [42, 42],
+      iconAnchor: [21, 42],
+      popupAnchor: [0, -35]
     });
 
     const deliveryIcon = L.icon({
       iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-      iconSize: [32, 32],
-      iconAnchor: [16, 32]
+      iconSize: [36, 36],
+      iconAnchor: [18, 36]
     });
+
+    function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Earth radius km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return (R * c).toFixed(1);
+    }
+
+    function handleLiveLocationBroadcast(loc) {
+      if (!map || !currentTrackingOrder) return;
+
+      const { lat, lng, speed, accuracy, deliveryBoyName, timestamp } = loc;
+      const currentPos = [lat, lng];
+
+      liveTelemetryHud.style.display = 'block';
+      document.getElementById('hudDriverName').textContent = deliveryBoyName || 'Delivery Partner';
+      document.getElementById('hudSpeed').textContent = `${speed || 24} km/h`;
+      document.getElementById('hudAccuracy').textContent = accuracy ? `±${Math.round(accuracy)}m` : '±5m';
+      document.getElementById('hudPing').textContent = new Date(timestamp || Date.now()).toLocaleTimeString();
+
+      if (vehicleMarker) {
+        vehicleMarker.setLatLng(currentPos);
+      } else {
+        vehicleMarker = L.marker(currentPos, { icon: truckIcon }).addTo(map);
+      }
+
+      if (pulseCircle) {
+        pulseCircle.setLatLng(currentPos);
+      } else {
+        pulseCircle = L.circle(currentPos, {
+          radius: 300,
+          color: '#22c55e',
+          fillColor: '#22c55e',
+          fillOpacity: 0.2
+        }).addTo(map);
+      }
+
+      // Smooth pan map to follow driver
+      map.panTo(currentPos, { animate: true, duration: 1.0 });
+
+      if (currentTrackingOrder.destCoords) {
+        const remainingKm = calculateDistanceKm(lat, lng, currentTrackingOrder.destCoords[0], currentTrackingOrder.destCoords[1]);
+        const etaMins = Math.max(2, Math.round((remainingKm / (speed || 25)) * 60));
+        
+        detailsBox.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h3 style="color:var(--primary);margin:0;"><i class="fas fa-satellite"></i> Live GPS Feed: ${currentTrackingOrder.id}</h3>
+            <span class="status-badge status-OUT_FOR_DELIVERY" style="font-size:0.85rem;"><i class="fas fa-location-dot"></i> LIVE STREAM</span>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; font-size:0.92rem;">
+            <div><i class="fas fa-route" style="color:var(--accent);margin-right:6px;"></i>Distance to Doorstep: <strong>${remainingKm} km</strong></div>
+            <div><i class="fas fa-clock" style="color:var(--primary);margin-right:6px;"></i>Estimated Arrival: <strong>~${etaMins} mins</strong></div>
+            <div><i class="fas fa-user-check" style="color:var(--primary);margin-right:6px;"></i>Partner: <strong>${deliveryBoyName || 'Assigned'}</strong></div>
+            <div><i class="fas fa-map-pin" style="color:var(--accent);margin-right:6px;"></i>Destination: <strong>${currentTrackingOrder.deliveryLocation}</strong></div>
+          </div>
+        `;
+      }
+    }
 
     async function geocodeLocation(location) {
       try {
@@ -119,29 +232,23 @@
       return { coords: [13.0827, 80.2707], name: location };
     }
 
-    function interpolateCoords(start, end, steps) {
-      const points = [];
-      const latStep = (end[0] - start[0]) / steps;
-      const lngStep = (end[1] - start[1]) / steps;
-      for (let i = 0; i <= steps; i++) {
-        points.push([start[0] + latStep * i, start[1] + lngStep * i]);
-      }
-      return points;
-    }
-
     function initMap(originCoords, destCoords) {
       if (!map) {
-        map = L.map('map').setView(originCoords, 8);
+        map = L.map('map').setView(originCoords, 9);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
       } else {
-        map.setView(originCoords, 8);
+        map.setView(originCoords, 9);
         if (vehicleMarker) map.removeLayer(vehicleMarker);
         if (deliveryMarker) map.removeLayer(deliveryMarker);
         if (routeLine) map.removeLayer(routeLine);
+        if (pulseCircle) map.removeLayer(pulseCircle);
       }
-      deliveryMarker = L.marker(destCoords, { icon: deliveryIcon }).addTo(map);
-      vehicleMarker = L.marker(originCoords, { icon: truckIcon }).addTo(map);
-      routeLine = L.polyline([originCoords, destCoords], { color: '#e65100', weight: 4 }).addTo(map);
+      deliveryMarker = L.marker(destCoords, { icon: deliveryIcon }).addTo(map).bindPopup('<strong>Customer Doorstep</strong><br>Delivery Location');
+      vehicleMarker = L.marker(originCoords, { icon: truckIcon }).addTo(map).bindPopup('<strong>Live Delivery Partner</strong><br>Real-time Location');
+      routeLine = L.polyline([originCoords, destCoords], { color: '#e65100', weight: 4, dashArray: '6, 8' }).addTo(map);
+      
+      const bounds = L.latLngBounds([originCoords, destCoords]);
+      map.fitBounds(bounds, { padding: [50, 50] });
     }
 
     function updateTimeline(status) {
@@ -155,8 +262,8 @@
         }
       };
       setStep('stepPlaced', true);
-      setStep('stepAccepted', ['CONFIRMED', 'ASSIGNED', 'PICKED_UP', 'DELIVERED'].includes(status));
-      setStep('stepPicked', ['PICKED_UP', 'DELIVERED'].includes(status));
+      setStep('stepAccepted', ['CONFIRMED', 'ASSIGNED', 'PICKED_UP', 'OUT_FOR_DELIVERY', 'DELIVERED'].includes(status));
+      setStep('stepPicked', ['PICKED_UP', 'OUT_FOR_DELIVERY', 'DELIVERED'].includes(status));
       setStep('stepDelivered', status === 'DELIVERED');
     }
 
@@ -166,6 +273,7 @@
         mapDiv.style.display = 'block';
         detailsBox.style.display = 'block';
         timelineDiv.style.display = 'block';
+        liveTelemetryHud.style.display = 'block';
 
         updateTimeline(order.status || 'ASSIGNED');
 
@@ -173,32 +281,26 @@
         const originCoords = productsData[originDistrict] ? productsData[originDistrict].coords : [9.9252, 78.1198];
         const destData = await geocodeLocation(order.deliveryLocation || 'Chennai');
 
+        order.destCoords = destData.coords;
+        currentTrackingOrder = order;
+
         initMap(originCoords, destData.coords);
 
-        const route = interpolateCoords(originCoords, destData.coords, totalSteps);
-        routeLine.setLatLngs(route);
+        detailsBox.innerHTML = `
+          <h3 style="color:var(--primary);margin-bottom:8px;"><i class="fas fa-truck-fast"></i> Order: ${order.orderId || order.id}</h3>
+          <p style="margin-bottom:4px;"><strong>Status:</strong> <span class="status-badge status-${order.status || 'ASSIGNED'}">${(order.status || 'IN TRANSIT').replace('_',' ')}</span></p>
+          <p style="margin-bottom:4px;"><strong>Pickup Origin:</strong> ${order.farmerLocation || 'Madurai Farm Hub'}</p>
+          <p><strong>Delivery Destination:</strong> ${destData.name}</p>
+        `;
 
-        let currentIndex = 0;
-        animationInterval = setInterval(() => {
-            currentIndex++;
-            if (currentIndex >= route.length) {
-                clearInterval(animationInterval);
-                detailsBox.innerHTML = `
-                    <h3 style="color:var(--primary);margin-bottom:8px;">Order ID: ${order.orderId || order.id}</h3>
-                    <p style="margin-bottom:4px;"><strong>Status:</strong> <span class="status-badge status-DELIVERED">DELIVERED</span></p>
-                    <p><strong>Destination:</strong> ${destData.name}</p>
-                `;
-                vehicleMarker.setLatLng(route[route.length - 1]);
-                return;
-            }
-            vehicleMarker.setLatLng(route[currentIndex]);
-            detailsBox.innerHTML = `
-                <h3 style="color:var(--primary);margin-bottom:8px;">Order ID: ${order.orderId || order.id}</h3>
-                <p style="margin-bottom:4px;"><strong>Status:</strong> <span class="status-badge status-${order.status || 'ASSIGNED'}">${(order.status || 'IN TRANSIT').replace('_',' ')}</span></p>
-                <p style="margin-bottom:4px;"><strong>Delivery Destination:</strong> ${destData.name}</p>
-                <p><strong>Estimated Arrival:</strong> ${Math.ceil((totalSteps - currentIndex) * 0.5)} seconds</p>
-            `;
-        }, stepDurationMs);
+        // Check if there is an existing live location on backend
+        try {
+          const locRes = await fetch(`/api/delivery/location/${order.id}`);
+          const locData = await locRes.json();
+          if (locData.location) {
+            handleLiveLocationBroadcast(locData.location);
+          }
+        } catch(e) {}
     }
 
     trackBtn.addEventListener('click', async () => {
@@ -226,10 +328,10 @@
         }
 
         if (order) {
-            if (window.showToast) window.showToast(`Tracking ${orderId}...`, 'info');
+            if (window.showToast) window.showToast(`Tracking ${orderId} in Real Time...`, 'info');
             startTracking(order);
         } else {
-            alert('Order ID not found. Try placing an order in Customer Shop first.');
+            alert('Order ID not found. Try entering ORD-9001 or select an active order from Cart.');
         }
     });
 

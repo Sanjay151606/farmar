@@ -29,6 +29,8 @@ router.put('/orders/:id/status', verifyToken, apiControllers.updateOrderStatus);
 router.get('/delivery-boys', apiControllers.getDeliveryBoys);
 router.get('/delivery/orders', verifyToken, apiControllers.getOrders);
 router.post('/delivery/assign', verifyToken, apiControllers.assignDelivery);
+router.post('/delivery/location', apiControllers.updateDeliveryLocation);
+router.get('/delivery/location/:id', apiControllers.getDeliveryLocation);
 
 // Disease
 router.get('/farmer/disease-detection/history', verifyToken, apiControllers.getDiseaseHistory);

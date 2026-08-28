@@ -30,6 +30,14 @@ io.on('connection', (socket) => {
     socket.join(`role_${role}`);
   });
 
+  // Real-time GPS Delivery Tracking
+  socket.on('update_delivery_location', (data) => {
+    if (data && data.orderId) {
+      io.emit(`tracking_${data.orderId}`, data);
+    }
+    io.emit('delivery_location_update', data);
+  });
+
   socket.on('disconnect', () => {
     // client disconnected
   });

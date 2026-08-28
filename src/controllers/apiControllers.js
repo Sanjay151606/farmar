@@ -170,6 +170,37 @@ const apiControllers = {
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
+  },
+
+  // Live GPS Tracking (Delivery Partner Location)
+  updateDeliveryLocation(req, res) {
+    const { orderId, deliveryBoyId, deliveryBoyName, lat, lng, speed, accuracy } = req.body;
+    
+    // Store in-memory / state
+    const locationData = {
+      orderId,
+      deliveryBoyId,
+      deliveryBoyName,
+      lat: Number(lat),
+      lng: Number(lng),
+      speed: Number(speed || 0),
+      accuracy: Number(accuracy || 10),
+      updatedAt: new Date().toISOString()
+    };
+
+    if (global.lastKnownLocations) {
+      global.lastKnownLocations[orderId || deliveryBoyId] = locationData;
+    } else {
+      global.lastKnownLocations = { [orderId || deliveryBoyId]: locationData };
+    }
+
+    res.json({ success: true, location: locationData });
+  },
+
+  getDeliveryLocation(req, res) {
+    const { id } = req.params;
+    const loc = (global.lastKnownLocations && global.lastKnownLocations[id]) || null;
+    res.json({ success: true, location: loc });
   }
 };
 
