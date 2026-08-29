@@ -210,6 +210,26 @@
           <span style="font-size: 0.78rem; color: var(--slate-500);">Tamil Nadu coverage</span>
         </div>
       </div>
+
+      <!-- Live Agro-Climate Advisory Banner (OpenWeather Integration) -->
+      <div style="margin-top: var(--space-4); background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1px solid #86efac; border-radius: var(--radius-md); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 44px; height: 44px; border-radius: 50%; background: #16a34a; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+            <i class="fas fa-cloud-sun"></i>
+          </div>
+          <div>
+            <div style="font-weight: 800; font-size: 0.95rem; color: #166534;" id="weatherHeader">
+              Live Agro-Climate Advisory &bull; <span id="weatherLocationName">Madurai, TN</span>
+            </div>
+            <div style="font-size: 0.85rem; color: #15803d;" id="weatherSummaryText">
+              Temperature: <strong id="weatherTemp">31°C</strong> | Humidity: <strong id="weatherHum">65%</strong> | Condition: <strong id="weatherCond">Optimal Growing Climate</strong>
+            </div>
+          </div>
+        </div>
+        <div style="font-size: 0.8rem; font-weight: 700; color: #166534; background: white; border: 1px solid #86efac; padding: 4px 10px; border-radius: 12px;">
+          <i class="fas fa-shield-alt"></i> Low Crop Risk
+        </div>
+      </div>
     </div>
 
     <!-- 8-Stage Interactive Lifecycle Section -->
@@ -628,6 +648,19 @@
           const dbs = await dbRes.json();
           document.getElementById('liveDeliveryBoyCount').textContent = dbs.length;
         }
+
+        // Fetch Live Weather & Climate
+        try {
+          const userLoc = session.location || 'Madurai';
+          const wRes = await fetch(`/api/weather?location=${encodeURIComponent(userLoc)}`);
+          if (wRes.ok) {
+            const wData = await wRes.json();
+            document.getElementById('weatherLocationName').textContent = `${wData.location}, TN`;
+            document.getElementById('weatherTemp').textContent = wData.temperature;
+            document.getElementById('weatherHum').textContent = wData.humidity;
+            document.getElementById('weatherCond').textContent = wData.condition;
+          }
+        } catch (we) {}
       } catch (e) {
         console.warn('Error loading live journey stats:', e);
       }

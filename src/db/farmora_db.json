@@ -364,6 +364,33 @@
   ],
   "diseaseDiagnoses": [
     {
+      "id": "DIAG-478582",
+      "farmerId": "Kavitha S",
+      "farmerName": "Kavitha S",
+      "cropName": "Paddy (Rice)",
+      "diseaseName": "Healthy Paddy Crop",
+      "confidence": 97.6,
+      "severity": "None (Healthy)",
+      "isHealthy": true,
+      "imageUrl": "https://vwgmxetvvufcrasysqlm.supabase.co/storage/v1/object/public/disease-scans/scans/1787962476115_leaf_scan.jpg",
+      "symptoms": [
+        "Upright lush green tillers with uniform canopy height",
+        "Clean leaf sheaths with no necrosis or bacterial lesion lines",
+        "Strong root anchorage in puddled soil"
+      ],
+      "recommendations": [
+        "Apply Azospirillum and Phosphobacteria biofertilizers with enriched compost.",
+        "No chemical intervention required.",
+        "Practice Alternate Wetting and Drying (AWD) for water saving and root aeration."
+      ],
+      "organicRemedy": "Apply Azospirillum and Phosphobacteria biofertilizers with enriched compost.",
+      "chemicalRemedy": "No chemical intervention required.",
+      "preventativeTips": [
+        "Practice Alternate Wetting and Drying (AWD) for water saving and root aeration."
+      ],
+      "createdAt": "2026-08-29T00:14:38.582Z"
+    },
+    {
       "id": "DIAG-312896",
       "farmerId": "Kavitha S",
       "farmerName": "Kavitha S",
@@ -474,6 +501,34 @@
     }
   ],
   "yieldPredictions": [
+    {
+      "id": "YIELD-476104",
+      "farmerId": "Kavitha S",
+      "cropName": "Paddy (Rice)",
+      "landArea": 3,
+      "unit": "Acres",
+      "soilType": "Alluvial Soil",
+      "season": "Kharif (Monsoon)",
+      "irrigation": "Canal / Borewell",
+      "location": "Thanjavur",
+      "previousYield": null,
+      "estimatedYield": "8.6 Tons",
+      "estimatedYieldNum": 8.6,
+      "expectedRange": "7.7 – 9.5 Tons",
+      "confidence": 83,
+      "climateData": {
+        "temperature": "31°C",
+        "humidity": "64%",
+        "condition": "Optimal Growing Climate"
+      },
+      "recommendations": [
+        "Maintain optimal irrigation schedule tailored for Paddy (Rice) during critical growth phases.",
+        "Monitor soil nitrogen, phosphorus, and potassium levels for Alluvial Soil conditions in Thanjavur.",
+        "Implement integrated pest management (IPM) to safeguard expected harvest yield of 8.6 Tons.",
+        "Consult local Krishi Vigyan Kendra (KVK) advisory for regional weather and market trends."
+      ],
+      "createdAt": "2026-08-29T00:14:36.104Z"
+    },
     {
       "id": "YIELD-310802",
       "farmerId": "Kavitha S",
