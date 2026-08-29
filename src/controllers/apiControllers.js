@@ -477,10 +477,12 @@ const apiControllers = {
 
   // Live GPS Tracking (Delivery Partner Location)
   async updateDeliveryLocation(req, res) {
-    const { orderId, deliveryBoyId, deliveryBoyName, lat, lng, speed, accuracy, heading, status } = req.body;
+    const { orderId, deliveryBoyId, deliveryBoyName, speed, accuracy, heading, status } = req.body;
+    const lat = req.body.lat !== undefined ? req.body.lat : req.body.latitude;
+    const lng = req.body.lng !== undefined ? req.body.lng : req.body.longitude;
     
     if (!orderId || lat === undefined || lng === undefined) {
-      return res.status(400).json({ error: 'orderId, lat, and lng are required' });
+      return res.status(400).json({ error: 'orderId, lat (or latitude), and lng (or longitude) are required' });
     }
 
     const { supabase, isSupabaseEnabled } = require('../config/supabase');
