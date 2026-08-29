@@ -279,7 +279,7 @@ const diseaseService = {
 
     if (cropHint) {
       const q = cropHint.toLowerCase().trim();
-      const candidates = CROP_PATHOLOGY_DATABASE.filter(item => 
+      const candidates = CROP_PATHOLOGY_DATABASE.filter(item =>
         item.crop_name.toLowerCase().includes(q) ||
         item.disease_name.toLowerCase().includes(q)
       );
