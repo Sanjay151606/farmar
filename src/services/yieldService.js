@@ -23,7 +23,7 @@ async function getRegionalAgroClimate(location, apiKey) {
     if (res.ok) {
       const data = await res.json();
       return {
-        temperature: data.main ? `${data.main.temp}°C` : '31°C',
+        temperature: data.main ? `${Math.round(data.main.temp)}°C` : '31°C',
         humidity: data.main ? `${data.main.humidity}%` : '65%',
         condition: data.weather && data.weather[0] ? data.weather[0].description : 'Favorable Tropical Climate'
       };
@@ -91,7 +91,7 @@ const yieldService = {
     const confidence = Math.min(baseConf, 95);
 
     // Live climate enrichment
-    const climateApiKey = process.env.CROP_YIELD_API_KEY || process.env.OPENWEATHER_API_KEY;
+    const climateApiKey = process.env.CROP_YIELD_API_KEY || process.env.OPENWEATHER_API_KEY || '2bf59d1dfcf538afa96d29de6c92df71';
     const climateData = await getRegionalAgroClimate(location, climateApiKey);
 
     const customRecs = [

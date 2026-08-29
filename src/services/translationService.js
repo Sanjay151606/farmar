@@ -375,7 +375,7 @@ async function translateTamilToEnglish(tamilText) {
   const raw = cleanText(tamilText);
 
   // 1. If Sarvam / Voice Translator API Key is configured, use Sarvam AI
-  const sarvamKey = process.env.VOICE_TRANSLATOR_API_KEY || process.env.SARVAM_API_KEY;
+  const sarvamKey = process.env.VOICE_TRANSLATOR_API_KEY || process.env.SARVAM_API_KEY || 'f0191cf304f35aee2faf84926fe4a9c6147f4b63205237ff97b88bd16e1565b4';
   if (sarvamKey) {
     const sarvamRes = await translateWithSarvam(raw, sarvamKey);
     if (sarvamRes.success && sarvamRes.text) {

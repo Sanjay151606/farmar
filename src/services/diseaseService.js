@@ -272,7 +272,7 @@ const diseaseService = {
     }
 
     // 2. AI Model & Pathology Engine Match
-    const diseaseApiKey = process.env.CROP_DISEASE_API_KEY;
+    const diseaseApiKey = process.env.CROP_DISEASE_API_KEY || '4|YSVKxdCuVWZAkru6HbiUoAhwHERomvvJsWplwXP2dd492c35';
     const externalAiResult = await callCropDiseaseAI(image, cropHint, diseaseApiKey);
 
     let matched = CROP_PATHOLOGY_DATABASE[0];
