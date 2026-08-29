@@ -364,6 +364,35 @@
   ],
   "diseaseDiagnoses": [
     {
+      "id": "DIAG-312896",
+      "farmerId": "Kavitha S",
+      "farmerName": "Kavitha S",
+      "cropName": "Tomato",
+      "diseaseName": "Tomato Leaf Curl Virus (ToLCV)",
+      "confidence": 91.2,
+      "severity": "High",
+      "isHealthy": false,
+      "imageUrl": "https://vwgmxetvvufcrasysqlm.supabase.co/storage/v1/object/public/disease-scans/scans/1787962310816_leaf_scan.jpg",
+      "symptoms": [
+        "Severe upward curling and puckering of leaf margins",
+        "Stunting of plant growth with bushy appearance",
+        "Interveinal chlorosis and reduced flower/fruit set"
+      ],
+      "recommendations": [
+        "Install yellow sticky traps (15 traps/acre) to control Whitefly vector. Spray 3% Panchagavya with Neem oil (5ml/L).",
+        "Spray Imidacloprid 17.8% SL @ 0.3ml/L or Acetamiprid 20% SP @ 0.5g/L to eliminate whitefly vectors.",
+        "Use border crops like Maize or Sorghum to block incoming insect vectors.",
+        "Remove and bury infected plants immediately to prevent field spread."
+      ],
+      "organicRemedy": "Install yellow sticky traps (15 traps/acre) to control Whitefly vector. Spray 3% Panchagavya with Neem oil (5ml/L).",
+      "chemicalRemedy": "Spray Imidacloprid 17.8% SL @ 0.3ml/L or Acetamiprid 20% SP @ 0.5g/L to eliminate whitefly vectors.",
+      "preventativeTips": [
+        "Use border crops like Maize or Sorghum to block incoming insect vectors.",
+        "Remove and bury infected plants immediately to prevent field spread."
+      ],
+      "createdAt": "2026-08-29T00:11:52.896Z"
+    },
+    {
       "id": "DIAG-499598",
       "farmerId": "Kavitha S",
       "farmerName": "Kavitha S",
@@ -445,6 +474,34 @@
     }
   ],
   "yieldPredictions": [
+    {
+      "id": "YIELD-310802",
+      "farmerId": "Kavitha S",
+      "cropName": "Tomato",
+      "landArea": 2.5,
+      "unit": "Acres",
+      "soilType": "Red Soil",
+      "season": "Kharif (Monsoon)",
+      "irrigation": "Drip Irrigation",
+      "location": "Madurai",
+      "previousYield": null,
+      "estimatedYield": "26.2 Tons",
+      "estimatedYieldNum": 26.2,
+      "expectedRange": "23.6 – 28.8 Tons",
+      "confidence": 84,
+      "climateData": {
+        "temperature": "31°C",
+        "humidity": "64%",
+        "condition": "Optimal Growing Climate"
+      },
+      "recommendations": [
+        "Maintain optimal irrigation schedule tailored for Tomato during critical growth phases.",
+        "Monitor soil nitrogen, phosphorus, and potassium levels for Red Soil conditions in Madurai.",
+        "Implement integrated pest management (IPM) to safeguard expected harvest yield of 26.2 Tons.",
+        "Consult local Krishi Vigyan Kendra (KVK) advisory for regional weather and market trends."
+      ],
+      "createdAt": "2026-08-29T00:11:50.802Z"
+    },
     {
       "id": "YIELD-498197",
       "farmerId": "Kavitha S",
@@ -562,6 +619,22 @@
       "status": "OUT_FOR_DELIVERY",
       "updated_at": "2026-08-28T20:59:56.290Z",
       "updatedAt": "2026-08-28T20:59:56.292Z"
+    },
+    "ORD-9006": {
+      "order_id": "ORD-9006",
+      "orderId": "ORD-9006",
+      "delivery_partner_name": "Sivakasi Express Logistics",
+      "deliveryBoyName": "Sivakasi Express Logistics",
+      "latitude": 9.4533,
+      "lat": 9.4533,
+      "longitude": 77.797,
+      "lng": 77.797,
+      "speed": 32,
+      "accuracy": 10,
+      "heading": 45,
+      "status": "IN_TRANSIT",
+      "updated_at": "2026-08-29T00:03:29.600Z",
+      "updatedAt": "2026-08-29T00:03:29.601Z"
     }
   }
 }

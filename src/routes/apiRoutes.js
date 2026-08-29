@@ -54,10 +54,11 @@ router.get('/yield/history', verifyToken, apiControllers.getYieldHistory);
 router.post('/farmer/yield-prediction', verifyToken, apiControllers.predictYield);
 router.post('/yield', verifyToken, apiControllers.predictYield);
 
-// Notifications
+// Notifications & Weather
 router.get('/notifications', verifyToken, apiControllers.getNotifications);
 router.post('/notifications/send-sms', apiControllers.sendSms);
 router.post('/notifications/whatsapp-link', apiControllers.getWhatsAppLink);
+router.get('/weather', apiControllers.getWeather);
 
 // Voice Translation
 router.post('/translate', apiControllers.translate);
