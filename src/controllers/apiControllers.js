@@ -587,7 +587,7 @@ const apiControllers = {
   // Weather & Smart Agriculture Climate Alerts
   async getWeather(req, res) {
     const location = req.query.location || 'Madurai';
-    const weatherKey = process.env.OPENWEATHER_API_KEY || process.env.CROP_YIELD_API_KEY;
+    const weatherKey = process.env.OPENWEATHER_API_KEY || process.env.CROP_YIELD_API_KEY || '2bf59d1dfcf538afa96d29de6c92df71';
 
     if (!weatherKey) {
       return res.json({

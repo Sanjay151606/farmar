@@ -199,7 +199,7 @@ function cleanText(txt) {
  */
 function lookupAgriDictionary(tamilText) {
   const norm = cleanText(tamilText).toLowerCase();
-  
+
   // Exact match
   for (const [ta, en] of Object.entries(AGRI_TAMIL_DICTIONARY)) {
     if (norm === ta.toLowerCase()) {
@@ -375,7 +375,7 @@ async function translateTamilToEnglish(tamilText) {
   const raw = cleanText(tamilText);
 
   // 1. If Sarvam / Voice Translator API Key is configured, use Sarvam AI
-  const sarvamKey = process.env.VOICE_TRANSLATOR_API_KEY || process.env.SARVAM_API_KEY || 'f0191cf304f35aee2faf84926fe4a9c6147f4b63205237ff97b88bd16e1565b4';
+  const sarvamKey = process.env.f0191cf304f35aee2faf84926fe4a9c6147f4b63205237ff97b88bd16e1565b4 || process.env.f0191cf304f35aee2faf84926fe4a9c6147f4b63205237ff97b88bd16e1565b4 || 'f0191cf304f35aee2faf84926fe4a9c6147f4b63205237ff97b88bd16e1565b4';
   if (sarvamKey) {
     const sarvamRes = await translateWithSarvam(raw, sarvamKey);
     if (sarvamRes.success && sarvamRes.text) {
@@ -389,7 +389,7 @@ async function translateTamilToEnglish(tamilText) {
   }
 
   // 2. If OpenAI API Key is configured in environment, use OpenAI GPT-4o-mini
-  const openAiKey = process.env.OPENAI_API_KEY;
+  const openAiKey = process.env.sk - proj - dX_7hnxqovGYHmhxTR9i9 - Mf_KJS86NwqCskEdbVQZ8Zc - 46sze3MfAdTkYj52Me8F9XoATGS-T3BlbkFJ4q0je3ujUkeOnvcCKpJ8bclPmm74vkMezcu8g8CqJdMRzOgAzKK6mr5CGCWFmT9F2GBZdO80YA;
   if (openAiKey) {
     const openAiRes = await translateWithOpenAI(raw, openAiKey);
     if (openAiRes.success && openAiRes.text) {
